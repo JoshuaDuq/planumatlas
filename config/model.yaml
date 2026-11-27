@@ -138,6 +138,10 @@ anatomies:
       labels: [4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 26, 28,
                43, 44, 46, 47, 49, 50, 51, 52, 53, 54, 58, 60,
                251, 252, 253, 254, 255]
+    learning:
+      # On the averaged midline aseg's callosum covers most of these two units; validation holds
+      # each to this measured share (docs/features/mni-template.md).
+      cross_source_overlap: {fornix: 0.582, septal: 0.574}
     nextbrain:
       directory: data/nextbrain-mni152
       volume: nextbrain-mni152.mgz

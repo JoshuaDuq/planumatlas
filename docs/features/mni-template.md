@@ -23,7 +23,7 @@ The **Subject** choice offers a second brain beside sub_013 of the MGH Connectom
 | SPM12 tissue probability maps | Registered onto the template as onto CDMD ([published coordinates](published-coordinates.md)) | `data/sources.json`; `data/mni152/coordinate-registration.json` |
 | Harvard Ascending Arousal Network Atlas 2.0 | Ten brainstem nuclei placed on the template by both of CDMD's methods ([arousal nuclei](arousal-nuclei.md)) | `config/arousal-nuclei.yaml`; `data/sources.json`; `data/mni152/arousal-registration.json` |
 
-The build is published under `public/models/mni152/` (58 files, 266 MB) and `public/diffusion/mni152-hcp1065/` (21 gzip-compressed TrackVis (TRK) files, 139 MB, with `surface-space.json`, the brain outline and `provenance.json`). `public/models/anatomies.json` lists the template beside CDMD as `"individual": false`. Citations and licences are in [references](../reference/references.md#group-data-and-templates).
+The build is published under `public/models/mni152/` (84 files, 276 MB) and `public/diffusion/mni152-hcp1065/` (21 gzip-compressed TrackVis (TRK) files, 139 MB, with `surface-space.json`, the brain outline and `provenance.json`). `public/models/anatomies.json` lists the template beside CDMD as `"individual": false`. Citations and licences are in [references](../reference/references.md#group-data-and-templates).
 
 ## Method
 
@@ -116,9 +116,9 @@ On this brain **Coordinate** and **Overlay** offer MNI152NLin2009cAsym, SPM12 (T
 | `coordinate_spaces.accept` on the template, SPM12 (`data/mni152/coordinate-registration.json`) | As on CDMD: each subcortical Dice ≥ 0.70, median ≥ 0.80; cortex ≥ 0.65; hemispheres ≥ 0.98; round trip ≤ 0.5 mm median, ≤ 1.0 mm p95; grid error ≤ 0.1 mm p95 | 0.752, 0.856; 0.752; 0.999; 0.03, 0.10 mm; 0.004 mm |
 | `stroke_cases.accept` on the template (not published) | As on CDMD: each subcortical Dice ≥ 0.70 | left pallidum 0.645: fails |
 | `arousal_nuclei.failures` on the template (`data/mni152/arousal-registration.json`) | As on CDMD: three centroids ≤ 3 mm from NextBrain's; each nucleus ≥ 95% inside Brain-Stem and VentralDC, the periaqueductal grey ≥ 90% | SynthMorph 4.91 mm, 87.9%: fails; SegmentAAN 1.56 mm, 90.9%, others ≥ 98.7%: published |
-| `brain_model.validate --anatomy mni152` | The checks CDMD passes | fails one check |
+| `brain_model.validate --anatomy mni152` | The checks CDMD passes; a teaching unit lies < 50% inside other sources unless declared at its measured share | passes, with two declared units: fornix 0.582, medial septal 0.574 |
 
-`brain_model.validate --anatomy mni152` fails one check: the teaching set's medial septal unit lies 57.4% inside other sources, against a limit of 50%. Validation stops there, so later checks do not run, and no `validation.json` is published for the template. The septal unit sits on the template's blurred midline, where it overlaps aseg's corpus callosum and ventricle.
+Two of the template's teaching units lie mostly inside another source's structures: the fornix (58.2%, of which 56.2% in aseg's corpus callosum) and the medial septal unit (57.4%: 42.2% in the corpus callosum, 15.2% in the lateral ventricles). On CDMD the same units lie 16.5% and 15.8% inside other sources, and every other unit of the template lies at most 13.9% inside. The three middle segments of aseg's corpus callosum are 35–86% larger on the template than on CDMD (central segment 872 mm³ against 469 mm³), although the template is drawn at 0.90 of its size. `config/model.yaml` declares the two units with these shares (`learning.cross_source_overlap`). `check_overlaps` refuses an undeclared unit at or over 50%, a declared unit whose measured share differs from the declared one at three decimals or has fallen under 50%, and a declared name that is no drawn unit. With the two declared, every check runs and `validation.json` is published for the template.
 
 ## Limitations
 
@@ -129,6 +129,8 @@ FreeSurfer and NextBrain were built to segment one person's scan. On the templat
 CerebNet was also built for one person's scan. In the template's cerebellar hemispheres its lobule borders do not follow fissures that can be seen, and they were checked only against aseg's outline and SUIT's group lobules. Left lobule X agrees least with SUIT (Dice 0.590).
 
 The template was reconstructed with FreeSurfer's Linux build on a cluster, not the pinned macOS install CDMD's checks name. Its arousal nuclei were segmented with the macOS build, because no Linux build of FreeSurfer 8.2 includes SegmentAAN's program.
+
+At the template's midline, aseg's corpus callosum is drawn over most of the fornix and of the medial septal unit. Averaging blurs the border between the callosum's body and the fornix beneath it, and which source is wrong there was not established. The three solids are drawn as their sources give them.
 
 Only maps and coordinates in MNI152NLin2009cAsym are placed on the template. A map in another template, such as FSL's MNI152NLin6Asym, is read as MNI152NLin2009cAsym if opened as an unstated MNI map; on CDMD the two readings land a median 1.56 mm apart at the cortex.
 

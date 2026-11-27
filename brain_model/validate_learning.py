@@ -38,6 +38,24 @@ def on_nextbrain_grid(config, path, grid):
     return coarse
 
 
+OVERLAP_LIMIT = 0.5
+
+
+def check_overlaps(fractions, declared):
+    """A unit at or over the limit is declared with its measured share; no other unit is declared."""
+    for unit, fraction in fractions.items():
+        known = declared.get(unit)
+        if known is None and fraction >= OVERLAP_LIMIT:
+            raise ValueError(f"Learning unit {unit} is mostly inside another source: {fraction:.3f}")
+        if known is not None and (fraction < OVERLAP_LIMIT or round(fraction, 3) != known):
+            raise ValueError(
+                f"Learning unit {unit} is declared {known} inside another source, measured {fraction:.3f}"
+            )
+    unknown = sorted(set(declared) - set(fractions))
+    if unknown:
+        raise ValueError(f"Declared overlaps name no drawn unit: {unknown}")
+
+
 def validate_source_overlap(config, nextbrain_source):
     definition = read_definition(config)
     grid, table = nextbrain_source
@@ -53,7 +71,7 @@ def validate_source_overlap(config, nextbrain_source):
         )
     counts = np.bincount(grid.labels.ravel(), minlength=max(table) + 1)
     overlaps = np.bincount(grid.labels[covered], minlength=len(counts))
-    reports = []
+    fractions = {}
     for unit in definition["nextbrain"]:
         members = [
             label + offset for label in unit["labels"]
@@ -62,11 +80,12 @@ def validate_source_overlap(config, nextbrain_source):
         total = int(counts[members].sum())
         if total == 0:
             continue
-        fraction = float(overlaps[members].sum() / total)
-        if fraction >= 0.5:
-            raise ValueError(f"Learning unit {unit['id']} is mostly inside another source: {fraction:.3f}")
-        reports.append({"unit": unit["id"], "cross_source_overlap_fraction": fraction})
-    return reports
+        fractions[unit["id"]] = float(overlaps[members].sum() / total)
+    check_overlaps(fractions, config["anatomy"].get("learning", {}).get("cross_source_overlap", {}))
+    return [
+        {"unit": unit, "cross_source_overlap_fraction": fraction}
+        for unit, fraction in fractions.items()
+    ]
 
 
 def validate_domain_units(config, nextbrain_source):

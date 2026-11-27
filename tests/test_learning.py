@@ -6,6 +6,7 @@ from brain_model.labels.volumes import load_on_grid, resample_nearest
 from brain_model.layers.learning import combine_labels, read_definition
 from brain_model.sources import read_config
 from brain_model.surfaces.geometry import extract_structure, smooth_display
+from brain_model.validate_learning import check_overlaps
 
 
 @pytest.mark.parametrize("unit,label,source_name", [
@@ -247,3 +248,22 @@ def test_the_caudal_medulla_joins_nextbrain_s_medulla_to_the_cord():
     cord = spinal_cord.load(config)
     cord_z = np.argwhere(cord.labels > 0) @ cord.voxel_to_surface[2, :3] + cord.voxel_to_surface[2, 3]
     assert z.min() < cord_z.max()
+
+
+def test_a_unit_mostly_inside_another_source_is_refused_unless_declared_at_its_measured_share():
+    measured = {"fornix": 0.5821, "septal": 0.5739, "thalamus": 0.01}
+    check_overlaps(measured, {"fornix": 0.582, "septal": 0.574})
+    with pytest.raises(ValueError, match="septal is mostly inside another source: 0.574"):
+        check_overlaps(measured, {"fornix": 0.582})
+    with pytest.raises(ValueError, match="fornix is declared 0.58 inside another source, measured 0.582"):
+        check_overlaps(measured, {"fornix": 0.58, "septal": 0.574})
+
+
+def test_a_declared_overlap_that_no_longer_holds_or_names_no_unit_is_refused():
+    with pytest.raises(ValueError, match="thalamus is declared 0.6 inside another source, measured 0.010"):
+        check_overlaps({"thalamus": 0.01}, {"thalamus": 0.6})
+    with pytest.raises(ValueError, match="name no drawn unit: \\['insula'\\]"):
+        check_overlaps({"thalamus": 0.01}, {"insula": 0.7})
+    # At the limit itself a unit is over it.
+    with pytest.raises(ValueError, match="thalamus is mostly inside another source: 0.500"):
+        check_overlaps({"thalamus": 0.5}, {})

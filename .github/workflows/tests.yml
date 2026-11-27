@@ -136,8 +136,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        # mni152 is held out until the midline septal cross-source overlap (0.574 vs 0.50) is resolved.
-        anatomy: [cdmd]
+        anatomy: [cdmd, mni152]
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
