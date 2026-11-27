@@ -1,10 +1,9 @@
 import type { en } from '../../lib/core/i18n/areas/footer.ts';
 
 /**
- * Where readers' feedback goes. Planum is a static site, so a Cloudflare Worker of its own
- * (workers/feedback) mails each message on to this address.
+ * Planum is a static site, so a Cloudflare Worker of its own (workers/feedback) mails each message
+ * on to the maintainer's address (CONTACT_ADDRESS).
  */
-export const FEEDBACK_ADDRESS = 'joshua.duquette.1@ulaval.ca';
 export const RELAY = 'https://feedback.planumatlas.com';
 
 /**

@@ -463,7 +463,23 @@ describe('Masthead', () => {
     await userEvent.keyboard('{Tab}');
     expect(document.activeElement).toBe(source);
     await userEvent.keyboard('{Tab}');
+    expect(document.activeElement).toBe(el(button('Contact')));
+    await userEvent.keyboard('{Tab}');
     expect(document.activeElement).toBe(el(more()));
+  });
+
+  test('Contact offers the maintainer’s address to copy and to write to', async () => {
+    await render(Fixture);
+    const contact = el(button('Contact'));
+    expect(contact.closest('.masthead-end')).not.toBeNull();
+    expect(contact.dataset.tooltip).toBe('Contact');
+    await button('Contact').click();
+    await expect
+      .element(page.getByRole('button', { name: 'joshua.duquette.1@ulaval.ca, Copy' }))
+      .toBeVisible();
+    const write = page.getByRole('link', { name: 'Write an email' }).element() as HTMLAnchorElement;
+    expect(write.href).toBe('mailto:joshua.duquette.1@ulaval.ca');
+    await expectAxeClean();
   });
 
   test('in French, Methods says the site is in English', async () => {
@@ -512,7 +528,7 @@ describe('Masthead', () => {
     expect(panelOpen()).toBe(false);
   });
 
-  test('phone: the menu offers Full screen, Copy link, Feedback and Provenance; the masthead hides those buttons', async () => {
+  test('phone: the menu offers Full screen, Copy link, Feedback, Contact and Provenance; the masthead hides those buttons', async () => {
     const calls: string[] = [];
     await render(Fixture, { calls });
     await page.viewport(390, 844);
@@ -525,6 +541,7 @@ describe('Masthead', () => {
         'Full screen',
         'Copy link to this view',
         'Feedback',
+        'Contact',
         'Provenance',
         'How to use Planum',
         'Keyboard shortcuts ?',
@@ -536,6 +553,10 @@ describe('Masthead', () => {
       const sources = page.getByRole('link', { name: SOURCE }).elements();
       expect(sources).toHaveLength(1);
       expect(sources[0]!.closest('.settings-menu')).not.toBeNull();
+      expect(page.getByRole('button', { name: 'Contact' }).elements()).toHaveLength(0);
+      expect(
+        (page.getByRole('link', { name: 'Contact' }).element() as HTMLAnchorElement).href,
+      ).toBe('mailto:joshua.duquette.1@ulaval.ca');
       expect(page.getByRole('button', { name: 'Full screen' }).elements()).toHaveLength(1);
       expect(page.getByRole('button', { name: 'Copy link to this view' }).elements()).toHaveLength(
         1,

@@ -865,6 +865,9 @@
   "feedbackSend": "Send",
   "feedbackSending": "Sending…",
   "feedbackSent": "Thank you, your feedback was sent.",
+  "contact": "Contact",
+  "contactNote": "For a collaboration or anything else, write to",
+  "contactWrite": "Write an email",
   "feedbackFailed": {
    "invalid": "The feedback server refused this message. You can send it by email to",
    "tooLarge": "The message is too long for the feedback server. Shorten it and try again, or write to",

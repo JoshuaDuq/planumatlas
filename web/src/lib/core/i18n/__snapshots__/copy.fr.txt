@@ -865,6 +865,9 @@
   "feedbackSend": "Envoyer",
   "feedbackSending": "Envoi…",
   "feedbackSent": "Merci, vos commentaires ont été envoyés.",
+  "contact": "Contact",
+  "contactNote": "Pour une collaboration ou toute autre demande, écrivez à",
+  "contactWrite": "Écrire un courriel",
   "feedbackFailed": {
    "invalid": "Le serveur de commentaires a refusé ce message. Vous pouvez l’envoyer par courriel à",
    "tooLarge": "Le message est trop long pour le serveur de commentaires. Raccourcissez-le et réessayez, ou écrivez à",

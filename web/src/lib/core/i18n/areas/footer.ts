@@ -19,6 +19,9 @@ export const en = {
   feedbackSend: 'Send',
   feedbackSending: 'Sending…',
   feedbackSent: 'Thank you, your feedback was sent.',
+  contact: 'Contact',
+  contactNote: 'For a collaboration or anything else, write to',
+  contactWrite: 'Write an email',
   // Each is followed by the address, which is its own copy button (FeedbackForm).
   feedbackFailed: {
     invalid: 'The feedback server refused this message. You can send it by email to',
@@ -135,6 +138,9 @@ export const fr: typeof en = {
   feedbackSend: 'Envoyer',
   feedbackSending: 'Envoi…',
   feedbackSent: 'Merci, vos commentaires ont été envoyés.',
+  contact: 'Contact',
+  contactNote: 'Pour une collaboration ou toute autre demande, écrivez à',
+  contactWrite: 'Écrire un courriel',
   feedbackFailed: {
     invalid: 'Le serveur de commentaires a refusé ce message. Vous pouvez l’envoyer par courriel à',
     tooLarge:

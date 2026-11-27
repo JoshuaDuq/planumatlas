@@ -64,10 +64,11 @@ describe('what the masthead region holds', () => {
     // The data bar is its one summary, named with every value it holds.
     expect(names.slice(0, 2)).toEqual(['Skip to model', 'Planum']);
     expect(names[2]).toMatch(/^Subject Individual, Atlas \S.*, Colour \S/);
-    expect(names.slice(-4)).toEqual([
+    expect(names.slice(-5)).toEqual([
       'Save image (PNG)',
       'Share this view',
       'Source code on GitHub (opens in a new tab)',
+      'Contact',
       'More settings',
     ]);
     // One subject is published, so the summary's popover has no Subject list.

@@ -12,7 +12,7 @@
   import { tick } from 'svelte';
   import type { Attachment } from 'svelte/attachments';
   import { t } from '../../lib/core/i18n/index.ts';
-  import { methodsHref, SOURCE_HREF } from '../../lib/core/methods.ts';
+  import { CONTACT_ADDRESS, methodsHref, SOURCE_HREF } from '../../lib/core/methods.ts';
   import type { ThemeChoice } from '../../lib/state/theme.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
   import { announce } from '../../lib/ui/announcer.svelte.ts';
@@ -259,6 +259,15 @@
       {/if}
       {@render item(copy.copyLink, onCopyLink, { phone: true })}
       {@render item(t(lang, 'footer').feedback, onFeedback, { phone: true, dialog: true })}
+      <!-- Phones only: the masthead carries Contact elsewhere. A phone has an email app to open. -->
+      <a
+        class="menu-item phone-only"
+        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+        href="mailto:{CONTACT_ADDRESS}"
+        onclick={close}
+      >
+        {t(lang, 'footer').contact}
+      </a>
       {#if provenanceReady}
         {@render item(t(lang, 'footer').provenance, onProvenance, { phone: true, dialog: true })}
       {/if}

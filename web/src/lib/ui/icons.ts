@@ -71,6 +71,9 @@ export const ICONS = {
   'arrow-up': { shapes: [path('M12 19V5m-6 6 6-6 6 6')] },
   'arrow-down': { shapes: [path('M12 5v14m-6-6 6 6 6-6')] },
 
+  // An envelope: write to the maintainer.
+  mail: { shapes: [path('M3 6h18v12H3ZM3 6l9 7 9-7')] },
+
   // GitHub's mark (Octicons mark-github), on the 3–21 band the stroked icons fill.
   github: {
     shapes: [

@@ -8,7 +8,8 @@
 -->
 <script module lang="ts">
   import { untrack } from 'svelte';
-  import { FEEDBACK_ADDRESS, FeedbackError, MAX_EMAIL, isEmail, sendFeedback } from './feedback.ts';
+  import { CONTACT_ADDRESS } from '../../lib/core/methods.ts';
+  import { FeedbackError, MAX_EMAIL, isEmail, sendFeedback } from './feedback.ts';
 
   export class FeedbackDraft {
     name = $state('');
@@ -78,7 +79,7 @@
       if (!(error instanceof FeedbackError)) throw error;
       console.error(error);
       draft.failure = error;
-      announce(`${failed(error)} ${FEEDBACK_ADDRESS}`);
+      announce(`${failed(error)} ${CONTACT_ADDRESS}`);
       return;
     }
     draft.message = '';
@@ -139,7 +140,7 @@
       <!-- Said by the announcer, which says it again when the same failure repeats. -->
       <p class="feedback-failed">
         {failed(draft.failure)}
-        <CopyValue value={FEEDBACK_ADDRESS} words={t(lang, 'inspector').copyValue} />
+        <CopyValue value={CONTACT_ADDRESS} words={t(lang, 'inspector').copyValue} />
       </p>
     {/if}
     <button

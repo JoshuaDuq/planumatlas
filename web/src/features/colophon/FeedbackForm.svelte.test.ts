@@ -9,7 +9,8 @@ import { t } from '../../lib/core/i18n/index.ts';
 import type { Language } from '../../lib/types/index.ts';
 import { expectAxeClean } from '../../lib/ui/a11y-test-support.ts';
 import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
-import { FEEDBACK_ADDRESS, TIMEOUT_MS } from './feedback.ts';
+import { CONTACT_ADDRESS } from '../../lib/core/methods.ts';
+import { TIMEOUT_MS } from './feedback.ts';
 import Fixture from './feedback-test-support.svelte';
 
 const en = t('en', 'footer');
@@ -80,14 +81,14 @@ describe('COLO-11 · each failure says what happened and what to do', () => {
     mount(lang);
     await userEvent.fill(field(copy(lang).feedbackMessage), 'Hello');
     await send(lang);
-    await expect.poll(failure).toBe(`${words} ${FEEDBACK_ADDRESS}`);
-    expect(announcer.textContent).toBe(`${words} ${FEEDBACK_ADDRESS}`);
+    await expect.poll(failure).toBe(`${words} ${CONTACT_ADDRESS}`);
+    expect(announcer.textContent).toBe(`${words} ${CONTACT_ADDRESS}`);
     // Said once, by the announcer, which says a repeat again; not also by an alert.
     expect(document.querySelectorAll('[role="alert"]')).toHaveLength(0);
     await expect
       .element(
         page.getByRole('button', {
-          name: `${FEEDBACK_ADDRESS}, ${t(lang, 'inspector').copyValue.copy}`,
+          name: `${CONTACT_ADDRESS}, ${t(lang, 'inspector').copyValue.copy}`,
         }),
       )
       .toBeVisible();
@@ -106,7 +107,7 @@ describe('COLO-11 · each failure says what happened and what to do', () => {
     mount();
     await userEvent.fill(field(en.feedbackMessage), 'Hello');
     await send();
-    await expect.poll(failure).toBe(`${en.feedbackFailed.offline} ${FEEDBACK_ADDRESS}`);
+    await expect.poll(failure).toBe(`${en.feedbackFailed.offline} ${CONTACT_ADDRESS}`);
   });
 
   test('no answer within the timeout', async () => {
@@ -123,7 +124,7 @@ describe('COLO-11 · each failure says what happened and what to do', () => {
     mount();
     await userEvent.fill(field(en.feedbackMessage), 'Hello');
     await send();
-    await expect.poll(failure).toBe(`${en.feedbackFailed.timeout} ${FEEDBACK_ADDRESS}`);
+    await expect.poll(failure).toBe(`${en.feedbackFailed.timeout} ${CONTACT_ADDRESS}`);
     expect(asked).toHaveBeenCalledExactlyOnceWith(TIMEOUT_MS);
   });
 
@@ -136,7 +137,7 @@ describe('COLO-11 · each failure says what happened and what to do', () => {
     mount();
     await userEvent.fill(field(en.feedbackMessage), 'Hello');
     await send();
-    await expect.poll(failure).toBe(`${en.feedbackFailed.relay} ${FEEDBACK_ADDRESS}`);
+    await expect.poll(failure).toBe(`${en.feedbackFailed.relay} ${CONTACT_ADDRESS}`);
     await send();
     await expect
       .poll(() => document.querySelector('.feedback-said')?.textContent)

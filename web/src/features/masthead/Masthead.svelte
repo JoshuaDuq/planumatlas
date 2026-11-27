@@ -1,7 +1,7 @@
 <!--
   The masthead (index.html:96-153, viewer/ui/chrome/header.js:96-243, styles/masthead.css:1-70,
   308-364, 365-452): the skip link, the brand, the data group H3 supplies as `data`, then
-  Full screen, Save image, Share, the GitHub link and the ⋯ settings panel. Full screen and Save image only
+  Full screen, Save image, Share, the GitHub link, Contact and the ⋯ settings panel. Full screen and Save image only
   emit; G6 owns what they do. Save image and Share are menus (APG Disclosure, as ⋯ is): Save image
   offers 2× and 3× and Copy image, Share copies the address, whose hash holds the whole view, or
   the frame a course page pastes. The page mounts one Tooltip (U5) for the `data-tooltip` triggers.
@@ -16,6 +16,7 @@
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { SOURCE_HREF } from '../../lib/core/methods.ts';
   import Popover from '../../lib/ui/Popover.svelte';
+  import ContactMenu from './ContactMenu.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
 
   interface Props {
@@ -243,6 +244,7 @@
     >
       {@render iconGraphic('github')}
     </a>
+    <ContactMenu {lang} />
     <SettingsMenu
       bind:this={menu}
       disabled={settingsDisabled}
@@ -451,7 +453,7 @@
       clip-path: inset(50%);
     }
 
-    /* Phones: the mark alone names the app; Full screen, Share and the source move into the settings panel. */
+    /* Phones: the mark alone names the app; Full screen, Share, the source and Contact move into the settings panel. */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       #masthead {
         display: flex;
