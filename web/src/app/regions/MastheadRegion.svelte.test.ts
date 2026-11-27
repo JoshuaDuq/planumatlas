@@ -281,7 +281,12 @@ describe('the data bar', () => {
       ({ id }) => id !== world!.view.current.detail,
     )!;
     await openData();
-    await choose('Internal anatomy', atlasSwitchLabel(other.id, 'en'));
+    // A detail level's name is followed by how precise it is.
+    await userEvent.click(
+      page
+        .getByRole('toolbar', { name: 'Internal anatomy', exact: true })
+        .getByRole('button', { name: atlasSwitchLabel(other.id, 'en'), exact: false }),
+    );
     await vi.waitFor(() => expect(world!.view.current.detail).toBe(other.id));
   });
 

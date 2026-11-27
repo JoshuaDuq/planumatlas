@@ -41,6 +41,8 @@
     palette?: readonly Rgb[] | null;
     /** What a first visit opens on: the manifest's first atlas, the default colour and level. */
     isDefault?: boolean;
+    /** How fine a detail level's segmentation is, beside its name. */
+    precision?: string;
   }
 
   interface ChoiceGroup {
@@ -189,6 +191,7 @@
       aside: aside('detail', id, null),
       note: line('detail', id, shown.detail, brief(id)),
       isDefault: id === defaultDetail,
+      precision: copy.precision[id],
     })),
   );
   const subjectOptions = $derived<Choice[]>(
@@ -249,6 +252,8 @@
               <span class="data-option-name" id="{id}-name">
                 {option.name}{#if option.isDefault}{' '}<span class="data-option-default">
                     {copy.isDefault}
+                  </span>{/if}{#if option.precision}{' '}<span class="data-option-default">
+                    {option.precision}
                   </span>{/if}
               </span>
               {#if option.palette}

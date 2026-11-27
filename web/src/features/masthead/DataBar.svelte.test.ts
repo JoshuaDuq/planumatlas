@@ -233,9 +233,13 @@ describe('DataBar lists', () => {
 
   test('every option is listed, colours in named groups, each saying what else it changes', async () => {
     const view = await wide();
-    // The opening atlas, colour and internal anatomy say so; no other option does.
+    // The opening atlas, colour and internal anatomy say so; no other option does. Only the
+    // detail levels say how precise they are, so aseg as an atlas carries no tag.
     expect(names('Atlas')).toEqual(['Destrieux (Default)', 'HCP-MMP', 'FreeSurfer aseg']);
-    expect(names('Internal anatomy')).toEqual(['Teaching set (Default)', 'NextBrain']);
+    expect(names('Internal anatomy')).toEqual([
+      'Teaching set (Default)',
+      'NextBrain (more precise)',
+    ]);
     // No paint option while no tab paints: assistive technology lists only real choices.
     expect(names('Colour')).toEqual([
       'Tissue',
@@ -257,9 +261,15 @@ describe('DataBar lists', () => {
     expect(asides('Colour')[0]).toBeNull();
     // The teaching set is the default wherever it is listed; without it, the first level is.
     await view.rerender({ bar: barProps({ detailLevels: ['nextbrain', 'learning'] }) });
-    expect(names('Internal anatomy')).toEqual(['NextBrain', 'Teaching set (Default)']);
+    expect(names('Internal anatomy')).toEqual([
+      'NextBrain (more precise)',
+      'Teaching set (Default)',
+    ]);
     await view.rerender({ bar: barProps({ detailLevels: ['aseg', 'nextbrain'] }) });
-    expect(names('Internal anatomy')).toEqual(['FreeSurfer aseg (Default)', 'NextBrain']);
+    expect(names('Internal anatomy')).toEqual([
+      'FreeSurfer aseg (Default) (less precise)',
+      'NextBrain (more precise)',
+    ]);
   });
 
   test('a colouring with colours of its own draws them beside its name, unannounced', async () => {
@@ -338,7 +348,7 @@ describe('DataBar lists', () => {
       },
     });
     await userEvent.click(option('Atlas', 'HCP-MMP'));
-    await userEvent.click(option('Internal anatomy', 'NextBrain'));
+    await userEvent.click(option('Internal anatomy', 'NextBrain (more precise)'));
     await expect.poll(() => chosen('Internal anatomy')).toMatch(/ · Loading…$/);
     bar.atlas = 'hcp-mmp';
     await expect.poll(() => chosen('Atlas')).toBe('HCP-MMP');
@@ -351,7 +361,7 @@ describe('DataBar lists', () => {
     await userEvent.click(option('Atlas', 'Destrieux (Default)'));
     await userEvent.click(option('Atlas', 'FreeSurfer aseg'));
     await userEvent.click(option('Colour', 'T1 MRI'));
-    await userEvent.click(option('Internal anatomy', 'NextBrain'));
+    await userEvent.click(option('Internal anatomy', 'NextBrain (more precise)'));
     await userEvent.click(option('Subject', 'CDMD sub_014'));
     expect(commands(calls)).toEqual([
       'atlas:aseg',

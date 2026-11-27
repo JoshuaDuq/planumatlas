@@ -1196,6 +1196,10 @@
   ],
   "dataSummary": "Atlas and display settings",
   "isDefault": "(Default)",
+  "precision": {
+   "nextbrain": "(more precise)",
+   "aseg": "(less precise)"
+  },
   "borrowedBy": {
    "functions": "via Functions",
    "deficits": "via Deficits"

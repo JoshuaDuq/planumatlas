@@ -35,6 +35,8 @@ export const en = {
   dataSummary: 'Atlas and display settings',
   // Beside the atlas and colour a first visit opens on.
   isDefault: '(Default)',
+  // Beside the two segmentations in Internal anatomy, so the finer one is plain before choosing.
+  precision: { nextbrain: '(more precise)', aseg: '(less precise)' } as Record<string, string>,
   // While a function or deficit shows its regions on another atlas than the reader's own.
   borrowedBy: { functions: 'via Functions', deficits: 'via Deficits' },
   borrowedNote: {
@@ -128,6 +130,7 @@ export const fr: typeof en = {
   colourBecomes: (colour: string) => `La couleur devient ${colour}`,
   dataSummary: 'Réglages de l’atlas et de l’affichage',
   isDefault: '(par défaut)',
+  precision: { nextbrain: '(plus précis)', aseg: '(moins précis)' },
   borrowedBy: { functions: 'via Fonctions', deficits: 'via Déficits' },
   borrowedNote: {
     functions: (atlas: string, own: string) =>

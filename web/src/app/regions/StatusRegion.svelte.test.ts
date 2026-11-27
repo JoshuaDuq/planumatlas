@@ -191,7 +191,9 @@ describe('the count', () => {
     // The data lists are behind the masthead's summary.
     await userEvent.click(page.getByRole('button', { name: /^Subject / }));
     const detail = page.getByRole('toolbar', { name: 'Internal anatomy', exact: true });
-    await userEvent.click(detail.getByRole('button', { name: atlasSwitchLabel(other.id, 'en') }));
+    await userEvent.click(
+      detail.getByRole('button', { name: atlasSwitchLabel(other.id, 'en'), exact: false }),
+    );
     // Each option's line under its name: how far the held choice has loaded.
     const asides = () =>
       [...detail.element().querySelectorAll('.data-option-aside')].map(
