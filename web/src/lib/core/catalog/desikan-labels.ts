@@ -3,7 +3,11 @@
  * (`caudalanteriorcingulate`): each region's structure written out, as the white-matter parcels
  * named for it and NextBrain's cortex both use it.
  */
-export const DESIKAN_REGIONS: Record<string, { structure: string; aliases?: string[] }> = {
+export const DESIKAN_REGIONS: Record<
+  string,
+  // `cortical`: names the cortex alone answers to, its white matter not being that area.
+  { structure: string; aliases?: string[]; cortical?: string[] }
+> = {
   bankssts: { structure: 'banks of the superior temporal sulcus' },
   caudalanteriorcingulate: { structure: 'caudal anterior cingulate cortex' },
   caudalmiddlefrontal: { structure: 'caudal middle frontal gyrus' },
@@ -35,9 +39,9 @@ export const DESIKAN_REGIONS: Record<string, { structure: string; aliases?: stri
     aliases: ['pars triangularis'],
   },
   pericalcarine: { structure: 'pericalcarine cortex' },
-  postcentral: { structure: 'postcentral gyrus' },
+  postcentral: { structure: 'postcentral gyrus', cortical: ['S1'] },
   posteriorcingulate: { structure: 'posterior cingulate cortex' },
-  precentral: { structure: 'precentral gyrus' },
+  precentral: { structure: 'precentral gyrus', cortical: ['M1'] },
   precuneus: { structure: 'precuneus' },
   rostralanteriorcingulate: { structure: 'rostral anterior cingulate cortex' },
   rostralmiddlefrontal: { structure: 'rostral middle frontal gyrus' },
@@ -90,3 +94,9 @@ const LOBE_REGIONS: Record<string, string[]> = {
 export const DESIKAN_LOBES: Readonly<Record<string, string>> = Object.fromEntries(
   Object.entries(LOBE_REGIONS).flatMap(([lobe, names]) => names.map((name) => [name, lobe])),
 );
+
+/** A Desikan-Killiany cortex's English search aliases. */
+export const desikanCortexAliases = (sourceName: string) => [
+  ...(DESIKAN_REGIONS[sourceName]?.aliases ?? []),
+  ...(DESIKAN_REGIONS[sourceName]?.cortical ?? []),
+];

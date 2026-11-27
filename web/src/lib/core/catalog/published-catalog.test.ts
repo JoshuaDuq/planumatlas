@@ -127,6 +127,14 @@ describe('the published cdmd anatomy', () => {
       'destrieux:right:12',
       'destrieux:left:14',
       'destrieux:right:14',
+      'hcp-mmp:left:74',
+      'hcp-mmp:right:74',
+      'hcp-mmp:left:75',
+      'hcp-mmp:right:75',
+      'julich:left:2',
+      'julich:right:2',
+      'julich:left:1',
+      'julich:right:1',
       'nextbrain:left:111',
       'nextbrain:right:10111',
     ]);
@@ -151,17 +159,63 @@ describe('the published cdmd anatomy', () => {
   test('CAT-22: the published search totals are fixed', () => {
     const total = (query: string, lang: Language) =>
       catalogs[lang].search(query, settings({ lang })).total;
-    assert.equal(total('s', 'en'), 1432);
+    assert.equal(total('s', 'en'), 1450);
     assert.equal(total('noyau', 'fr'), 247);
     assert.equal(total('zzz', 'en'), 0);
     assert.equal(total('', 'en'), 0);
   });
 
-  test('CAT-24: a search for "s" is capped at 50 rows of 1432', () => {
+  test('CAT-24: a search for "s" is capped at 50 rows of 1450', () => {
     const found = catalogs.en.search('s', settings());
     assert.equal(found.rows.length, 50);
-    assert.equal(found.total, 1432);
+    assert.equal(found.total, 1450);
     assert.equal(catalogs.en.search('s', settings(), 5).rows.length, 5);
+  });
+
+  test('CAT-72: classical names find the HCP-MMP and Julich-Brain areas they name, in English and French', () => {
+    // Left-side HCP-MMP and Julich-Brain matches only: gyral rows are CAT-22's.
+    const areas = (query: string, lang: Language) =>
+      catalogs[lang]
+        .search(query, settings({ lang }), Infinity)
+        .rows.map((row) => row.region.id)
+        .filter((id) => /^(hcp-mmp|julich):left:/.test(id))
+        .sort();
+    const motor = ['hcp-mmp:left:8', 'julich:left:47', 'julich:left:48'];
+    const visual = ['hcp-mmp:left:1', 'julich:left:8'];
+    const somatosensory = [
+      'hcp-mmp:left:51',
+      'hcp-mmp:left:52',
+      'hcp-mmp:left:53',
+      'hcp-mmp:left:9',
+      'julich:left:49',
+      'julich:left:50',
+      'julich:left:51',
+      'julich:left:81',
+    ];
+    const auditory = ['hcp-mmp:left:24', 'julich:left:11', 'julich:left:14', 'julich:left:16'];
+    const area44 = ['hcp-mmp:left:74', 'julich:left:2'];
+    const area45 = ['hcp-mmp:left:75', 'julich:left:1'];
+    const cases: [string, string, string[]][] = [
+      ['primary motor cortex', 'cortex moteur primaire', motor],
+      ['motor cortex', 'cortex moteur', motor],
+      ['M1', 'M1', motor],
+      ['primary visual cortex', 'cortex visuel primaire', visual],
+      ['striate cortex', 'cortex strié', visual],
+      ['Brodmann 17', 'aire de Brodmann 17', visual],
+      ['primary somatosensory cortex', 'cortex somesthésique primaire', somatosensory],
+      ['primary somatosensory', 'cortex somatosensoriel primaire', somatosensory],
+      ['primary auditory cortex', 'cortex auditif primaire', auditory],
+      ['BA 44', 'BA44', area44],
+      ['area 44', 'aire 44', area44],
+      ['Brodmann area 45', 'aire 45 de Brodmann', area45],
+      ['Broca', 'Broca', [...area45, ...area44].sort()],
+      ['area 55b', 'aire 55b', ['hcp-mmp:left:12']],
+      ['Wernicke', 'Wernicke', []],
+    ];
+    for (const [english, french, expected] of cases) {
+      assert.deepEqual(areas(english, 'en'), expected, english);
+      assert.deepEqual(areas(french, 'fr'), expected, french);
+    }
   });
 
   test('CAT-25: the destrieux list holds the published groups and row counts', () => {

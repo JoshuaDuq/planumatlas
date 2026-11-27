@@ -8,10 +8,11 @@ import { schaeferLabel } from './schaefer-labels.ts';
 import { NEXTBRAIN_LABELS_FR } from './nextbrain-labels.fr.ts';
 import { STRUCTURE_LABELS } from './structure-groups.ts';
 import { STRUCTURE_LABELS_FR } from './structure-groups.fr.ts';
-import { DESIKAN_LOBES, DESIKAN_REGIONS } from './desikan-labels.ts';
+import { DESIKAN_LOBES, DESIKAN_REGIONS, desikanCortexAliases } from './desikan-labels.ts';
 import { WHITE_MATTER_LABELS } from './white-matter-labels.ts';
 import { WHITE_MATTER_LABELS_FR } from './white-matter-labels.fr.ts';
 import { canonicalSourceName } from './source-names.ts';
+import { classicalNames } from './classical-names.ts';
 
 /** A region's display name, short code, navigation group and search aliases. */
 export interface RegionLabel {
@@ -83,7 +84,8 @@ export const beneathCortex = (region: Region) =>
  *
  * Destrieux and aseg names come from curated tables. HCP-MMP has no name table
  * in this repository, so its areas keep their published codes rather than
- * being given invented expansions. NextBrain follows the same rule: its French
+ * being given invented expansions, search alone finding a primary area or area
+ * 44 or 45 by its classical name. NextBrain follows the same rule: its French
  * table is filled in as terms are verified, and every name it does not cover
  * falls back to the published English one.
  *
@@ -127,7 +129,7 @@ export function labelOf(region: Region, lang: Language = 'en'): RegionLabel | nu
       name,
       code: null,
       group: nextbrainSystem(region, lang),
-      aliases: entry?.aliases ?? (isFr ? [] : (DESIKAN_REGIONS[sourceName]?.aliases ?? [])),
+      aliases: entry?.aliases ?? (isFr ? [] : desikanCortexAliases(sourceName)),
     };
   }
 
@@ -152,7 +154,8 @@ export function labelOf(region: Region, lang: Language = 'en'): RegionLabel | nu
       name: code,
       code,
       group: network ? networkName(network, lang) : alphabeticalBucket(code),
-      aliases: [],
+      // Glasser's own word for each code, then any classical name the area answers to.
+      aliases: [`${isFr ? 'aire' : 'area'} ${code}`, ...classicalNames('hcp-mmp', code, lang)],
     };
   }
 
@@ -167,7 +170,7 @@ export function labelOf(region: Region, lang: Language = 'en'): RegionLabel | nu
       name: entry?.name ?? readable(sourceName),
       code: null,
       group: isFr ? LOBE_FR[lobe]! : lobe,
-      aliases: entry?.aliases ?? (isFr ? [] : (DESIKAN_REGIONS[sourceName]?.aliases ?? [])),
+      aliases: entry?.aliases ?? (isFr ? [] : desikanCortexAliases(sourceName)),
     };
   }
 

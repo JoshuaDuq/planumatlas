@@ -156,6 +156,21 @@ test('gyral white matter is named for its Desikan gyrus and grouped by lobe', ()
   assert.equal(insula.group, 'Substance blanche insulaire');
 });
 
+test('the precentral and postcentral cortex answer to M1 and S1 in both languages, their white matter not', () => {
+  for (const lang of ['en', 'fr'] as const) {
+    for (const [source_name, area, source_label_id] of [
+      ['precentral', 'M1', 2024],
+      ['postcentral', 'S1', 2022],
+    ] as const) {
+      for (const atlas of ['desikan', 'nextbrain']) {
+        const cortex = labelOf(region({ atlas, source_name, source_label_id }), lang);
+        assert.ok(cortex.aliases.includes(area), `${atlas} ${source_name} ${lang}`);
+      }
+      assert.ok(!labelOf(whiteMatter(source_name), lang).aliases.includes(area), source_name);
+    }
+  }
+});
+
 test('every gyral white-matter parcel wmparc publishes has its own French name', () => {
   const desikan = [
     'bankssts',

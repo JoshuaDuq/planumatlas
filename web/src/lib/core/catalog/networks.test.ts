@@ -84,12 +84,8 @@ test('HCP-MMP areas group by the network they mostly fall in', () => {
     source_name: 'L_V1_ROI',
     networks: [{ network: 'Vis', fraction: 1 }],
   };
-  assert.deepEqual(labelOf(area), {
-    name: 'V1',
-    code: 'V1',
-    group: 'Visual',
-    aliases: [],
-  });
+  const { aliases: _, ...label } = labelOf(area);
+  assert.deepEqual(label, { name: 'V1', code: 'V1', group: 'Visual' });
   assert.equal(labelOf(area, 'fr').group, 'Visuel');
 });
 

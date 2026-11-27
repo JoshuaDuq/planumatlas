@@ -1,4 +1,5 @@
 import type { Language } from '../../types/index.ts';
+import { classicalNames } from './classical-names.ts';
 import type { RegionLabel } from './labels.ts';
 
 /**
@@ -67,6 +68,6 @@ export function julichLabel(sourceName: string, lang: Language): RegionLabel | n
     name: isFr ? sourceName.replace(/^Area /, 'Aire ') : sourceName,
     code: null,
     group: isFr ? LOBE_FR[lobe]! : lobe,
-    aliases: [],
+    aliases: classicalNames('julich', sourceName, lang),
   };
 }

@@ -10,7 +10,7 @@ test('a Julich-Brain area joins the lobe its first location tag names, in both l
     name: 'Area 3b (PostCG)',
     code: null,
     group: 'Central',
-    aliases: [],
+    aliases: ['primary somatosensory cortex', 'S1', 'Brodmann area 3', 'Brodmann 3', 'BA 3', 'BA3'],
   });
   assert.equal(julichLabel('Area hOc1 (V1, 17, CalcS)', 'en')!.group, 'Occipital');
   assert.equal(julichLabel('Area TPJ (STG, SMG)', 'en')!.group, 'Temporal');
