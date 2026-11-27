@@ -15,6 +15,7 @@ import { drawDepthFirst, GHOST, TRANSLUCENT } from '../render/draw-order.ts';
 import { drawsSurfaceMap, showSurfaceMapRegions } from '../tissues/map-surface.ts';
 import { ghosted, ghosting } from '../tissues/palette.ts';
 import type { WhiteMatterSurfaces } from '../tissues/white-matter-surfaces.ts';
+import type { BordersUniforms } from './atlas-borders.ts';
 import type { AtlasMesh, Layer } from './layers.ts';
 import type { AtlasManifest } from './manifest.ts';
 import type { SurfaceMaterials } from './surface-materials.ts';
@@ -209,6 +210,9 @@ export function drawLayers({
         if (userData.sulcMix) {
           userData.sulcMix.value = surfaceColor === 'sulc' && !paint && !ghost ? 1 : 0;
         }
+        // Over every colouring and paint; a ghost keeps none.
+        const borders = material.userData['borders'] as BordersUniforms | undefined;
+        if (borders) borders.bordersMix.value = settings.atlasBorders && !ghost ? 1 : 0;
       }
       const surfaceMap = drawsSurfaceMap(material);
       if (surfaceMap) surfaceMap.value = surfaceColor === 'cerebellar' && !paint && !ghost;

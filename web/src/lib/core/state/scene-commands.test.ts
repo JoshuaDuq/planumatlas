@@ -124,6 +124,11 @@ function fixture({ atlas = 'hcp-mmp', detail = 'aseg', cord = true, nuclei = fal
       if (visible) await this.ensureSpinalCord(progress);
       this.spinalCordVisible = visible;
     },
+    atlasBorders: null as string | null,
+    async setAtlasBorders(atlas: string | null) {
+      if (atlas !== null) await this.loadLayer(`borders-${atlas}`);
+      this.atlasBorders = atlas;
+    },
     clearIsolation() {},
     setInternalSystem() {},
     setHemisphere() {},
@@ -405,6 +410,28 @@ test('STATE-49 a failed download offers Retry, which asks for the same atlas, de
   await broken.fail('destrieux', new Error('Atlas not applied: destrieux'));
   await choosing;
   assert.equal(broken.session.assemble({}).notice!.action, null, 'only a download is retried');
+});
+
+test("BORDER-03 the Atlas list's borders download, a failed download is the Atlas field's notice with Retry, and none goes at once", async () => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  const scene = fixture();
+  const choosing = scene.commands.chooseAtlasBorders('destrieux');
+  await scene.settle();
+  await scene.fail(
+    'borders-destrieux',
+    Object.assign(new Error('HTTP 503'), { code: 'asset-fetch' }),
+  );
+  await choosing;
+  const { notice } = scene.session.assemble({});
+  assert.match(notice!.text, /^Could not load Destrieux\. A file could not be downloaded/);
+  assert.equal(notice!.action, 'retry');
+  assert.equal(scene.model.atlasBorders, null);
+  scene.session.retryNotice();
+  await scene.settle();
+  await scene.finish('borders-destrieux');
+  assert.equal(scene.model.atlasBorders, 'destrieux');
+  await scene.commands.chooseAtlasBorders(null);
+  assert.equal(scene.model.atlasBorders, null);
 });
 
 test('STATE-49 a later success of the failed switch, by any route, takes its error away; another error stays', async () => {

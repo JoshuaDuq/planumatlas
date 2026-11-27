@@ -50,6 +50,7 @@ function picker() {
   const region = { id: 'destrieux:left:1' };
   const asked: unknown[] = [];
   const hovered: unknown[][] = [];
+  const rays: unknown[] = [];
   const domElement = canvas();
   const controls = new EventDispatcher<{ change: object }>();
   const instance = createPicker<Region>({
@@ -62,10 +63,13 @@ function picker() {
         return region;
       },
     }),
-    onHover: (...args) => hovered.push(args),
+    onHover: (region, position, ray) => {
+      hovered.push([region, position]);
+      if (ray) rays.push(ray);
+    },
     onSelect: () => {},
   });
-  return { domElement, controls, instance, asked, hovered, region };
+  return { domElement, controls, instance, asked, hovered, rays, region };
 }
 
 function selecting(pick: () => Region | null) {
@@ -85,12 +89,14 @@ describe('picker', () => {
     vi.unstubAllGlobals();
   });
 
-  it('names what the pointer is over without being clicked', () => {
+  it('names what the pointer is over without being clicked, handing on the ray it was picked with', () => {
     const clock = frames();
-    const { domElement, hovered, region } = picker();
+    const { domElement, hovered, rays, asked, region } = picker();
     domElement.emit('pointermove', { clientX: 120, clientY: 40 });
     clock.run();
     assert.deepEqual(hovered, [[region, { x: 120, y: 40 }]]);
+    // Another reading of the same point, the borders' atlas's region, needs no ray of its own.
+    assert.deepEqual(rays, [asked.at(-1)]);
   });
 
   // From inside an animation callback, the scene's redraw for the ring would wait a frame.

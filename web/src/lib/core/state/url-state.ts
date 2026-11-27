@@ -32,6 +32,7 @@ type Defaults = Pick<
   | 'internalVisible'
   | 'spinalCordVisible'
   | 'surfaceColor'
+  | 'atlasBorders'
   | 'view'
   | 'cut'
   | 'cutOffset'
@@ -74,6 +75,7 @@ export const DEFAULTS: Defaults = {
   internalVisible: true,
   spinalCordVisible: false,
   surfaceColor: 'atlas',
+  atlasBorders: null,
   view: 'oblique',
   cut: 'off',
   cutOffset: 0,
@@ -342,6 +344,7 @@ const FIELDS: Field[] = [
   field('internalVisible', 'internal', flag, writeFlag),
   field('spinalCordVisible', 'cord', flag, writeFlag),
   field('surfaceColor', 'colors', surfaceColor),
+  field('atlasBorders', 'borders', nonempty),
   field(
     'cortexOpacity',
     'opacity',

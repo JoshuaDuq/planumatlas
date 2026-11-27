@@ -12,6 +12,7 @@ const SCENE_FIELDS = [
   'internalVisible',
   'spinalCordVisible',
   'surfaceColor',
+  'atlasBorders',
   'internalSystem',
   'view',
   'cut',
@@ -110,6 +111,7 @@ export async function applyReaderState(
       | 'showSpinalCord'
       | 'loadSupplemental'
       | 'applySurfaceColor'
+      | 'showAtlasBorders'
       | 'cut'
     >;
     current: () => boolean;
@@ -164,6 +166,7 @@ export async function applyReaderState(
     }
   });
   await step(['colors'], () => commands.applySurfaceColor(target.surfaceColor, current));
+  await step(['borders'], () => commands.showAtlasBorders(target.atlasBorders, current));
   // The position is judged against the range of the plane it lies in, so it goes once that plane is cut.
   const planeCut = await step(['cut', 'tilt', 'az', 'rev', 'pos'], async () => {
     if (target.cut === 'off') {

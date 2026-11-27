@@ -372,6 +372,48 @@ describe('DataBar lists', () => {
     expect(el(summary()).getAttribute('aria-expanded')).toBe('true');
   });
 
+  test('BORDER-03 each other atlas whose borders the shown one can draw offers them in its row, pressed while drawn', async () => {
+    const calls: string[] = [];
+    const bordersOver = new Map([
+      ['destrieux', new Set(['hcp-mmp'])],
+      ['hcp-mmp', new Set(['destrieux'])],
+    ]);
+    const view = await wide(barProps({ bordersOver }), { calls });
+    const toggles = () => [
+      ...el(list('Atlas')).querySelectorAll<HTMLButtonElement>('.data-option-borders'),
+    ];
+    // Not on the shown atlas, nor on aseg, whose borders Destrieux's cortex cannot draw.
+    expect(
+      toggles().map((button) => [
+        button.closest('.data-option-row')!.querySelector('.data-option-name')!.textContent,
+        button.getAttribute('aria-label'),
+        button.textContent,
+        button.getAttribute('aria-pressed'),
+      ]),
+    ).toEqual([['HCP-MMP', 'HCP-MMP borders', 'Borders', 'false']]);
+    expect(toggles()[0]!.dataset['tooltip']).toBe('Draw HCP-MMP’s borders as lines over Destrieux');
+    // In the list's arrow order, right after its atlas.
+    option('Atlas', 'HCP-MMP').focus();
+    await userEvent.keyboard('{ArrowDown}');
+    expect(document.activeElement).toBe(toggles()[0]);
+    await userEvent.keyboard('{Enter}');
+    await view.rerender({ bar: barProps({ bordersOver, atlasBorders: 'hcp-mmp' }) });
+    expect(toggles()[0]!.getAttribute('aria-pressed')).toBe('true');
+    // Pressed and not, the rows pass axe on a wide window and a phone, in both themes.
+    await expectAxeClean();
+    await page.viewport(...WIDE);
+    await userEvent.click(toggles()[0]!);
+    expect(commands(calls)).toEqual(['borders:hcp-mmp', 'borders:null']);
+    // With HCP-MMP shown, Destrieux's row offers them, in French too.
+    await view.rerender({ bar: barProps({ bordersOver, atlas: 'hcp-mmp', lang: 'fr' }) });
+    expect(toggles().map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Limites de Destrieux',
+    ]);
+    // Without published borders, no row has one.
+    await view.rerender({ bar: barProps() });
+    expect(toggles()).toEqual([]);
+  });
+
   test('arrows move between options without choosing; Enter chooses (decision 0003)', async () => {
     const calls: string[] = [];
     await wide(barProps(), { calls });

@@ -153,6 +153,22 @@ describe('the dev server watcher', () => {
       (hook(plugin, 'load')(publishedModule) as string).replace(/^export default |;$/g, ''),
     ).files as Record<string, unknown>;
 
+  it('BUILD-16 leaves the default anatomy’s atlas borders to the other chunk', () => {
+    const path = 'models/bert/borders-destrieux-hcp-mmp.field';
+    writeFileSync(resolve(fixture, path), 'borders');
+    try {
+      const { plugin, server } = startServer();
+      server.watcher.emit('all', 'add', resolve(publicDirectory, path));
+      const elsewhere = JSON.parse(
+        (hook(plugin, 'load')(elsewhereModule) as string).replace(/^export default |;$/g, ''),
+      ) as Record<string, unknown>;
+      expect(Object.keys(elsewhere)).toEqual([path]);
+      expect(loadedFiles(plugin)).not.toHaveProperty(path);
+    } finally {
+      rmSync(resolve(fixture, path), { force: true });
+    }
+  });
+
   it('BUILD-16 gives the entry the default anatomy and leaves another anatomy to its own chunk', () => {
     // The published index lists mni152 beside the default; its files stay off the first visit.
     const path = 'models/mni152/manifest.json';

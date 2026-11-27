@@ -52,6 +52,14 @@
 
   const app = getApp();
   const world = $derived(app.world);
+  /** The atlases whose borders each atlas's cortex can draw (`manifest.atlas_borders`). */
+  const bordersOver = $derived(
+    new Map(
+      Object.entries(world?.engine.model.manifest.atlas_borders?.files ?? {}).map(
+        ([shown, overlays]) => [shown, new Set(Object.keys(overlays))],
+      ),
+    ),
+  );
 
   /** The address of the view on screen, written now rather than after the link writer's delay. */
   function currentLink() {
@@ -320,6 +328,9 @@
         anatomies={world.anatomies}
         reference={tractReference ? reference(current.referenceAnatomy) : null}
         borrowed={borrowedAtlas(current)}
+        atlasBorders={current.atlasBorders}
+        {bordersOver}
+        onBorders={commands.chooseAtlasBorders}
         bind:settingsOpen
         bind:choosing
         onAtlas={(id) => anatomy.chooseLayer(() => excursions.chooseAtlas(id))}

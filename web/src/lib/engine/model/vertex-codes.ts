@@ -1,4 +1,4 @@
-// A byte per cortical vertex, read by the shader through gl_VertexID: thickness and the body map.
+// A byte per cortical vertex, read by the shader through gl_VertexID: thickness, the body map, atlas borders.
 import { DataTexture, RedFormat, UnsignedByteType } from 'three';
 import type { IUniform } from 'three';
 import type { Region } from '../../types/index.ts';
@@ -30,7 +30,7 @@ function codeTexture(codes: Uint8Array): { texture: DataTexture; width: number }
  * Give each mesh of an atlas's cortex its vertices' bytes. The build writes them region by region in
  * the published regions' order, each region's vertices in its mesh's order, so a mesh whose vertex
  * count is not its region's, or bytes left over, mean the file and the cortex disagree. `what` names
- * the measure in errors.
+ * the measure in errors. Returns each mesh with the offset of its bytes.
  */
 export function attachVertexCodes(
   layer: Pick<Layer, 'meshes'>,
@@ -39,7 +39,7 @@ export function attachVertexCodes(
   atlas: string,
   what: string,
   slotOf: (userData: AnatomicalUserData) => CodeSlot | null,
-): void {
+): [Layer['meshes'][number], number][] {
   const meshes = new Map(layer.meshes.map((mesh) => [mesh.userData['region_id'] as string, mesh]));
   const placed: [CodeSlot, Uint8Array, (typeof layer.meshes)[number]][] = [];
   let at = 0;
@@ -57,9 +57,12 @@ export function attachVertexCodes(
   // Only once the whole file fits: a cortex is never drawn with some parcels' bytes and not others'.
   for (const [slot, values, mesh] of placed) {
     const { texture, width } = codeTexture(values);
+    // Another atlas's borders replace the ones a mesh carried.
+    slot.codes.value?.dispose();
     slot.codes.value = texture;
     slot.width.value = width;
     slot.ready.value = true;
     mesh.geometry.addEventListener('dispose', () => texture.dispose());
   }
+  return placed.map(([, values, mesh]) => [mesh, values.byteOffset - codes.byteOffset]);
 }

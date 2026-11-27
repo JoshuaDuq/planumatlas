@@ -17,6 +17,7 @@ import manifest, {
   networks,
   appearance as published,
 } from '../../../../../public/models/cdmd/manifest.json';
+import { addAtlasBorders } from '../model/atlas-borders.ts';
 import { SurfaceMaterials } from '../model/surface-materials.ts';
 import type { Region } from '../../types/index.ts';
 import { Volume } from '../slices/volume.ts';
@@ -87,6 +88,8 @@ export function publishedCortexMaterial(): Material {
   const shown = materials.dress(mesh as never, { id: 'r', kind: 'cortex' } as Region, true);
   materials.addFeathers([shown]);
   addMriSurfaceAppearance(shown.material, createMriUniforms(scanAnatomy()), 'mid-thickness');
+  // And another atlas's borders, as their first showing patches it.
+  addAtlasBorders(shown.material);
   return shown.material;
 }
 
@@ -110,6 +113,28 @@ export function patchCombinations(): Map<string, Material> {
       undefined,
       withNetworks ? networkPalettes() : undefined,
     );
+
+  // Borders are patched in when first drawn, before or after the scan, always after the feather.
+  add('networked surface + feather + borders', () => {
+    const material = surface(true);
+    addBorderFeather(material, feather());
+    addAtlasBorders(material);
+    return material;
+  });
+  add('networked surface + feather + MRI + borders', () => {
+    const material = surface(true);
+    addBorderFeather(material, feather());
+    addMriSurfaceAppearance(material, createMriUniforms(anatomy), 'mid-thickness');
+    addAtlasBorders(material);
+    return material;
+  });
+  add('networked surface + feather + borders + MRI', () => {
+    const material = surface(true);
+    addBorderFeather(material, feather());
+    addAtlasBorders(material);
+    addMriSurfaceAppearance(material, createMriUniforms(anatomy), 'mid-thickness');
+    return material;
+  });
 
   for (const withNetworks of [false, true]) {
     const label = withNetworks ? 'networked surface' : 'plain surface';

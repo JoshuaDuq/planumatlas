@@ -15,6 +15,7 @@
     | 'onSurfaceColor'
     | 'onDetail'
     | 'onAnatomy'
+    | 'onBorders'
     | 'onPanel'
     | 'settingsOpen'
   >;
@@ -87,6 +88,7 @@
       onSurfaceColor={(colour) => command(`colour:${colour}`)}
       onDetail={(id) => command(`detail:${id}`)}
       onAnatomy={(id) => command(`anatomy:${id}`)}
+      onBorders={(atlas) => command(`borders:${atlas}`)}
       onPanel={(right, immediate) => panels.push([right, immediate])}
     />
   {/snippet}

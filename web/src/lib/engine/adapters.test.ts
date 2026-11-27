@@ -49,11 +49,11 @@ describe('the MRI window link', () => {
 describe('the model', () => {
   it('ATLAS-54 has a layer only once the model calls it whole, not while a cortex is still blending', () => {
     const atlas = { hasLayer: (id: string) => id === 'a', layers: new Map([['b', {}]]) };
-    const model = createEngineModel(atlas as never, {
-      inSight: () => [],
-      seenAt: () => [],
-      point: () => {},
-    });
+    const model = createEngineModel(
+      atlas as never,
+      { inSight: () => [], seenAt: () => [], point: () => {} },
+      new URL('https://example.test/manifest.json'),
+    );
     assert.equal(model.hasLayer('a'), true);
     assert.equal(model.hasLayer('b'), false);
   });

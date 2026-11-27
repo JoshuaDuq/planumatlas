@@ -564,6 +564,7 @@
                 : null,
             },
           )}
+      borders={tractReference ? null : current.atlasBorders}
       cases={!tractReference && world.strokeCases.cohort.status === 'ready'
         ? casesKey(world.strokeCases.cohort.data, world.strokeCases.chosen, current.lang)
         : null}

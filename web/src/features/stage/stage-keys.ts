@@ -3,7 +3,7 @@ import { SULC_RAMP } from '../../lib/core/catalog/sulcal-depth.ts';
 import { THICKNESS_RAMP } from '../../lib/core/catalog/thickness-ramp.ts';
 import { cabNpName, networkCss, networkName } from '../../lib/core/catalog/networks.ts';
 import { decimal, withUnit } from '../../lib/core/format.ts';
-import { t } from '../../lib/core/i18n/index.ts';
+import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
 import type { Legend } from '../../lib/core/state/paint.ts';
 import { modelUsable } from '../../lib/core/state/session.ts';
 import type {
@@ -30,7 +30,7 @@ const KEY_HEAD_PX = 42;
 /** The space between stacked plates (`--space-2`). */
 export const KEY_GAP_PX = 8;
 
-export type KeyName = 'map' | 'map-2' | 'network' | 'paint' | 'cases' | 'direction';
+export type KeyName = 'map' | 'map-2' | 'network' | 'paint' | 'borders' | 'cases' | 'direction';
 
 export interface KeyRow {
   id: string;
@@ -42,6 +42,8 @@ export interface KeyRow {
   absent: boolean;
   /** A colour scale instead of one colour: CSS colours from its start to its end. */
   ramp?: readonly string[];
+  /** The line another atlas's borders are drawn with instead of a colour (`BORDER_LINE`). */
+  line?: boolean;
 }
 
 /** One plate of the stage key, in the order the plates are drawn. */
@@ -85,6 +87,8 @@ export interface KeySources {
   lobes?: readonly { id: string; color: Rgb; label: string }[] | null;
   /** The key of the paint on show (`legendFor`), or null. */
   legend: Legend | null;
+  /** The atlas whose borders are drawn over the cortex, or null. */
+  borders?: string | null;
   /** The stroke cases on the stage: each one's colour and name, and the shared colour for two. */
   cases?: { title: string; rows: { id: string; color: Rgb | string; label: string }[] } | null;
   /** The streamlines are drawn, coloured by direction. */
@@ -104,6 +108,9 @@ const row = (id: string, color: Rgb | string, label: string, pressed = false, ab
   pressed,
   absent,
 });
+
+/** The line's sRGB inks, as the cortex draws it facing the light (`BORDER_LINE`, linear). */
+export const BORDER_INK = { core: '#f2f2f2', casing: '#1b1b1b' };
 
 /** The swatch's CSS colour. */
 export const swatchColor = (color: Rgb | string) =>
@@ -262,6 +269,18 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
       ),
       note: legend.note,
       pickable: legend.pickable !== false && legend.rows.length > 1,
+    });
+  }
+
+  if (ready && sources.borders) {
+    const words = t(lang, 'display');
+    plates.push({
+      name: 'borders',
+      map: 'borders',
+      title: words.bordersKey(atlasSwitchLabel(sources.borders, lang)),
+      rows: [{ ...row('line', BORDER_INK.core, words.bordersLine), line: true }],
+      note: '',
+      pickable: false,
     });
   }
 

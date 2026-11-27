@@ -12,6 +12,7 @@ from .labels import boundary_certainty, nextbrain, segmentation_agreement, white
 from .layers import (
     arousal_nuclei,
     arterial_territories,
+    atlas_borders,
     body_map,
     cab_np,
     cerebellar_functions,
@@ -364,6 +365,13 @@ LAYERS = (
         export=lambda run: body_map.export(run.config, run.regions),
         limitations=lambda config: body_map.limitations(),
         validate=lambda check: body_map.validate(check.config, check.manifest),
+    ),
+    Layer(
+        "atlas_borders",
+        published=atlas_borders.is_declared,
+        inputs=atlas_borders.inputs,
+        export=lambda run: atlas_borders.export(run.config, run.regions),
+        validate=lambda check: atlas_borders.validate(check.config, check.manifest),
     ),
     Layer(
         "stroke_cases",

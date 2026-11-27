@@ -55,6 +55,8 @@ export interface SeenPoint {
 export interface HoverEvent {
   region: Region | null;
   position: { x: number; y: number } | null;
+  /** While another atlas's borders are drawn, its region at the point on the shown cortex. */
+  borders?: Region | null;
 }
 
 /** The stage's measured size and the part of it the interface leaves uncovered (app.js:122). */

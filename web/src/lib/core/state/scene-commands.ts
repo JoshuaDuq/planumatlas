@@ -184,6 +184,15 @@ export function createSceneCommands({
     return current();
   }
 
+  /**
+   * Draw another atlas's borders over the shown cortex, or none. Always asked, so a showing still
+   * downloading is overtaken.
+   */
+  async function showAtlasBorders(atlas: string | null, current: () => boolean) {
+    await model.setAtlasBorders(atlas);
+    return current();
+  }
+
   /** Show or hide the spinal cord; its first showing downloads it. */
   async function showSpinalCord(visible: boolean, current: () => boolean) {
     if (visible && !hasSpinalCord())
@@ -285,6 +294,21 @@ export function createSceneCommands({
     if (current()) render();
   }
 
+  /** The Atlas list's borders toggle: another atlas's borders over the shown one, or none. */
+  async function chooseAtlasBorders(atlas: string | null) {
+    const current = begin();
+    session.notify(null);
+    try {
+      await showAtlasBorders(atlas, current);
+    } catch (error) {
+      failChoice(current, 'atlas', error, ['layer', atlasSwitchLabel(atlas!, lang())], () => {
+        void chooseAtlasBorders(atlas);
+      });
+      return;
+    }
+    if (current()) render();
+  }
+
   /**
    * The masthead's colour field; an atlas it switches to was named in the option. True once the colour
    * is shown and no later command has taken over.
@@ -314,6 +338,7 @@ export function createSceneCommands({
     loadAtlas,
     loadDetail,
     applySurfaceColor,
+    showAtlasBorders,
     showSpinalCord,
     loadSupplemental,
     prepareCut,
@@ -323,6 +348,7 @@ export function createSceneCommands({
     chooseAtlas,
     chooseDetail,
     chooseSurfaceColor,
+    chooseAtlasBorders,
   };
 }
 

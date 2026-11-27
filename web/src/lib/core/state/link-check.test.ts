@@ -14,6 +14,8 @@ const known: KnownLinkIds = {
   explorers: new Set(['anatomy', 'functions', 'deficits', 'circuits', 'diffusion']),
   // A build without Yeo 7 networks: `network` decodes but is not published.
   surfaceColors: new Set(['tissue', 'mri', 'atlas', 'cab-np']),
+  // Destrieux's cortex can draw HCP-MMP's borders; HCP-MMP's draws none.
+  borders: new Map([['destrieux', new Set(['hcp-mmp'])]]),
   regions: new Map([
     ['destrieux:left:29', { kind: 'cortex' }],
     ['aseg:left:17', { kind: 'structure' }],
@@ -60,6 +62,22 @@ test('each unknown name is dropped and reported under its link parameter', () =>
     'step',
   ]);
   assert.deepEqual(state, { explorer: 'diffusion', hemisphere: 'left' });
+});
+
+test("BORDER-04 a link's borders are another atlas's that the shown cortex can draw", () => {
+  assert.deepEqual(check('#atlas=destrieux&borders=hcp-mmp'), {
+    state: { atlas: 'destrieux', atlasBorders: 'hcp-mmp' },
+    rejected: [],
+  });
+  // With no atlas of its own the link opens on the first published, Destrieux.
+  assert.deepEqual(check('#borders=hcp-mmp').rejected, []);
+  // Its own borders, one with none published for that cortex, and an unknown atlas are refused.
+  assert.deepEqual(check('#atlas=destrieux&borders=destrieux').rejected, ['borders']);
+  assert.deepEqual(check('#atlas=hcp-mmp&borders=destrieux').rejected, ['borders']);
+  assert.deepEqual(check('#borders=yeo&hemi=left').state, { hemisphere: 'left' });
+  assert.deepEqual(check('#borders=yeo').rejected, ['borders']);
+  // An atlas the link names but this anatomy does not publish falls back to the first, as it opens.
+  assert.deepEqual(check('#atlas=yeo&borders=hcp-mmp').rejected, ['atlas']);
 });
 
 test('focus needs a selected region that exists', () => {

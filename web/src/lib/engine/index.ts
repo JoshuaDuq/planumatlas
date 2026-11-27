@@ -400,7 +400,15 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
               pick: (ray) => sections.pick(ray) ?? null,
               intersect: (ray) => sections.intersect(ray),
             },
-      onHover: presentation.hover,
+      // While borders are drawn, the point is read again for the region they outline there.
+      onHover: (region, position, ray) =>
+        presentation.hover(
+          region,
+          position,
+          region && ray && atlas.settings.atlasBorders
+            ? atlas.bordersRegionAt(sections.intersect(ray)!)
+            : null,
+        ),
       onSelect: (id, hit) =>
         events.emit('pick', { id, point: hit && worldToRas(anatomicalPoint(hit)) }),
       onFocusPoint: stage.focusWorldPoint,
@@ -537,15 +545,19 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     return {
       on: events.on,
       canvas: scene.domElement,
-      model: createEngineModel(atlas, {
-        inSight: (targets) => atlas.inSight(targets, rays()),
-        seenAt: (points) => seenAt(points, { ...rays(), regions: atlas.regions }),
-        point(id) {
-          const region = id === null ? null : atlas.regions.get(id);
-          if (region === undefined) throw new Error(`Unknown region: ${id}`);
-          presentation.hover(region, null);
+      model: createEngineModel(
+        atlas,
+        {
+          inSight: (targets) => atlas.inSight(targets, rays()),
+          seenAt: (points) => seenAt(points, { ...rays(), regions: atlas.regions }),
+          point(id) {
+            const region = id === null ? null : atlas.regions.get(id);
+            if (region === undefined) throw new Error(`Unknown region: ${id}`);
+            presentation.hover(region, null);
+          },
         },
-      }),
+        absoluteManifestUrl,
+      ),
       sections: engineSections,
       camera: stage.camera,
       comparison,

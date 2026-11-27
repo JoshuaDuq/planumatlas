@@ -8,7 +8,7 @@ import { patchCombinations, publishedCortexMaterial } from './test-support.ts';
 // where the coat is dropped, so a program two combinations share, or that fails to link, shows in
 // the renderer's program list. Every combination differs between the two.
 const COMPILE_TIMEOUT_MS = 120_000;
-const DISTINCT = 21;
+const DISTINCT = 24;
 
 test(
   'SHADER-35 every combination of patches the app uses links under real WebGL, on desktop and on a phone, and gets its own program',
@@ -60,8 +60,10 @@ test(
 // At sixteen active attributes, the most WebGL 2 guarantees and gl_VertexID among them, Chrome on some
 // phones and tablets failed to link the cortex, and it was never drawn.
 const CORTEX_ATTRIBUTES = 13;
+// WebGL 2 guarantees sixteen texture units to each stage; the cortex reads its bytes in the vertex stage.
+const CORTEX_SAMPLERS = 16;
 
-test('SHADER-36 the cortex as dressed on CDMD links with three of the sixteen vertex attributes WebGL 2 guarantees free', () => {
+test('SHADER-36 the cortex as dressed on CDMD links with three of the sixteen vertex attributes WebGL 2 guarantees free, and within sixteen texture units', () => {
   const renderer = new WebGLRenderer({ canvas: document.createElement('canvas') });
   renderer.debug.checkShaderErrors = true;
   const camera = new PerspectiveCamera();
@@ -72,12 +74,26 @@ test('SHADER-36 the cortex as dressed on CDMD links with three of the sixteen ve
   renderer.render(scene, camera);
   const programs = renderer.info.programs! as unknown as { program: WebGLProgram }[];
   expect(programs).toHaveLength(1);
-  const gl = renderer.getContext();
+  const gl = renderer.getContext() as WebGL2RenderingContext;
   const { program } = programs[0]!;
   expect(gl.getProgramParameter(program, gl.LINK_STATUS)).toBe(true);
   expect(gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES)).toBeLessThanOrEqual(
     CORTEX_ATTRIBUTES,
   );
+  const uniforms = Array.from(
+    { length: gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS) as number },
+    (_, index) => gl.getActiveUniform(program, index)!,
+  );
+  const samplerTypes: number[] = [
+    gl.SAMPLER_2D,
+    gl.SAMPLER_3D,
+    gl.SAMPLER_CUBE,
+    gl.UNSIGNED_INT_SAMPLER_3D,
+  ];
+  const samplers = uniforms.filter(({ type }) => samplerTypes.includes(type));
+  // The borders' bytes are drawn by the dressed cortex, within the units every GPU has.
+  expect(samplers.map(({ name }) => name)).toContain('bordersCodes');
+  expect(samplers.length).toBeLessThanOrEqual(CORTEX_SAMPLERS);
   material.dispose();
   renderer.dispose();
   renderer.forceContextLoss();

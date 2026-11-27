@@ -56,6 +56,8 @@ export class SurfaceMaterials {
   /** The cerebellar map its surfaces draw, once attached (`attachCerebellarMap`). */
   cerebellarMap: SurfaceMap | null = null;
   private cerebellarUniforms: SurfaceMapUniforms | null = null;
+  /** The borders' patch every cortical material takes once borders are first drawn (`atlas-borders.ts`). */
+  private bordersPatch: ((material: Material) => void) | null = null;
   /** The network and territory colours each cortical vertex looks up by its index. */
   private readonly palettes: SurfacePalettes;
   private readonly manifest: AtlasManifest;
@@ -135,6 +137,7 @@ export class SurfaceMaterials {
     if (this.cerebellarUniforms && drawsCerebellarMap(region)) {
       addSurfaceMap(shown.material, this.cerebellarUniforms);
     }
+    if (cortical && this.bordersPatch) this.bordersPatch(shown.material);
     this.sourceColors.set(shown, stageLegible(shown.material.color.clone()));
     return shown;
   }
@@ -190,6 +193,18 @@ export class SurfaceMaterials {
         if (drawsCerebellarMap(this.regions.get(mesh.userData['region_id'] as string)!)) {
           addSurfaceMap(mesh.material, this.cerebellarUniforms);
         }
+      }
+    }
+  }
+
+  /** Patch every cortical material, those loaded later too, to draw another atlas's borders. */
+  attachBorders(patch: (material: Material) => void, layers: Iterable<Layer>): void {
+    if (this.bordersPatch) return;
+    this.bordersPatch = patch;
+    for (const layer of layers) {
+      for (const mesh of layer.meshes) {
+        const { kind } = this.regions.get(mesh.userData['region_id'] as string)!;
+        if (kind === 'cortex' || kind === 'non-region') patch(mesh.material);
       }
     }
   }

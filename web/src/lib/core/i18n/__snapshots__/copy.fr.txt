@@ -640,6 +640,15 @@
    "[\"\",\"Alpha\"] → \" à Alpha\""
   ],
   "networkMatrix": "Matrice de corrélation",
+  "bordersKey": [
+   "[\"Alpha\"] → \"Limites de Alpha\"",
+   "[\"\"] → \"Limites de \""
+  ],
+  "bordersLine": "Là où chaque aire s’arrête",
+  "bordersHover": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Alpha<NNBSP>:  · Alpha<NNBSP>: \"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"<NNBSP>: Alpha · <NNBSP>: Alpha\""
+  ],
   "thicknessNote": "Mesurée sur cet examen par FreeSurfer. Le cortex très myélinisé, comme le cortex moteur primaire, y paraît plus mince qu’au microscope.",
   "sulcNote": "Profondeur selon FreeSurfer<NNBSP>: le déplacement de chaque point quand la surface est gonflée, vers l’extérieur dans les sillons (rouge), vers l’intérieur sur les crêtes des gyrus (bleu), autour de la moyenne de l’hémisphère.",
   "highlightKey": {
@@ -1197,6 +1206,15 @@
    "[\"Alpha\"] → \"La couleur devient Alpha\"",
    "[\"\"] → \"La couleur devient \""
   ],
+  "borders": "Limites",
+  "bordersOf": [
+   "[\"Alpha\"] → \"Limites de Alpha\"",
+   "[\"\"] → \"Limites de \""
+  ],
+  "bordersTip": [
+   "[\"Alpha\",\"\"] → \"Tracer les limites de Alpha en lignes sur \"",
+   "[\"\",\"Alpha\"] → \"Tracer les limites de  en lignes sur Alpha\""
+  ],
   "dataSummary": "Réglages de l’atlas et de l’affichage",
   "isDefault": "(par défaut)",
   "precision": {
@@ -1551,6 +1569,7 @@
    "internal": "affichage de l’anatomie interne",
    "cord": "moelle épinière",
    "colors": "coloration",
+   "borders": "limites",
    "function": "fonction",
    "zmin": "seuil de peinture",
    "opacity": "opacité du cortex",

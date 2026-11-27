@@ -1,6 +1,7 @@
 <!--
   The data popover's lists: Atlas, Colour, Internal anatomy and Subject, each an APG Toolbar of
   `aria-pressed` buttons (decision 0003: a choice that downloads is not applied by arrowing past it).
+  Each atlas but the shown one has a second toggle in its row that draws its borders over the shown one.
   A chunk of its own (BUILD-15): the data bar fetches it when the reader first points at, focuses or
   opens the summary. The bar holds what is chosen; this draws it and says what each option is.
 -->
@@ -43,6 +44,8 @@
     isDefault?: boolean;
     /** How fine a detail level's segmentation is, beside its name. */
     precision?: string;
+    /** An atlas whose borders can be drawn over the shown one: whether they are. */
+    borders?: boolean;
   }
 
   interface ChoiceGroup {
@@ -73,7 +76,13 @@
     palette: (mode: SurfaceColor) => readonly Rgb[] | null;
     /** The atlas a colouring would need, were `atlas` the one shown. */
     required: (colour: string, atlas: string) => string | null | undefined;
+    /** The atlas whose borders are drawn over the shown one, or null. */
+    atlasBorders: string | null;
+    /** The atlases whose borders each atlas's cortex can draw, by that atlas. */
+    bordersOver: ReadonlyMap<string, ReadonlySet<string>>;
     onChoose: (field: Field, value: string) => void;
+    /** Draw this atlas's borders over the shown one, or none. */
+    onBorders: (atlas: string | null) => void;
     onAnatomy: (id: string) => void;
     onAtlasIntent: () => void;
   }
@@ -94,7 +103,10 @@
     holdsSubject,
     required,
     palette,
+    atlasBorders,
+    bordersOver,
     onChoose,
+    onBorders,
     onAnatomy,
     onAtlasIntent,
   }: Props = $props();
@@ -150,6 +162,7 @@
       aside: aside('atlas', id, atlasAside(lang, id, required(shown.colour, id))),
       note: line('atlas', id, shown.atlas, brief(id)),
       isDefault: id === atlases[0],
+      ...(bordersOver.get(shown.atlas)?.has(id) && { borders: id === atlasBorders }),
     })),
   );
   const colourOptions = $derived<ChoiceGroup[]>([
@@ -232,49 +245,75 @@
             <p id={groupId} class="data-group-label">{group.label}</p>
           {/if}
           {#each group.options as option (option.value)}
-            {@const id = `${name}-${option.value}-${uid}`}
-            <button
-              type="button"
-              class="data-option"
-              aria-labelledby={option.aside ? `${id}-name ${id}-aside` : `${id}-name`}
-              aria-describedby={option.note ? `${id}-note` : undefined}
-              aria-pressed={option.value === pressed}
-              aria-disabled={unavailable || undefined}
-              onpointerenter={name === 'atlas' ? onAtlasIntent : undefined}
-              onfocus={name === 'atlas' ? onAtlasIntent : undefined}
-              onclick={() => {
-                if (!unavailable && option.value !== pressed) onpress(option.value);
-              }}
-            >
-              <span class="data-option-check">
-                {#if option.value === pressed}{@render iconGraphic('check')}{/if}
-              </span>
-              <span class="data-option-name" id="{id}-name">
-                {option.name}{#if option.isDefault}{' '}<span class="data-option-default">
-                    {copy.isDefault}
-                  </span>{/if}{#if option.precision}{' '}<span class="data-option-default">
-                    {option.precision}
-                  </span>{/if}
-              </span>
-              {#if option.palette}
-                <span class="data-option-palette" aria-hidden="true">
-                  {#each option.palette as [r, g, b], index (index)}
-                    <span style:background="rgb({r} {g} {b})"></span>
-                  {/each}
-                </span>
-              {/if}
-              {#if option.aside}
-                <span class="data-option-aside" id="{id}-aside">{option.aside}</span>
-              {/if}
-              {#if option.note}
-                <span class="data-option-note" id="{id}-note">{option.note}</span>
-              {/if}
-            </button>
+            {#if option.borders === undefined}
+              {@render choice(name, option, pressed, onpress, unavailable)}
+            {:else}
+              <div class="data-option-row">
+                {@render choice(name, option, pressed, onpress, unavailable)}
+                <button
+                  type="button"
+                  class="data-option-borders"
+                  aria-pressed={option.borders}
+                  aria-label={copy.bordersOf(option.name)}
+                  data-tooltip={copy.bordersTip(option.name, atlasSwitchLabel(shown.atlas, lang))}
+                  onclick={() => onBorders(option.borders ? null : option.value)}
+                >
+                  <span class="data-option-line" aria-hidden="true"></span>{copy.borders}
+                </button>
+              </div>
+            {/if}
           {/each}
         </div>
       {/each}
     </div>
   </div>
+{/snippet}
+
+{#snippet choice(
+  name: 'subject' | Field,
+  option: Choice,
+  pressed: string,
+  onpress: (value: string) => void,
+  unavailable: boolean,
+)}
+  {@const id = `${name}-${option.value}-${uid}`}
+  <button
+    type="button"
+    class="data-option"
+    aria-labelledby={option.aside ? `${id}-name ${id}-aside` : `${id}-name`}
+    aria-describedby={option.note ? `${id}-note` : undefined}
+    aria-pressed={option.value === pressed}
+    aria-disabled={unavailable || undefined}
+    onpointerenter={name === 'atlas' ? onAtlasIntent : undefined}
+    onfocus={name === 'atlas' ? onAtlasIntent : undefined}
+    onclick={() => {
+      if (!unavailable && option.value !== pressed) onpress(option.value);
+    }}
+  >
+    <span class="data-option-check">
+      {#if option.value === pressed}{@render iconGraphic('check')}{/if}
+    </span>
+    <span class="data-option-name" id="{id}-name">
+      {option.name}{#if option.isDefault}{' '}<span class="data-option-default">
+          {copy.isDefault}
+        </span>{/if}{#if option.precision}{' '}<span class="data-option-default">
+          {option.precision}
+        </span>{/if}
+    </span>
+    {#if option.palette}
+      <span class="data-option-palette" aria-hidden="true">
+        {#each option.palette as [r, g, b], index (index)}
+          <span style:background="rgb({r} {g} {b})"></span>
+        {/each}
+      </span>
+    {/if}
+    {#if option.aside}
+      <span class="data-option-aside" id="{id}-aside">{option.aside}</span>
+    {/if}
+    {#if option.note}
+      <span class="data-option-note" id="{id}-note">{option.note}</span>
+    {/if}
+  </button>
 {/snippet}
 
 {@render list('atlas', copy.atlas, [{ options: atlasOptions }], shown.atlas, (value) =>
@@ -399,6 +438,53 @@
         background: var(--surface-hover);
       }
     }
+    /* An atlas's row with its borders toggle at the end of its name's line. */
+    .data-option-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-1);
+    }
+    .data-option-row > .data-option {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .data-option-borders {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      gap: var(--space-1);
+      min-height: 30px;
+      padding: 0 var(--space-2);
+      border: 0;
+      border-radius: var(--radius-small);
+      background: none;
+      color: var(--text-secondary);
+      font: inherit;
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      cursor: pointer;
+    }
+    .data-option-borders[aria-pressed='true'] {
+      background: var(--surface-pressed);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .data-option-borders:focus-visible {
+      outline-offset: -2px;
+    }
+    /* The line the borders are drawn with on the stage (BORDER_INK). */
+    .data-option-line {
+      width: 12px;
+      height: 3px;
+      background: #f2f2f2;
+      box-shadow: 0 0 0 1px #1b1b1b;
+      forced-color-adjust: none;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .data-option-borders:hover:not([aria-pressed='true']) {
+        background: var(--surface-hover);
+      }
+    }
     .data-option-check {
       display: flex;
       grid-row: 1;
@@ -441,7 +527,8 @@
 
     /* Touch targets: 44px options, whatever --control-height is. */
     @media (pointer: coarse), (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
-      .data-option {
+      .data-option,
+      .data-option-borders {
         min-height: 44px;
       }
     }

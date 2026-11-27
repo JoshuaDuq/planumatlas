@@ -36,6 +36,8 @@ export interface LinkState {
   internalVisible: boolean;
   spinalCordVisible: boolean;
   surfaceColor: SurfaceColor;
+  /** Another atlas's area borders, drawn as lines over the shown cortex. */
+  atlasBorders: string | null;
   view: string;
   cut: CutMode;
   cutOffset: number;

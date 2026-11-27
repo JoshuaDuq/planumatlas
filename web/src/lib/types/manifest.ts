@@ -138,6 +138,7 @@ export interface Manifest {
   cortical_layers?: ManifestFile & Record<string, unknown>;
   cortical_thickness?: CorticalThickness;
   body_map?: BodyMap;
+  atlas_borders?: AtlasBorders;
   stroke_cases?: StrokeCasesRecord;
   volumes?: ManifestFile;
   tissues?: ManifestFile;
@@ -294,6 +295,18 @@ export interface BodyMap {
   floor: { d: number; z: number };
   hemispheres: Record<'left' | 'right', BodyMapHemisphere>;
   validation: Record<string, unknown>;
+}
+
+/**
+ * `manifest.atlas_borders`: for each shown atlas and each other atlas, a byte per vertex of the shown
+ * cortex in the published regions' order: the other atlas's border classes as bits (`files[shown][other]`).
+ */
+export interface AtlasBorders {
+  label: string;
+  method: string;
+  encoding: { classes: number; bits: string };
+  files: Record<string, Record<string, { file: string; vertex_count: number }>>;
+  validation: { largest_chord_offset_mm: number };
 }
 
 /** `manifest.retinotopy`: V1–V3 retinotopy predicted by the Benson template, carried per cortical vertex. */

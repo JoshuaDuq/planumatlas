@@ -11,7 +11,7 @@ import {
   scoredSource,
 } from '../../lib/core/catalog/neuropsych-domains.ts';
 import type { NeuropsychDomains, TermRecord } from '../../lib/core/catalog/neuropsych-domains.ts';
-import { t } from '../../lib/core/i18n/index.ts';
+import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
 import { paintKind } from '../../lib/core/state/paint.ts';
 import type { Language, ModelState, Region, SessionState } from '../../lib/types/index.ts';
 
@@ -63,11 +63,26 @@ function domainNames(
 /**
  * What the chip says about the region under the pointer, or null where the model does not let it be
  * selected (app.js:1694-1717). Both hemispheres share every name, so the chip says which side as well.
+ * While another atlas's borders are drawn, `borders` is its region at the point, named after the shown
+ * atlas's, each with its atlas.
  */
-export function hoverText(region: Region, view: HoverView, sources: HoverSources): string | null {
+export function hoverText(
+  region: Region,
+  view: HoverView,
+  sources: HoverSources,
+  borders: Region | null = null,
+): string | null {
   if (!sources.canSelect(region)) return null;
   const { lang, surfaceColor, paint } = view;
-  const name = sources.catalogName(region.id) ?? region.label;
+  const own = sources.catalogName(region.id) ?? region.label;
+  const name = borders
+    ? t(lang, 'display').bordersHover(
+        atlasSwitchLabel(region.atlas!, lang),
+        own,
+        atlasSwitchLabel(borders.atlas!, lang),
+        sources.catalogName(borders.id) ?? borders.label,
+      )
+    : own;
   // The network a colour stands for, where one network holds the whole region: every CAB-NP area; a
   // Yeo 7 region only when all its assigned vertices share one network.
   const cabNp = surfaceColor === 'cab-np' ? sources.cabNp?.regions[region.id] : undefined;

@@ -132,7 +132,7 @@ for (const [path, version] of Object.entries(head)) assert.equal(map.files[path]
 
 // BUILD-15: byte ceilings on a first visit. Raw bytes for the scripts the browser parses before the
 // app runs; gzip, as the host serves it, for everything a cold start downloads before the brain.
-const CEILINGS = { entry: 1_359_000, three: 760_000, coldStart: 22_600_000 };
+const CEILINGS = { entry: 1_362_000, three: 760_000, coldStart: 22_600_000 };
 const linked = (pattern) => [...text.matchAll(pattern)].map((match) => match[1]);
 const entry = linked(/<script type="module" crossorigin src="\/([^"]+)"/g);
 assert.equal(entry.length, 1, `one entry script, found ${entry}`);

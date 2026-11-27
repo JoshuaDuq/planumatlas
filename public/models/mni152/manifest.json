@@ -2714,6 +2714,113 @@
     },
     "method": "Each group map is read at every fsaverage vertex's MNI152 coordinate from registration fusion (RF-ANTs), linearly interpolated, and each vertex of this brain takes the values of its nearest fsaverage vertex on the registered spheres. On the central strip, the cortex vertices Destrieux labels G_precentral, S_central, G_postcentral, G_and_S_paracentral or G_and_S_subcentral, a vertex takes the movement whose z is largest among the opposite foot, the opposite hand and the tongue, where that z reaches 11.02 (Cohen's d 0.5 over 486 people); every other vertex is 0. Areas are on the mid-thickness surface. A vertex the parcel boundaries add takes the movement carrying the most weight among the source vertices it is made from, and 0 on a tie or where none carries any"
   },
+  "atlas_borders": {
+    "label": "Atlas borders",
+    "method": "Each atlas's areas take a border class, 1 to 4, no two areas that meet alike; its non-regions are one class, so no border lies between two of them. A shown atlas's cortex vertex carries the classes of the source pial vertices it is made from: its own, or those of the source edge or triangle whose midpoint or centre it is. Each class takes an equal share of the vertex, and the border is drawn where two classes' interpolated shares meet: through each source edge's midpoint, where the atlas comparison's barycentric vertex cells put it. Within a source triangle the shown atlas leaves whole, it runs straight between the edge midpoints rather than through the triangle's centre. A second byte per vertex is the other atlas's label; a point is named by the class with the largest share there, from a corner that holds that class alone",
+    "encoding": {
+      "planes": [
+        "classes",
+        "labels"
+      ],
+      "classes": "bit 0 no area, bits 1-4 the border classes",
+      "labels": "uint8: the other atlas's source label plus one, 0 for none"
+    },
+    "files": {
+      "destrieux": {
+        "hcp-mmp": {
+          "file": "borders-destrieux-hcp-mmp.field",
+          "vertex_count": 411512
+        },
+        "julich": {
+          "file": "borders-destrieux-julich.field",
+          "vertex_count": 411512
+        },
+        "schaefer": {
+          "file": "borders-destrieux-schaefer.field",
+          "vertex_count": 411512
+        },
+        "desikan": {
+          "file": "borders-destrieux-desikan.field",
+          "vertex_count": 411512
+        }
+      },
+      "hcp-mmp": {
+        "destrieux": {
+          "file": "borders-hcp-mmp-destrieux.field",
+          "vertex_count": 507207
+        },
+        "julich": {
+          "file": "borders-hcp-mmp-julich.field",
+          "vertex_count": 507207
+        },
+        "schaefer": {
+          "file": "borders-hcp-mmp-schaefer.field",
+          "vertex_count": 507207
+        },
+        "desikan": {
+          "file": "borders-hcp-mmp-desikan.field",
+          "vertex_count": 507207
+        }
+      },
+      "julich": {
+        "destrieux": {
+          "file": "borders-julich-destrieux.field",
+          "vertex_count": 475654
+        },
+        "hcp-mmp": {
+          "file": "borders-julich-hcp-mmp.field",
+          "vertex_count": 475654
+        },
+        "schaefer": {
+          "file": "borders-julich-schaefer.field",
+          "vertex_count": 475654
+        },
+        "desikan": {
+          "file": "borders-julich-desikan.field",
+          "vertex_count": 475654
+        }
+      },
+      "schaefer": {
+        "destrieux": {
+          "file": "borders-schaefer-destrieux.field",
+          "vertex_count": 496912
+        },
+        "hcp-mmp": {
+          "file": "borders-schaefer-hcp-mmp.field",
+          "vertex_count": 496912
+        },
+        "julich": {
+          "file": "borders-schaefer-julich.field",
+          "vertex_count": 496912
+        },
+        "desikan": {
+          "file": "borders-schaefer-desikan.field",
+          "vertex_count": 496912
+        }
+      },
+      "desikan": {
+        "destrieux": {
+          "file": "borders-desikan-destrieux.field",
+          "vertex_count": 337167
+        },
+        "hcp-mmp": {
+          "file": "borders-desikan-hcp-mmp.field",
+          "vertex_count": 337167
+        },
+        "julich": {
+          "file": "borders-desikan-julich.field",
+          "vertex_count": 337167
+        },
+        "schaefer": {
+          "file": "borders-desikan-schaefer.field",
+          "vertex_count": 337167
+        }
+      }
+    },
+    "validation": {
+      "largest_chord_offset_mm": 0.899
+    }
+  },
   "cut_atlases": [
     {
       "id": "destrieux",

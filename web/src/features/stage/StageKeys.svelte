@@ -25,6 +25,7 @@
   import { roving } from '../../lib/ui/Toolbar.svelte';
   import Swatch from '../../lib/ui/Swatch.svelte';
   import {
+    BORDER_INK,
     KEY_GAP_PX,
     KEY_NOTE_MIN_WIDTH_PX,
     defaultOpen,
@@ -58,6 +59,8 @@
     lobes?: KeySources['lobes'];
     /** The key of the paint on show (`legendFor`), or null. */
     legend: Legend | null;
+    /** The atlas whose borders are drawn over the cortex, or null. */
+    borders?: KeySources['borders'];
     /** The stroke cases on the stage, or null. */
     cases?: KeySources['cases'];
     /** The reader's own maps on the stage, the one on top first. */
@@ -84,6 +87,7 @@
     networkMatrix = false,
     lobes = null,
     legend,
+    borders = null,
     cases = null,
     maps = [],
     directionShown,
@@ -105,6 +109,7 @@
       networkMatrix,
       lobes,
       legend,
+      borders,
       cases,
       maps,
       directionShown,
@@ -233,6 +238,13 @@
       class="network-swatch stage-key-ramp"
       aria-hidden="true"
       style:background="linear-gradient(to right, {row.ramp.join(', ')})"
+    ></span>
+  {:else if row.line}
+    <span
+      class="network-swatch stage-key-line"
+      aria-hidden="true"
+      style:--line-core={BORDER_INK.core}
+      style:--line-casing={BORDER_INK.casing}
     ></span>
   {:else}
     <Swatch colour={row.absent ? 'transparent' : swatchColor(row.color)} />
@@ -367,6 +379,17 @@
       height: 10px;
       margin-top: 5px;
       border-radius: var(--radius-mark);
+      forced-color-adjust: none;
+    }
+    /* The borders' line as the cortex draws it: a light core cased in dark, across the swatch. */
+    .stage-key-line {
+      display: block;
+      flex: none;
+      width: 16px;
+      height: 4px;
+      margin-top: 8px;
+      background: var(--line-core);
+      box-shadow: 0 0 0 1px var(--line-casing);
       forced-color-adjust: none;
     }
     /* A title naming an area wraps rather than run under the chevron (the Complete Name Rule). */

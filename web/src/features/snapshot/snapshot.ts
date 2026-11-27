@@ -370,6 +370,12 @@ function drawKey(ctx: Context, { box, fill, edge, swatches, texts }: KeyMark) {
       swatch.ramp.forEach((color, at) => ramp.addColorStop(at / (swatch.ramp!.length - 1), color));
       ctx.fillStyle = ramp;
     } else ctx.fillStyle = swatch.color;
+    if (swatch.casing) {
+      const { fillStyle } = ctx;
+      ctx.fillStyle = swatch.casing;
+      ctx.fillRect(swatch.x - 1, swatch.y - 1, swatch.width + 2, swatch.height + 2);
+      ctx.fillStyle = fillStyle;
+    }
     ctx.beginPath();
     ctx.roundRect(swatch.x, swatch.y, swatch.width, swatch.height, swatch.radius);
     ctx.fill();

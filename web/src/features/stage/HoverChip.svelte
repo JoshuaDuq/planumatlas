@@ -39,7 +39,10 @@
     last = event;
     const { region, position } = event;
     if (dismissed !== null && region?.id !== dismissed) dismissed = null;
-    const text = region && position && dismissed === null ? hoverText(region, view, sources) : null;
+    const text =
+      region && position && dismissed === null
+        ? hoverText(region, view, sources, event.borders)
+        : null;
     if (!text || !position) {
       chip.hidden = true;
       return;

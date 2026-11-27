@@ -48,7 +48,10 @@ export function publishedRecord(url: string | URL): PublishedRecord | null {
  */
 export const versionOf = (record: PublishedRecord): string => record.sha256.slice(0, 16);
 
-/** Adds the published files of the anatomies other than the default, before one of them is opened. */
+/**
+ * Adds the published files kept off the first visit's map: the anatomies other than the default,
+ * before one of them is opened, and every anatomy's atlas borders, before one is drawn.
+ */
 export async function loadOtherAnatomyFiles(): Promise<void> {
   if (!PUBLISHED.files) return;
   Object.assign(PUBLISHED.files, (await import('./published-elsewhere.ts')).default);

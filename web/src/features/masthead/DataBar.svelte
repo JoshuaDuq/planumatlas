@@ -49,6 +49,10 @@
     anatomies: readonly PublishedAnatomy[];
     /** The tract reference, another subject with nothing to choose. */
     reference: { label: string; description?: string } | null;
+    /** The atlas whose borders are drawn over the shown one, or null. */
+    atlasBorders?: string | null;
+    /** The atlases whose borders each atlas's cortex can draw, by that atlas; none where none are published. */
+    bordersOver?: ReadonlyMap<string, ReadonlySet<string>>;
     /** The reader's own atlas while the tab's open function or deficit shows another; leaving it brings it back. */
     borrowed: { own: string; by: 'functions' | 'deficits' } | null;
     /** The settings panel; opening this popover closes it, and it opening closes this. */
@@ -59,6 +63,8 @@
     onAtlas: (id: string) => unknown;
     /** The reader points at or focuses the Atlas list, or the summary that holds it. */
     onAtlasIntent: () => void;
+    /** S3's `chooseAtlasBorders`. */
+    onBorders?: (atlas: string | null) => unknown;
     /** The composition lifts the paint first (app.js:633-636), then runs the colour command. */
     onSurfaceColor: (colour: SurfaceColor) => unknown;
     onDetail: (id: string) => unknown;
@@ -87,11 +93,14 @@
     anatomy,
     anatomies,
     reference,
+    atlasBorders = null,
+    bordersOver = new Map(),
     borrowed,
     settingsOpen = $bindable(false),
     choosing = $bindable(false),
     onAtlas,
     onAtlasIntent,
+    onBorders = () => {},
     onSurfaceColor,
     onDetail,
     onAnatomy,
@@ -440,6 +449,9 @@
         holdsSubject={switching || touring}
         required={(colour, atlas) => requiredAtlas(colourings, colour as SurfaceColor, atlas)}
         palette={(mode) => colourPalette(mode, colourings)}
+        {atlasBorders}
+        {bordersOver}
+        onBorders={(next) => void onBorders(next)}
         onChoose={(field, value) =>
           choose(
             field,

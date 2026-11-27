@@ -48,8 +48,14 @@ function fixture() {
       },
     },
     referenceActive: () => state.reference,
-    emit: ((type: string, event: { region: Region | null; position: unknown }) => {
-      if (type === 'hover') log.push(['hover', event.region?.id ?? null, event.position]);
+    emit: ((
+      type: string,
+      event: { region: Region | null; position: unknown; borders?: Region | null },
+    ) => {
+      if (type === 'hover') {
+        const borders = event.borders ? [event.borders.id] : [];
+        log.push(['hover', event.region?.id ?? null, event.position, ...borders]);
+      }
     }) as never,
   });
   const only = (kind: string) => log.filter(([name]) => name === kind);
@@ -70,6 +76,18 @@ describe('hover and selection marking', () => {
     presentation.hover(regions.get('a')!, { x: 30, y: 40 });
     assert.equal(only('outlined').length, 1);
     assert.deepEqual(only('hover').at(-1), ['hover', 'a', { x: 30, y: 40 }]);
+  });
+
+  it("BORDER-09 moving over another atlas's border within one region renames the point, without a new outline", () => {
+    const { presentation, regions, only } = fixture();
+    const [shown, other] = [...regions.values()];
+    presentation.hover(shown!, { x: 10, y: 20 }, other!);
+    presentation.hover(shown!, { x: 12, y: 20 }, shown!);
+    assert.deepEqual(only('hover'), [
+      ['hover', shown!.id, { x: 10, y: 20 }, other!.id],
+      ['hover', shown!.id, { x: 12, y: 20 }, shown!.id],
+    ]);
+    assert.equal(only('outlined').length, 1);
   });
 
   it('FACADE-28 a region the reader cannot select is not hovered at the next outline pass', () => {

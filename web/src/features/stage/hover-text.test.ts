@@ -2,7 +2,9 @@
 import { describe, expect, test } from 'vitest';
 import type { CabNpPartition } from '../../lib/core/catalog/networks.ts';
 import type { NeuropsychDomains } from '../../lib/core/catalog/neuropsych-domains.ts';
-import type { Paint, Region } from '../../lib/types/index.ts';
+import { labelOf } from '../../lib/core/catalog/labels.ts';
+import { anatomies, readModel } from '../../lib/core/catalog/test-support.ts';
+import type { Language, Paint, Region } from '../../lib/types/index.ts';
 import { hoverText } from './hover-text.ts';
 import type { HoverSources, HoverView } from './hover-text.ts';
 
@@ -52,6 +54,37 @@ const sources = (extra: Partial<HoverSources> = {}): HoverSources => ({
 });
 
 describe('hoverText', () => {
+  test("BORDER-10 with another atlas's borders drawn, each atlas names its region where the pointer is, in both languages; unlabelled cortex says so", () => {
+    const published = new Map(
+      readModel<{ regions: Region[] }>(`${anatomies.default}/manifest.json`).regions.map(
+        (entry) => [entry.id, entry],
+      ),
+    );
+    const named = (lang: Language) =>
+      sources({ catalogName: (id) => labelOf(published.get(id)!, lang)!.name });
+    const gyrus = published.get('destrieux:left:29')!;
+    const words = (lang: Language, borders: string | null) =>
+      hoverText(
+        gyrus,
+        view({ lang }),
+        named(lang),
+        borders === null ? null : published.get(borders)!,
+      );
+    expect(words('en', 'hcp-mmp:left:8')).toBe('Destrieux: Precentral gyrus · HCP-MMP: 4 · Left');
+    expect(words('fr', 'hcp-mmp:left:8')).toBe(
+      'Destrieux\u202f: Gyrus précentral · HCP-MMP\u202f: 4 · Gauche',
+    );
+    // A gap map of Julich-Brain's is cortex it has not mapped: named as every unlabelled point is.
+    expect(words('en', 'julich:left:135')).toBe(
+      'Destrieux: Precentral gyrus · Julich-Brain: Unlabelled · Left',
+    );
+    expect(words('fr', 'julich:left:135')).toBe(
+      'Destrieux\u202f: Gyrus précentral · Julich-Brain\u202f: Non étiqueté · Gauche',
+    );
+    // Without borders, the shown atlas's name alone.
+    expect(words('en', null)).toBe('Precentral gyrus · Left');
+  });
+
   test('the catalog name and the capitalised side, joined by a middle dot', () => {
     expect(hoverText(region('a'), view(), sources())).toBe('Area A · Left');
     expect(hoverText(region('a', { hemisphere: 'midline' }), view(), sources())).toBe(

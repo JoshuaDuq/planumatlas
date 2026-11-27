@@ -8,6 +8,8 @@ export interface KnownLinkIds {
   details: ReadonlySet<string>;
   views: ReadonlySet<string>;
   surfaceColors: ReadonlySet<string>;
+  /** The atlases whose borders each atlas's cortex can draw, by the shown atlas. */
+  borders: ReadonlyMap<string, ReadonlySet<string>>;
   explorers: ReadonlySet<string>;
   /** Curated functions, searched terms, the overview and comparisons of them. */
   functions: Pick<ReadonlySet<string>, 'has'>;
@@ -63,6 +65,11 @@ export function checkLink(
   ];
   for (const [key, valid] of checks) {
     if (key in state && !(valid as (value: unknown) => boolean)(state[key])) reject(key);
+  }
+  // Borders lie on the shown atlas's cortex, the link's own or the first published; never its own.
+  const shown = state.atlas ?? [...known.atlases][0]!;
+  if ('atlasBorders' in state && !known.borders.get(shown)?.has(state.atlasBorders!)) {
+    reject('atlasBorders');
   }
   if ('circuitStep' in state && !(state.circuitStep! < (known.circuits.get(state.circuit!) ?? 0))) {
     reject('circuitStep');

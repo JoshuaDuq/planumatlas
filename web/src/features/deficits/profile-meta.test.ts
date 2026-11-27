@@ -25,6 +25,7 @@ const settings: DisplaySettings = {
   internalVisible: true,
   spinalCordVisible: true,
   surfaceColor: 'tissue',
+  atlasBorders: null,
   paint: null,
   isolatedRegion: null,
   focused: false,

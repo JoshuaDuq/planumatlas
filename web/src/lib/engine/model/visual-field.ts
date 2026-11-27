@@ -175,7 +175,7 @@ export function visualFieldAt(
 }
 
 /** Where `point` (world) lies on the face's triangle, as barycentric weights; null for a degenerate one. */
-function cornerWeights(
+export function cornerWeights(
   mesh: AtlasMesh,
   point: Vector3,
   { a, b, c }: { a: number; b: number; c: number },

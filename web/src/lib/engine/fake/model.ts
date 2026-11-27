@@ -135,6 +135,7 @@ export function createFakeModel({
     internalVisible: true,
     spinalCordVisible: false,
     surfaceColor: 'atlas' as SurfaceColor,
+    atlasBorders: null as string | null,
     paint: null as Paint | null,
     isolatedRegion: null as string | null,
     focused: false,
@@ -172,6 +173,15 @@ export function createFakeModel({
     }
     changed();
   }
+
+  /** `BrainAtlas.setAtlasBorders`'s refusals. */
+  const requireBorders = (atlas: string, overlay: string) => {
+    if (overlay === atlas)
+      throw new Error(`The ${overlay} cortex is shown: its borders are its colours.`);
+    if (!manifest.atlas_borders?.files[atlas]?.[overlay]) {
+      throw new Error(`No ${overlay} borders are published for the ${atlas} cortex.`);
+    }
+  };
 
   const requireBoolean = (value: unknown, what: string) => {
     if (typeof value !== 'boolean') throw new TypeError(`${what} must be boolean.`);
@@ -435,6 +445,11 @@ export function createFakeModel({
     setSurfaceColor(mode) {
       model.applySurfaceColor(mode);
     },
+    async setAtlasBorders(overlay) {
+      if (overlay !== null) requireBorders(values.atlas, overlay);
+      values.atlasBorders = overlay;
+      update();
+    },
     setPaint(paint) {
       if (paint !== null && (typeof paint.id !== 'string' || !(paint.colors instanceof Map))) {
         throw new TypeError('A paint needs an id and a Map of region colours.');
@@ -511,6 +526,7 @@ export function createFakeModel({
       values.internalVisible = true;
       values.spinalCordVisible = false;
       values.surfaceColor = 'atlas';
+      values.atlasBorders = null;
       values.isolatedRegion = null;
       values.ghostedAround = null;
       select(null);
@@ -519,6 +535,9 @@ export function createFakeModel({
     async setAtlas(id) {
       if (!manifest.atlases.some((atlas) => atlas.id === id))
         throw unknownLayer(`Unknown atlas: ${id}`);
+      // As the real model: the borders come with the atlas, and go on the atlas they outline.
+      if (values.atlasBorders === id) values.atlasBorders = null;
+      else if (values.atlasBorders) requireBorders(id, values.atlasBorders);
       layers.add(id);
       if (id !== values.atlas) previous.atlas = values.atlas;
       values.atlas = id;

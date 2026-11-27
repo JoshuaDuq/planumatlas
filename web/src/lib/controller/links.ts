@@ -94,6 +94,7 @@ export interface LinksOptions {
     | 'showSpinalCord'
     | 'loadSupplemental'
     | 'applySurfaceColor'
+    | 'showAtlasBorders'
     | 'cut'
   >;
   clinical: Pick<ClinicalCatalog, 'search'>;
@@ -174,6 +175,12 @@ export function createLinks({
       ...(model.manifest.cortical_thickness ? ['thickness'] : []),
       ...(model.manifest.appearance.field_ranges?.['_SULC'] ? ['sulc'] : []),
     ]),
+    borders: new Map(
+      Object.entries(model.manifest.atlas_borders?.files ?? {}).map(([shown, overlays]) => [
+        shown,
+        new Set(Object.keys(overlays)),
+      ]),
+    ),
     functions: {
       has: (id: string) => functions.has(id) || validComparison(domains, id),
     },

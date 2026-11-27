@@ -34,6 +34,8 @@ export interface KeySwatch extends Rect {
   radius: number;
   /** A colour scale's CSS colours, left to right, drawn instead of `color`. */
   ramp?: readonly string[];
+  /** The borders' line: `color` cased in this colour, a pixel each side. */
+  casing?: string;
 }
 
 /** A colour key's plate, its swatches and its words. */
@@ -235,6 +237,7 @@ export function snapshotMarkings(
           color: style.backgroundColor,
           radius: parseFloat(style.borderTopLeftRadius) || 0,
           ...(row.ramp && { ramp: row.ramp }),
+          ...(row.line && { casing: style.getPropertyValue('--line-casing').trim() }),
         });
         texts.push(words(find(item, '.stage-key-label'), row.label));
       });

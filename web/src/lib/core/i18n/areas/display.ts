@@ -111,6 +111,12 @@ export const en = {
   keyRange: (low: string, high: string) => `${low} to ${high}`,
   // Under Yeo's networks' key: the network matrix, a figure of its own.
   networkMatrix: 'Correlation matrix',
+  // Another atlas's borders drawn over the cortex: the key names the atlas, its row the line.
+  bordersKey: (atlas: string) => `${atlas} borders`,
+  bordersLine: 'Where each area ends',
+  // The pointer's region in each atlas while another's borders are drawn.
+  bordersHover: (atlas: string, name: string, other: string, otherName: string) =>
+    `${atlas}: ${name} · ${other}: ${otherName}`,
   thicknessNote:
     'Measured on this scan by FreeSurfer. Densely myelinated cortex, as in the primary motor cortex, reads thinner than under the microscope.',
   sulcNote:
@@ -212,6 +218,10 @@ export const fr: typeof en = {
   mapOnCerebellum: 'Tracées sur le cervelet et ses faces de coupe, voxel par voxel.',
   keyRange: (low: string, high: string) => `${low} à ${high}`,
   networkMatrix: 'Matrice de corrélation',
+  bordersKey: (atlas: string) => `Limites de ${atlas}`,
+  bordersLine: 'Là où chaque aire s’arrête',
+  bordersHover: (atlas: string, name: string, other: string, otherName: string) =>
+    `${atlas}\u202f: ${name} · ${other}\u202f: ${otherName}`,
   thicknessNote:
     'Mesurée sur cet examen par FreeSurfer. Le cortex très myélinisé, comme le cortex moteur primaire, y paraît plus mince qu’au microscope.',
   sulcNote:

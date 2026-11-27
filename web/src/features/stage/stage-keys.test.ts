@@ -196,6 +196,25 @@ describe('keyPlates', () => {
     expect(picked({ rows: legend.rows.slice(0, 1) })).toBe(false);
   });
 
+  test('BORDER-05 drawn borders key their atlas as a line, over any colour and paint, in both languages', () => {
+    const plates = keyPlates(
+      sources({ surfaceColor: 'thickness', thickness: [1, 4], legend, borders: 'hcp-mmp' }),
+    );
+    expect(names(plates)).toEqual(['paint', 'borders']);
+    expect(plates[1]).toMatchObject({
+      title: 'HCP-MMP borders',
+      rows: [{ id: 'line', label: 'Where each area ends', line: true }],
+      pickable: false,
+    });
+    const french = keyPlates(sources({ borders: 'julich', lang: 'fr' }))[0]!;
+    expect([french.title, french.rows[0]!.label]).toEqual([
+      'Limites de Julich-Brain',
+      'Là où chaque aire s’arrête',
+    ]);
+    expect(keyPlates(sources({ borders: null }))).toEqual([]);
+    expect(keyPlates(sources({ borders: 'hcp-mmp', status: 'loading' }))).toEqual([]);
+  });
+
   test('direction follows the streamlines, after the others, with its three fixed rows', () => {
     const plates = keyPlates(sources({ surfaceColor: 'network', directionShown: true }));
     expect(names(plates)).toEqual(['network', 'direction']);

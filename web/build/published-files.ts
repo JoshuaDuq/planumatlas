@@ -103,7 +103,9 @@ export function publishedAssets(): Plugin {
         .map(({ id }) => `models/${id}/`)
         .filter((prefix) => prefix !== `models/${index.default}/`)
         .concat(tracts);
-      const elsewhere = (path: string) => others.some((prefix) => path.startsWith(prefix));
+      // No first visit draws another atlas's borders, so those files stay off the entry too.
+      const elsewhere = (path: string) =>
+        others.some((prefix) => path.startsWith(prefix)) || /\/borders-[^/]+\.field$/.test(path);
       // The app derives each version from the sha256 (`versionOf`), so neither map carries it.
       const files = Object.fromEntries(
         Object.entries(published)

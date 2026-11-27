@@ -54,6 +54,7 @@ import { fetchManifest, validateManifest } from './manifest.ts';
 import type { AtlasManifest } from './manifest.ts';
 import { hitRegion, inSight, nearestHit } from './picking.ts';
 import type { FacingScene, StageHit } from './picking.ts';
+import { Borders } from './borders.ts';
 import { Placement } from './placement.ts';
 import { combineProgress } from './progress.ts';
 import type { ProgressCallback } from './progress.ts';
@@ -196,6 +197,7 @@ export class BrainAtlas extends EventTarget {
     shown: BodyPart | 'all' | null;
   } | null = null;
   private bodyRequest = 0;
+  private readonly borders: Borders;
 
   constructor(
     manifest: AtlasManifest,
@@ -245,6 +247,14 @@ export class BrainAtlas extends EventTarget {
       detail: () => this.detailId,
     });
     this.dissection = createDissection(this.regions);
+    this.borders = new Borders({
+      manifest,
+      regions: this.regions,
+      layers: layerStore.layers,
+      materials: this.materials,
+      atlas: () => this.atlasId,
+      update: () => this.update(),
+    });
     // What `initialize` is asked for by default; nothing is drawn until it has loaded them.
     this.atlasId = manifest.atlases[0]!.id;
     this.detailId = this.defaultDetail;
@@ -434,6 +444,7 @@ export class BrainAtlas extends EventTarget {
       await this.ensureBodyMap(id, this.body.base);
       if (request !== this.atlasRequest) return;
     }
+    if (!(await this.borders.follow(id, () => request === this.atlasRequest))) return;
     if (id !== this.atlasId) this.previousAtlas = this.atlasId;
     this.atlasId = id;
     this.release(this.manifest.atlases, [id, this.previousAtlas]);
@@ -501,6 +512,7 @@ export class BrainAtlas extends EventTarget {
       internalVisible: this.internalVisible,
       spinalCordVisible: this.spinalCordVisible,
       surfaceColor: this.surfaceColor,
+      atlasBorders: this.borders.shown,
       paint: this.paint,
       isolatedRegion: this.isolatedId,
       focused: this.focused,
@@ -842,6 +854,16 @@ export class BrainAtlas extends EventTarget {
     uniforms.bodyMapPart.value = part && part !== 'all' ? bodyPartCode(part) : 0;
   }
 
+  /** See `Borders.set` (`borders.ts`). */
+  setAtlasBorders(overlay: string | null, baseUrl: string | URL): Promise<void> {
+    return this.borders.set(overlay, baseUrl);
+  }
+
+  /** See `Borders.regionAt` (`borders.ts`). */
+  bordersRegionAt(hit: SurfaceHit): Region | null {
+    return this.borders.regionAt(hit);
+  }
+
   /** The body map's part drawn, every part, or null while it is not. */
   get bodyMapShown(): BodyPart | 'all' | null {
     return this.body?.shown ?? null;
@@ -1025,6 +1047,7 @@ export class BrainAtlas extends EventTarget {
     this.internalVisible = true;
     this.spinalCordVisible = false;
     this.surfaceColor = 'atlas';
+    this.borders.clear();
     this.isolatedId = null;
     this.ghostedAround = null;
     this.select(null);

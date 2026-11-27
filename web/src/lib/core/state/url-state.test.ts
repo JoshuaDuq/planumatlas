@@ -404,6 +404,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     internalVisible: false,
     spinalCordVisible: true,
     surfaceColor: 'cab-np',
+    atlasBorders: 'julich',
     cortexOpacity: 0.5,
     exploded: true,
     mriWindow: { center: 1, width: 2 },
@@ -451,6 +452,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
       'internal',
       'cord',
       'colors',
+      'borders',
       'opacity',
       'explode',
       'mri',
@@ -478,7 +480,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
   );
   assert.equal(
     written,
-    'hidden=a,b&anatomy=cdmd&atlas=destrieux&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&explode=1&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&route=1&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294&tracts=af-left,slf-left&keeptracts=1&names=1&mark=r:blue&embed=1',
+    'hidden=a,b&anatomy=cdmd&atlas=destrieux&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&borders=julich&opacity=0.5&explode=1&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&route=1&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294&tracts=af-left,slf-left&keeptracts=1&names=1&mark=r:blue&embed=1',
   );
   assert.deepEqual(PARAMS, {
     anatomy: 'anatomy',
@@ -500,6 +502,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     internalVisible: 'internal',
     spinalCordVisible: 'cord',
     surfaceColor: 'colors',
+    atlasBorders: 'borders',
     cortexOpacity: 'opacity',
     exploded: 'explode',
     mriWindow: 'mri',
@@ -525,6 +528,19 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     highlights: 'mark',
     embed: 'embed',
     hiddenRegions: 'hidden',
+  });
+});
+
+test('BORDER-04 borders travel as the atlas they outline, none by default and then not written', () => {
+  assert.equal(encodeState({ atlasBorders: null }), '');
+  assert.equal(encodeState({ atlasBorders: 'hcp-mmp' }), 'borders=hcp-mmp');
+  assert.deepEqual(decodeState('borders=hcp-mmp'), {
+    state: { atlasBorders: 'hcp-mmp' },
+    rejected: [],
+  });
+  assert.deepEqual(decodeState('borders=&hemi=left'), {
+    state: { hemisphere: 'left' },
+    rejected: ['borders'],
   });
 });
 

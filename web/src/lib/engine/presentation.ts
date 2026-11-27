@@ -9,6 +9,7 @@ import type { Highlight } from './tissues/gpu-sections.ts';
 interface Hovered {
   region: Region;
   position: { x: number; y: number } | null;
+  borders: Region | null;
 }
 
 /** What presentation reads of the model. */
@@ -37,7 +38,11 @@ export interface PresentationOptions {
 
 export interface Presentation {
   /** The pointer came over a region, moved on it, or left (app.js:1798-1806). */
-  hover(region: Region | null, position: { x: number; y: number } | null): void;
+  hover(
+    region: Region | null,
+    position: { x: number; y: number } | null,
+    borders?: Region | null,
+  ): void;
   /** Forget what the pointer was over (app.js:1434). */
   clearHover(): void;
   /** Mark what the pointer is on and the selection: a surface outlines, and a cut face also lights. */
@@ -62,6 +67,7 @@ export function createPresentation({
     emit('hover', {
       region: hovered?.region ?? null,
       position: hovered?.position ?? null,
+      borders: hovered?.borders ?? null,
     } satisfies HoverEvent);
 
   /** Mark what the pointer is on — a cut face lights — and name it. */
@@ -97,9 +103,9 @@ export function createPresentation({
   }
 
   return {
-    hover(region, position) {
+    hover(region, position, borders = null) {
       const regionChanged = region?.id !== hovered?.region.id;
-      hovered = region ? { region, position } : null;
+      hovered = region ? { region, position, borders } : null;
       if (regionChanged) {
         outline();
       } else if (position) {

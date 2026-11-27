@@ -32,6 +32,10 @@ export const en = {
   // Said under the option, before it is chosen: what else choosing it changes.
   atlasBecomes: (atlas: string) => `Atlas becomes ${atlas}`,
   colourBecomes: (colour: string) => `Colour becomes ${colour}`,
+  // Beside each other atlas in the Atlas list: its borders drawn as lines over the one shown.
+  borders: 'Borders',
+  bordersOf: (atlas: string) => `${atlas} borders`,
+  bordersTip: (atlas: string, shown: string) => `Draw ${atlas}’s borders as lines over ${shown}`,
   dataSummary: 'Atlas and display settings',
   // Beside the atlas and colour a first visit opens on.
   isDefault: '(Default)',
@@ -128,6 +132,10 @@ export const fr: typeof en = {
   },
   atlasBecomes: (atlas: string) => `L’atlas devient ${atlas}`,
   colourBecomes: (colour: string) => `La couleur devient ${colour}`,
+  borders: 'Limites',
+  bordersOf: (atlas: string) => `Limites de ${atlas}`,
+  bordersTip: (atlas: string, shown: string) =>
+    `Tracer les limites de ${atlas} en lignes sur ${shown}`,
   dataSummary: 'Réglages de l’atlas et de l’affichage',
   isDefault: '(par défaut)',
   precision: { nextbrain: '(plus précis)', aseg: '(moins précis)' },

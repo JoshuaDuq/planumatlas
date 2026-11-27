@@ -61,6 +61,7 @@ export type ModelPort = Pick<
   | 'setCortexVisible'
   | 'setCortexOpacity'
   | 'showRegions'
+  | 'setAtlasBorders'
 >;
 
 /** What the scene commands call on the sections. */

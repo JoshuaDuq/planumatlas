@@ -29,6 +29,8 @@
       marks: { region: string; label: string }[];
       /** Names on the brain. */
       names?: boolean;
+      /** The atlas whose borders are drawn, or none. */
+      borders?: string | null;
     };
     /** Receives the keys, as the Stage region binds them for the snapshot. */
     handle: { keys?: StageKeysModel };
@@ -86,6 +88,7 @@
     networks={live.networks}
     cabNp={null}
     legend={live.legend}
+    borders={live.borders ?? null}
     directionShown={false}
     onPaintPick={() => {}}
   />

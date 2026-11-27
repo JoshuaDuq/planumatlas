@@ -33,6 +33,7 @@ test('an empty link is the default scene on the loaded layers, with nothing left
     internalVisible: true,
     spinalCordVisible: false,
     surfaceColor: 'atlas',
+    atlasBorders: null,
     internalSystem: null,
     view: 'oblique',
     cut: 'off',
@@ -138,6 +139,7 @@ interface RestorationFixture {
       | 'showSpinalCord'
       | 'loadSupplemental'
       | 'applySurfaceColor'
+      | 'showAtlasBorders'
       | 'cut'
     >
   >;
@@ -216,6 +218,11 @@ function restorationFixture(): RestorationFixture {
         events.push('color');
         model.settings.surfaceColor = value;
       }
+      return true;
+    },
+    async showAtlasBorders(atlas) {
+      if (atlas !== model.settings.atlasBorders) events.push('borders');
+      model.settings.atlasBorders = atlas;
       return true;
     },
     async showSpinalCord(visible) {
@@ -398,6 +405,7 @@ test('startup restoration preserves layer, display, cut, selection and camera or
     hemisphere: 'left',
     spinalCordVisible: true,
     surfaceColor: 'tissue',
+    atlasBorders: 'julich',
     hiddenRegions: new Set(['hidden']),
     cut: 'oblique',
     selectedRegion: 'region',
@@ -415,6 +423,7 @@ test('startup restoration preserves layer, display, cut, selection and camera or
     'cord',
     'hidden',
     'color',
+    'borders',
     'angles',
     'cut',
     'cut-display',

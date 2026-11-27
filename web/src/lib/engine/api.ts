@@ -262,6 +262,12 @@ export interface EngineModel {
    * one that downloads and reports (brain-atlas.js:789). Throws for a colour the model cannot show.
    */
   setSurfaceColor(mode: SurfaceColor): void;
+  /**
+   * Draw another atlas's area borders as lines over the shown cortex, or none with null. The shown
+   * atlas's bytes for it download first; an atlas change brings them for the new atlas, and drops the
+   * lines when it shows that atlas itself. Rejects for an atlas whose borders this cortex cannot draw.
+   */
+  setAtlasBorders(atlas: string | null): Promise<void>;
   /** A paint is replaced whole by id; null lifts it; the same id is a no-op (brain-atlas.js:824). */
   setPaint(paint: Paint | null): void;
   /** Throws without a selection (brain-atlas.js:844). */

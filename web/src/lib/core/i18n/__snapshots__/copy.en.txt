@@ -640,6 +640,15 @@
    "[\"\",\"Alpha\"] → \" to Alpha\""
   ],
   "networkMatrix": "Correlation matrix",
+  "bordersKey": [
+   "[\"Alpha\"] → \"Alpha borders\"",
+   "[\"\"] → \" borders\""
+  ],
+  "bordersLine": "Where each area ends",
+  "bordersHover": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Alpha:  · Alpha: \"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \": Alpha · : Alpha\""
+  ],
   "thicknessNote": "Measured on this scan by FreeSurfer. Densely myelinated cortex, as in the primary motor cortex, reads thinner than under the microscope.",
   "sulcNote": "FreeSurfer’s depth: how far each point moved as the surface was inflated, outward in sulci (red), inward on gyral crowns (blue), around the hemisphere’s mean.",
   "highlightKey": {
@@ -1197,6 +1206,15 @@
    "[\"Alpha\"] → \"Colour becomes Alpha\"",
    "[\"\"] → \"Colour becomes \""
   ],
+  "borders": "Borders",
+  "bordersOf": [
+   "[\"Alpha\"] → \"Alpha borders\"",
+   "[\"\"] → \" borders\""
+  ],
+  "bordersTip": [
+   "[\"Alpha\",\"\"] → \"Draw Alpha’s borders as lines over \"",
+   "[\"\",\"Alpha\"] → \"Draw ’s borders as lines over Alpha\""
+  ],
   "dataSummary": "Atlas and display settings",
   "isDefault": "(Default)",
   "precision": {
@@ -1551,6 +1569,7 @@
    "internal": "internal anatomy shown",
    "cord": "spinal cord",
    "colors": "colour",
+   "borders": "borders",
    "function": "function",
    "zmin": "paint threshold",
    "opacity": "cortex opacity",

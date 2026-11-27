@@ -46,6 +46,7 @@ const frameOf = ({ center, normal, u, v, edges }: PlaneFrame): Frame => ({
 export function createEngineModel(
   atlas: BrainAtlas,
   { inSight, seenAt, point }: Pick<EngineModel, 'inSight' | 'seenAt' | 'point'>,
+  baseUrl: URL,
 ): EngineModel {
   return {
     // The model validated the manifest on load; the contract's type is its published shape.
@@ -97,6 +98,7 @@ export function createEngineModel(
     setInternalVisible: (visible) => atlas.setInternalVisible(visible),
     setSpinalCordVisible: (visible, onProgress) => atlas.setSpinalCordVisible(visible, onProgress),
     setSurfaceColor: (mode) => atlas.setSurfaceColor(mode),
+    setAtlasBorders: (overlay) => atlas.setAtlasBorders(overlay, baseUrl),
     setPaint: (paint) => atlas.setPaint(paint),
     isolate: () => atlas.isolate(),
     clearIsolation: () => atlas.clearIsolation(),

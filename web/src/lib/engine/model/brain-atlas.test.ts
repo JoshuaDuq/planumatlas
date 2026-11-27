@@ -1435,6 +1435,7 @@ test('settings is a cheap snapshot that does not walk the scene graph', async ()
     internalVisible: true,
     spinalCordVisible: false,
     surfaceColor: 'atlas',
+    atlasBorders: null,
     paint: null,
     isolatedRegion: null,
     focused: false,

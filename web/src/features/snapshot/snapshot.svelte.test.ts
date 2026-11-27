@@ -16,7 +16,7 @@ import type { Manifest } from '../../lib/types/index.ts';
 import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
 import { snapshotMarkings } from './markings.ts';
 import type { StageKeysModel } from './markings.ts';
-import { saveSnapshot, snapshotPlan } from './snapshot.ts';
+import { saveSnapshot, snapshotImage, snapshotPlan } from './snapshot.ts';
 import type { SnapshotStage, SnapshotSubject } from './snapshot.ts';
 import Fixture from './snapshot-test-support.svelte';
 
@@ -48,6 +48,7 @@ interface Live {
   networks: null;
   legend: Legend | null;
   marks: { region: string; label: string }[];
+  borders?: string | null;
 }
 
 let engine: FakeEngine;
@@ -155,6 +156,26 @@ describe('the keys in the image', () => {
     expect(mark!.texts.some((text) => text.text === DEFICIT.note)).toBe(false);
     const box = plate('paint').getBoundingClientRect();
     expect(mark!.box).toMatchObject({ width: box.width, height: box.height });
+  });
+
+  test('BORDER-07 the borders key is drawn in the image as on the stage: its atlas, and its light line cased in dark', async () => {
+    await mount({ borders: 'hcp-mmp' });
+    const [mark] = markings().keys;
+    expect(mark!.texts.map((text) => text.text)).toEqual([
+      'HCP-MMP borders',
+      'Where each area ends',
+    ]);
+    const [swatch] = mark!.swatches;
+    expect([swatch!.color, swatch!.casing]).toEqual(['rgb(242, 242, 242)', '#1b1b1b']);
+    const canvas = await snapshotImage(scene(), subject());
+    const ratio = canvas.width / stage.visibleRect!.width;
+    const shade = (x: number, y: number) =>
+      canvas.getContext('2d')!.getImageData(Math.floor(x * ratio), Math.floor(y * ratio), 1, 1)
+        .data[0]!;
+    const middle = swatch!.x + swatch!.width / 2;
+    expect(shade(middle, swatch!.y + swatch!.height / 2)).toBeGreaterThan(230);
+    expect(shade(middle, swatch!.y - 0.5)).toBeLessThan(60);
+    expect(shade(middle, swatch!.y + swatch!.height + 0.5)).toBeLessThan(60);
   });
 
   test('a fold draws the title row alone', async () => {

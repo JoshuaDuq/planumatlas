@@ -32,7 +32,12 @@ export interface PickerOptions<Region extends { id: string }> {
   camera: PerspectiveCamera;
   controls?: Pick<OrbitControls, 'addEventListener' | 'removeEventListener'>;
   model: () => PickModel<Region>;
-  onHover?: (region: Region | null, position: { x: number; y: number } | null) => void;
+  /** `ray` is aimed at the pointer, so another reading of the same point need not aim it again. */
+  onHover?: (
+    region: Region | null,
+    position: { x: number; y: number } | null,
+    ray?: Raycaster,
+  ) => void;
   /** The region a click chose, and where the ray met its surface when the model can say. */
   onSelect: (id: string, hit: SurfaceHit | null) => void;
   onFocusPoint?: (point: Vector3) => void;
@@ -146,7 +151,7 @@ export function createPicker<Region extends { id: string }>({
     const region = regionAt({ clientX, clientY });
     const rect = domElement.getBoundingClientRect();
     hovering = Boolean(region);
-    onHover?.(region, { x: clientX - rect.left, y: clientY - rect.top });
+    onHover?.(region, { x: clientX - rect.left, y: clientY - rect.top }, raycaster);
     // OrbitControls writes this inline too, so a stylesheet cannot reach it;
     // `grab` is the resting cursor it is configured with in scene.ts.
     domElement.style.cursor = region ? 'pointer' : 'grab';

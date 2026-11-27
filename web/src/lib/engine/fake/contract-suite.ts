@@ -1460,6 +1460,26 @@ export function defineEngineContract(
         );
       });
 
+      it("BORDER-02 draws another atlas's borders on the shown cortex, brings them to the next atlas, and drops them on their own", async () => {
+        const { engine } = await fresh();
+        const { model } = engine;
+        const shown = model.settings.atlas;
+        const [other, third] = model.manifest.atlases
+          .map(({ id }) => id)
+          .filter((id) => id !== shown);
+        await assert.rejects(model.setAtlasBorders(shown), /is shown/);
+        assert.equal(model.settings.atlasBorders, null);
+        await model.setAtlasBorders(other!);
+        assert.equal(model.settings.atlasBorders, other);
+        await model.setAtlas(third!);
+        assert.deepEqual([model.settings.atlas, model.settings.atlasBorders], [third, other]);
+        await model.setAtlas(other!);
+        assert.deepEqual([model.settings.atlas, model.settings.atlasBorders], [other, null]);
+        await model.setAtlasBorders(third!);
+        model.reset();
+        assert.equal(model.settings.atlasBorders, null);
+      });
+
       it('colours the cortex by its sulcal depth at once, downloading nothing, on any atlas', async () => {
         const { engine } = await fresh();
         const { model } = engine;

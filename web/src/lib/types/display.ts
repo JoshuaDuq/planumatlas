@@ -33,6 +33,8 @@ export interface DisplaySettings {
   internalVisible: boolean;
   spinalCordVisible: boolean;
   surfaceColor: SurfaceColor;
+  /** The atlas whose area borders are drawn as lines over the shown cortex; null for none. */
+  atlasBorders: string | null;
   paint: Paint | null;
   isolatedRegion: string | null;
   /** The selection drawn alone in its colour, everything else ghosted in tissue grey. */
