@@ -180,7 +180,7 @@ test('archived praxis visits the Grasp system, then the Use system, on the left 
   }
 });
 
-test('a landmark’s tract is one of the anatomy’s own bundles; corticospinal draws it down to the crossing', () => {
+test('a landmark’s tract is one of the anatomy’s own bundles, drawn at the landmarks it runs through', () => {
   const unknown = clone();
   circuitOf(unknown, 'corticospinal').steps[0].tract = 'no-such-bundle';
   assert.throws(() => create(unknown), { message: 'Unknown tract bundle: no-such-bundle' });
@@ -190,10 +190,20 @@ test('a landmark’s tract is one of the anatomy’s own bundles; corticospinal 
     'an anatomy whose tracts are another subject’s draws none',
   );
   assert.deepEqual(
-    create(data)
-      .get('corticospinal')
-      .steps.map((step) => step.tract ?? null),
-    ['cst-left', 'cst-left', 'cst-left', null],
+    create(data).all.flatMap((circuit) =>
+      circuit.steps.filter((step) => step.tract).map((s) => `${circuit.id}.${s.id} ${s.tract}`),
+    ),
+    [
+      'corticospinal.motor-cortex cst-left',
+      'corticospinal.midbrain cst-left',
+      'corticospinal.crossing cst-left',
+      'pontine-motor.right-pons mcp',
+      'vestibular.inferior-peduncle icp-left',
+      'mediodorsal-prefrontal.parvocellular-mediodorsal atr-left',
+      'mediodorsal-prefrontal.dorsal-prefrontal atr-left',
+      'dorsal-spinocerebellar.inferior-peduncle icp-right',
+      'olivocerebellar-flocculus.inferior-peduncle icp-left',
+    ],
   );
 });
 
@@ -818,7 +828,7 @@ test('CAT-54 · an unknown circuit, landmark or reference fails by name', () => 
   assert.throws(() => catalog.reference('missing'), { message: 'Unknown reference: missing' });
 });
 
-test('on the template, a tour naming a tract, cord or deficit it lacks is left out and the rest resolve', () => {
+test('on the template, a tour naming a cord or deficit it lacks is left out; a landmark whose tract it lacks keeps its tour and names the tract', () => {
   const template = manifests.find(([id]) => id === 'mni152')![1];
   // The app loads the template's averaged tracts before its catalogs (boot.ts): the bundles it names.
   const tracts = readRepoYaml<TractCatalog>('data/diffusion-mni152.yaml');
@@ -841,6 +851,22 @@ test('on the template, a tour naming a tract, cord or deficit it lacks is left o
     ACTIVE.map(([id]) => id).filter((id) => !catalog.unavailable.some((c) => c.id === id)),
   );
   assert.throws(() => catalog.get('corticospinal'), { message: 'Unknown circuit: corticospinal' });
+  // HCP1065's peduncles failed their gate: those landmarks draw nothing and name what CDMD draws.
+  assert.deepEqual(
+    catalog.all.flatMap((circuit) =>
+      circuit.steps
+        .filter((step) => step.tract || step.tractElsewhere)
+        .map((s) => [`${circuit.id}.${s.id}`, s.tract ?? null, s.tractElsewhere ?? null]),
+    ),
+    [
+      ['pontine-motor.right-pons', null, 'mcp'],
+      ['vestibular.inferior-peduncle', null, 'icp-left'],
+      ['mediodorsal-prefrontal.parvocellular-mediodorsal', 'atr-left', null],
+      ['mediodorsal-prefrontal.dorsal-prefrontal', 'atr-left', null],
+      ['dorsal-spinocerebellar.inferior-peduncle', null, 'icp-right'],
+      ['olivocerebellar-flocculus.inferior-peduncle', null, 'icp-left'],
+    ],
+  );
   // Complete, as the default anatomy must be, the template is refused rather than trimmed.
   assert.throws(
     () => createCircuitCatalog(data, template, deficitIds, ownTractIds(template.anatomy.id)),

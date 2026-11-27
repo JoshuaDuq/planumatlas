@@ -35,16 +35,16 @@ export const en = {
     shows:
       '45 tours of anatomical pathways and loop branches, 124 landmarks in all, through sensory, motor, cerebellar, hippocampal, limbic, association and commissural systems. Each landmark is a labelled region of this brain’s atlases, framed with 12 mm of surrounding anatomy.',
     source:
-      'Each tour cites circuit background separately from the patient studies behind its linked deficit. The 262 references are 252 PubMed articles, 9 chapters of Purves et al., Neuroscience, and a StatPearls chapter. The corticospinal tour draws the left corticospinal bundle tracked in this subject’s diffusion MRI.',
+      'Each tour cites circuit background separately from the patient studies behind its linked deficit. The 262 references are 252 PubMed articles, 9 chapters of Purves et al., Neuroscience, and a StatPearls chapter. A landmark on a bundle the Tracts tab publishes for this brain draws it, and its notes name the bundle and its source.',
     caution:
-      'Apart from the corticospinal streamlines, the tours teach connections described in the literature and measure nothing in this brain. Atlas labels approximate the structures, and some projections are known from tracing in monkeys, cats, rabbits or rodents. A deficit study supports a region–deficit association, not the pathway’s connections.',
+      'Apart from the streamlines drawn, the tours teach connections described in the literature and measure nothing in this brain. Atlas labels approximate the structures, and some projections are known from tracing in monkeys, cats, rabbits or rodents. A deficit study supports a region–deficit association, not the pathway’s connections.',
   },
   tracts: {
     scope: 'White matter tracked in this brain’s own diffusion scan.',
     shows:
-      '30 white-matter bundles reconstructed from the diffusion scan of the same person whose anatomy is shown, so streamlines, MRI and surfaces share one scanner frame without registration. Colour is local direction: red left–right, green front–back, blue up–down.',
+      '35 white-matter bundles reconstructed from the diffusion scan of the same person whose anatomy is shown, so streamlines, MRI and surfaces share one scanner frame without registration. Colour is local direction: red left–right, green front–back, blue up–down.',
     source:
-      'MGH CDMD sub_013 (CC0). Seventeen bundles come from DIPY tractography segmented by RecoBundles; thirteen (SLF I–III and seven callosal segments) from TractSeg. Every streamline is trimmed back into the brain at its ends.',
+      'MGH CDMD sub_013 (CC0). Seventeen bundles come from DIPY tractography segmented by RecoBundles; eighteen (SLF I–III, seven callosal segments, the cerebellar peduncles and the anterior thalamic radiations) from TractSeg. Every streamline is trimmed back into the brain at its ends.',
     caution:
       'One individual and one 2 mm diffusion scan: bundles are reconstructions, not observed axons. Streamline counts are not axon counts, and lengths do not measure connection strength. The corticospinal streamlines end near the caudal medulla, above the decussation.',
   },
@@ -126,16 +126,16 @@ export const fr: typeof en = {
     shows:
       '45 parcours de voies anatomiques et de branches de boucles, 124 repères en tout, dans les systèmes sensoriels, moteurs, cérébelleux, hippocampiques, limbiques, d’association et commissuraux. Chaque repère est une région étiquetée des atlas de ce cerveau, cadrée avec 12\u00a0mm d’anatomie environnante.',
     source:
-      'Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 262 références sont 252 articles PubMed, 9 chapitres de Purves et al., Neuroscience, et un chapitre de StatPearls. Le parcours corticospinal trace le faisceau corticospinal gauche suivi dans l’IRM de diffusion de ce sujet.',
+      'Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 262 références sont 252 articles PubMed, 9 chapitres de Purves et al., Neuroscience, et un chapitre de StatPearls. Un repère sur un faisceau que l’onglet Faisceaux publie pour ce cerveau le trace, et ses notes nomment le faisceau et sa source.',
     caution:
-      'Hormis les trajectoires corticospinales, les parcours enseignent des connexions décrites dans la littérature et ne mesurent rien dans ce cerveau. Les étiquettes d’atlas approchent les structures, et certaines projections ne sont connues que par traçage chez le singe, le chat, le lapin ou les rongeurs. Une étude de déficit appuie une association région–déficit, et non les connexions de la voie.',
+      'Hormis les trajectoires tracées, les parcours enseignent des connexions décrites dans la littérature et ne mesurent rien dans ce cerveau. Les étiquettes d’atlas approchent les structures, et certaines projections ne sont connues que par traçage chez le singe, le chat, le lapin ou les rongeurs. Une étude de déficit appuie une association région–déficit, et non les connexions de la voie.',
   },
   tracts: {
     scope: 'La substance blanche suivie dans l’IRM de diffusion de ce cerveau.',
     shows:
-      '30 faisceaux de substance blanche reconstruits à partir de l’IRM de diffusion de la personne dont l’anatomie est montrée\u202f: trajectoires, IRM et surfaces partagent un même repère du scanner, sans recalage. La couleur suit la direction locale\u202f: rouge gauche–droite, vert avant–arrière, bleu haut–bas.',
+      '35 faisceaux de substance blanche reconstruits à partir de l’IRM de diffusion de la personne dont l’anatomie est montrée\u202f: trajectoires, IRM et surfaces partagent un même repère du scanner, sans recalage. La couleur suit la direction locale\u202f: rouge gauche–droite, vert avant–arrière, bleu haut–bas.',
     source:
-      'MGH CDMD sub_013 (CC0). Dix-sept faisceaux viennent d’une tractographie DIPY segmentée par RecoBundles\u202f; treize (SLF I–III et sept segments calleux) de TractSeg. Chaque trajectoire est raccourcie à ses extrémités pour rester dans le cerveau.',
+      'MGH CDMD sub_013 (CC0). Dix-sept faisceaux viennent d’une tractographie DIPY segmentée par RecoBundles\u202f; dix-huit (SLF I–III, sept segments calleux, les pédoncules cérébelleux et les radiations thalamiques antérieures) de TractSeg. Chaque trajectoire est raccourcie à ses extrémités pour rester dans le cerveau.',
     caution:
       'Un seul individu et une seule IRM de diffusion à 2\u00a0mm\u202f: les faisceaux sont des reconstructions, et non des axones observés. Le nombre de trajectoires n’est pas un nombre d’axones, et leur longueur ne mesure pas la force d’une connexion. Les trajectoires corticospinales s’arrêtent près de la moelle allongée caudale, au-dessus de la décussation.',
   },

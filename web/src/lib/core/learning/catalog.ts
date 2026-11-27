@@ -69,8 +69,14 @@ export interface CircuitData {
   references: readonly CircuitReference[];
 }
 
-/** A landmark as the catalog serves it: one resolved form, and the regions it uncovers on arrival. */
-export type Landmark = Omit<AuthoredStep, 'alternatives'> & { restores: string[] };
+/**
+ * A landmark as the catalog serves it: one resolved form, and the regions it uncovers on arrival.
+ * On an anatomy without its tract it draws none, and `tractElsewhere` names the one it would draw.
+ */
+export type Landmark = Omit<AuthoredStep, 'alternatives'> & {
+  restores: string[];
+  tractElsewhere?: string;
+};
 export type Circuit = Omit<AuthoredCircuit, 'steps'> & { steps: Landmark[] };
 
 function requireText(value: unknown, context: string): asserts value is string {
@@ -209,7 +215,8 @@ export type CircuitCatalog = ReturnType<typeof createCircuitCatalog>;
 
 /**
  * Authored lessons must resolve to the exact source labels and tract bundles of the `complete`
- * anatomy. On another, a lesson naming a region, tract or deficit it lacks is moved to `unavailable`.
+ * anatomy. On another, a lesson naming a region or deficit it lacks is moved to `unavailable`, and a
+ * landmark naming a tract it lacks keeps its lesson without the tract.
  */
 export function createCircuitCatalog(
   data: CircuitData,
@@ -233,8 +240,7 @@ export function createCircuitCatalog(
   const places = (step: Omit<AuthoredStep, 'alternatives'> | null) =>
     step !== null &&
     regions.get(step.region)?.source_name === step.source_name &&
-    (step.covering_regions ?? []).every((id) => regions.has(id)) &&
-    (step.tract === undefined || tracts.has(step.tract));
+    (step.covering_regions ?? []).every((id) => regions.has(id));
   for (const reference of references.values()) {
     requireText(reference.title, `${reference.id}.title`);
     requireText(reference.citation, `${reference.id}.citation`);
@@ -281,7 +287,11 @@ export function createCircuitCatalog(
     }
     if (!deficits.has(circuit.deficit))
       throw new Error(`Unknown clinical target: ${circuit.deficit}`);
-    const resolved = forms as Omit<AuthoredStep, 'alternatives'>[];
+    const resolved = (forms as Omit<AuthoredStep, 'alternatives'>[]).map((step) => {
+      if (complete || step.tract === undefined || tracts.has(step.tract)) return step;
+      const { tract, ...rest } = step;
+      return { ...rest, tractElsewhere: tract };
+    });
     // What other landmarks cover is uncovered again on arriving at this one.
     const covered = new Set(resolved.flatMap((step) => step.covering_regions ?? []));
     const landmarks = indexRecords(
@@ -298,7 +308,7 @@ export function createCircuitCatalog(
   }
   return {
     all: [...circuits.values()],
-    /** Lessons this anatomy cannot show: they name a region, tract or deficit it does not have. */
+    /** Lessons this anatomy cannot show: they name a region or deficit it does not have. */
     unavailable,
     revised: data.revised,
     contextMarginMm: data.context_margin_mm,

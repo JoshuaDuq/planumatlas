@@ -12,7 +12,9 @@ export const en = {
   deficitsElsewhere: (count: number) =>
     `${count} more ${count === 1 ? 'profile maps' : 'profiles map'} structures this template does not have, and ${count === 1 ? 'is' : 'are'} on CDMD sub_013 only.`,
   circuitsElsewhere: (count: number) =>
-    `${count} more ${count === 1 ? 'circuit needs' : 'circuits need'} tracts or structures this template does not have, and ${count === 1 ? 'is' : 'are'} on CDMD sub_013 only.`,
+    `${count} more ${count === 1 ? 'circuit needs' : 'circuits need'} structures this template does not have, and ${count === 1 ? 'is' : 'are'} on CDMD sub_013 only.`,
+  tractElsewhere: (bundle: string, dataset: string) =>
+    `Streamlines: ${bundle}, on ${dataset} only; this template has none.`,
   anatomy: {
     scope: 'An average of 152 adults’ brains and the atlases drawn on it.',
     shows:
@@ -55,7 +57,9 @@ export const fr: typeof en = {
   deficitsElsewhere: (count: number) =>
     `${count} autres ${count > 1 ? 'profils cartographient' : 'profil cartographie'} des structures que ce gabarit n’a pas, et ne ${count > 1 ? 'sont' : 'est'} que sur CDMD sub_013.`,
   circuitsElsewhere: (count: number) =>
-    `${count} autres ${count > 1 ? 'parcours demandent' : 'parcours demande'} des faisceaux ou des structures que ce gabarit n’a pas, et ne ${count > 1 ? 'sont' : 'est'} que sur CDMD sub_013.`,
+    `${count} autres ${count > 1 ? 'parcours demandent' : 'parcours demande'} des structures que ce gabarit n’a pas, et ne ${count > 1 ? 'sont' : 'est'} que sur CDMD sub_013.`,
+  tractElsewhere: (bundle: string, dataset: string) =>
+    `Trajectoires\u202f: ${bundle}, sur ${dataset} seulement\u202f; ce gabarit n’en a pas.`,
   anatomy: {
     scope: 'La moyenne des cerveaux de 152 adultes et les atlas tracés dessus.',
     shows:

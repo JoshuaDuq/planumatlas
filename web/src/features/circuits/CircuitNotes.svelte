@@ -113,6 +113,7 @@
         <Disclosure summary={copy.mapping} variant="section" bind:open={open.mapping}>
           <div class="body">
             <p>{step.mapping[lang]}</p>
+            {#if model.streamlines}<p class="small">{model.streamlines}</p>{/if}
             <p class="small">{copy.mriNote}</p>
           </div>
         </Disclosure>

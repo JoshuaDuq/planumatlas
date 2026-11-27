@@ -25,6 +25,7 @@ export const en = {
   loading: 'Opening landmark…',
   mriNote:
     'In the linked MRI, the crosshair marks the 3D landmark’s centroid, which may fall outside a curved structure. MRI labels can use a different atlas.',
+  streamlines: (bundle: string, dataset: string) => `Streamlines: ${bundle}, ${dataset}`,
   step: (index: number, total: number) => `Landmark ${index + 1} of ${total}`,
   stepShort: (index: number, total: number) => `${index + 1} of ${total}`,
   inCircuits: 'In guided circuits',
@@ -71,6 +72,7 @@ export const fr: typeof en = {
   loading: 'Ouverture du repère…',
   mriNote:
     'Dans l’IRM liée, le réticule marque le centroïde du repère 3D, qui peut se situer hors d’une structure courbe. Les étiquettes IRM peuvent utiliser un autre atlas.',
+  streamlines: (bundle: string, dataset: string) => `Trajectoires\u202f: ${bundle}, ${dataset}`,
   step: (index: number, total: number) => `Repère ${index + 1} sur ${total}`,
   stepShort: (index: number, total: number) => `${index + 1} sur ${total}`,
   inCircuits: 'Dans les parcours guidés',

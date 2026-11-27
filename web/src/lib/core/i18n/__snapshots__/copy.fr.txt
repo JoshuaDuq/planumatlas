@@ -124,6 +124,10 @@
   "revised": "Contenu vérifié",
   "loading": "Ouverture du repère…",
   "mriNote": "Dans l’IRM liée, le réticule marque le centroïde du repère 3D, qui peut se situer hors d’une structure courbe. Les étiquettes IRM peuvent utiliser un autre atlas.",
+  "streamlines": [
+   "[\"Alpha\",\"\"] → \"Trajectoires<NNBSP>: Alpha, \"",
+   "[\"\",\"Alpha\"] → \"Trajectoires<NNBSP>: , Alpha\""
+  ],
   "step": [
    "[0,1] → \"Repère 1 sur 1\"",
    "[1,2] → \"Repère 2 sur 2\"",
@@ -2960,11 +2964,15 @@
    "[12345] → \"12345 autres profils cartographient des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\""
   ],
   "circuitsElsewhere": [
-   "[0] → \"0 autres parcours demande des faisceaux ou des structures que ce gabarit n’a pas, et ne est que sur CDMD sub_013.\"",
-   "[1] → \"1 autres parcours demande des faisceaux ou des structures que ce gabarit n’a pas, et ne est que sur CDMD sub_013.\"",
-   "[2] → \"2 autres parcours demandent des faisceaux ou des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\"",
-   "[183] → \"183 autres parcours demandent des faisceaux ou des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\"",
-   "[12345] → \"12345 autres parcours demandent des faisceaux ou des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\""
+   "[0] → \"0 autres parcours demande des structures que ce gabarit n’a pas, et ne est que sur CDMD sub_013.\"",
+   "[1] → \"1 autres parcours demande des structures que ce gabarit n’a pas, et ne est que sur CDMD sub_013.\"",
+   "[2] → \"2 autres parcours demandent des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\"",
+   "[183] → \"183 autres parcours demandent des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\"",
+   "[12345] → \"12345 autres parcours demandent des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\""
+  ],
+  "tractElsewhere": [
+   "[\"Alpha\",\"\"] → \"Trajectoires<NNBSP>: Alpha, sur  seulement<NNBSP>; ce gabarit n’en a pas.\"",
+   "[\"\",\"Alpha\"] → \"Trajectoires<NNBSP>: , sur Alpha seulement<NNBSP>; ce gabarit n’en a pas.\""
   ],
   "anatomy": {
    "scope": "La moyenne des cerveaux de 152 adultes et les atlas tracés dessus.",
@@ -3116,13 +3124,13 @@
   "circuits": {
    "scope": "Des parcours de voies décrites dans la littérature.",
    "shows": "45 parcours de voies anatomiques et de branches de boucles, 124 repères en tout, dans les systèmes sensoriels, moteurs, cérébelleux, hippocampiques, limbiques, d’association et commissuraux. Chaque repère est une région étiquetée des atlas de ce cerveau, cadrée avec 12<NBSP>mm d’anatomie environnante.",
-   "source": "Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 262 références sont 252 articles PubMed, 9 chapitres de Purves et al., Neuroscience, et un chapitre de StatPearls. Le parcours corticospinal trace le faisceau corticospinal gauche suivi dans l’IRM de diffusion de ce sujet.",
-   "caution": "Hormis les trajectoires corticospinales, les parcours enseignent des connexions décrites dans la littérature et ne mesurent rien dans ce cerveau. Les étiquettes d’atlas approchent les structures, et certaines projections ne sont connues que par traçage chez le singe, le chat, le lapin ou les rongeurs. Une étude de déficit appuie une association région–déficit, et non les connexions de la voie."
+   "source": "Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 262 références sont 252 articles PubMed, 9 chapitres de Purves et al., Neuroscience, et un chapitre de StatPearls. Un repère sur un faisceau que l’onglet Faisceaux publie pour ce cerveau le trace, et ses notes nomment le faisceau et sa source.",
+   "caution": "Hormis les trajectoires tracées, les parcours enseignent des connexions décrites dans la littérature et ne mesurent rien dans ce cerveau. Les étiquettes d’atlas approchent les structures, et certaines projections ne sont connues que par traçage chez le singe, le chat, le lapin ou les rongeurs. Une étude de déficit appuie une association région–déficit, et non les connexions de la voie."
   },
   "tracts": {
    "scope": "La substance blanche suivie dans l’IRM de diffusion de ce cerveau.",
-   "shows": "30 faisceaux de substance blanche reconstruits à partir de l’IRM de diffusion de la personne dont l’anatomie est montrée<NNBSP>: trajectoires, IRM et surfaces partagent un même repère du scanner, sans recalage. La couleur suit la direction locale<NNBSP>: rouge gauche–droite, vert avant–arrière, bleu haut–bas.",
-   "source": "MGH CDMD sub_013 (CC0). Dix-sept faisceaux viennent d’une tractographie DIPY segmentée par RecoBundles<NNBSP>; treize (SLF I–III et sept segments calleux) de TractSeg. Chaque trajectoire est raccourcie à ses extrémités pour rester dans le cerveau.",
+   "shows": "35 faisceaux de substance blanche reconstruits à partir de l’IRM de diffusion de la personne dont l’anatomie est montrée<NNBSP>: trajectoires, IRM et surfaces partagent un même repère du scanner, sans recalage. La couleur suit la direction locale<NNBSP>: rouge gauche–droite, vert avant–arrière, bleu haut–bas.",
+   "source": "MGH CDMD sub_013 (CC0). Dix-sept faisceaux viennent d’une tractographie DIPY segmentée par RecoBundles<NNBSP>; dix-huit (SLF I–III, sept segments calleux, les pédoncules cérébelleux et les radiations thalamiques antérieures) de TractSeg. Chaque trajectoire est raccourcie à ses extrémités pour rester dans le cerveau.",
    "caution": "Un seul individu et une seule IRM de diffusion à 2<NBSP>mm<NNBSP>: les faisceaux sont des reconstructions, et non des axones observés. Le nombre de trajectoires n’est pas un nombre d’axones, et leur longueur ne mesure pas la force d’une connexion. Les trajectoires corticospinales s’arrêtent près de la moelle allongée caudale, au-dessus de la décussation."
   },
   "section": {

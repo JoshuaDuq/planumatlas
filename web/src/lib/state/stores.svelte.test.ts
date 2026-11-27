@@ -1,12 +1,17 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
+import circuitRecords from '../../../../data/circuits.yaml';
+import clinicalRecords from '../../../../data/neuropsychology.yaml';
 import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import type { createCatalog } from '../core/catalog/catalog.ts';
 import { createCatalog as buildCatalog } from '../core/catalog/catalog.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
 import { findingPaint } from '../core/clinical/catalog.ts';
 import type { ClinicalCatalog } from '../core/clinical/catalog.ts';
-import type { Circuit } from '../core/learning/catalog.ts';
+import type { ClinicalData } from '../core/clinical/types.ts';
+import { ownTractIds } from '../core/diffusion/catalogs.ts';
+import { createCircuitCatalog } from '../core/learning/catalog.ts';
+import type { Circuit, CircuitCatalog, CircuitData } from '../core/learning/catalog.ts';
 import { createFakeEngine } from '../engine/fake.ts';
 import type { FakeEngine } from '../engine/fake.ts';
 import type { Manifest } from '../types/index.ts';
@@ -272,7 +277,10 @@ describe('a lesson landmark’s tract', () => {
       ({ steps: [{ tract: 'cst-left' }, { tract: 'cst-left' }, {}] }) as unknown as Circuit,
   };
 
-  function lessonWorld(showLandmarkTract = vi.fn(async (_id: string) => {})) {
+  function lessonWorld(
+    showLandmarkTract = vi.fn(async (_id: string) => {}),
+    lessons: Pick<CircuitCatalog, 'get'> = circuits,
+  ) {
     const tracts = { showLandmarkTract, clearLandmarkTract: vi.fn() };
     const fail = vi.fn();
     const parts = {} as {
@@ -281,7 +289,7 @@ describe('a lesson landmark’s tract', () => {
     };
     cleanup = $effect.root(() => {
       parts.session = createSessionStore({ views: ['oblique'] });
-      parts.lesson = createLessonStore(circuits as never);
+      parts.lesson = createLessonStore(lessons as never);
       const view = createView({
         engine: createEngineSync(engine),
         session: parts.session,
@@ -289,7 +297,7 @@ describe('a lesson landmark’s tract', () => {
         anatomy: published.anatomy.id,
         referenceAnatomy: engine.tracts.anatomy,
       });
-      syncLessonTract(tracts, view, circuits, fail);
+      syncLessonTract(tracts, view, lessons, fail);
     });
     flushSync();
     return { ...parts, tracts, fail };
@@ -333,6 +341,26 @@ describe('a lesson landmark’s tract', () => {
     lesson.showRoute();
     flushSync();
     expect(tracts.clearLandmarkTract).toHaveBeenCalledTimes(1);
+  });
+
+  test.each([
+    ['its own bundle on CDMD', true, [['mcp']]],
+    ['nothing on a brain without that bundle', false, []],
+  ])('from the catalog, a landmark draws %s', (_, complete, drawn) => {
+    const own = ownTractIds(published.anatomy.id);
+    const lessons = createCircuitCatalog(
+      circuitRecords as CircuitData,
+      published,
+      (clinicalRecords as ClinicalData).deficits.map((deficit) => deficit.id),
+      complete ? own : own.filter((id) => id !== 'mcp'),
+      complete,
+    );
+    const { session, lesson, tracts } = lessonWorld(undefined, lessons);
+    session.setExplorer('circuits');
+    lesson.start('pontine-motor');
+    lesson.go(2);
+    flushSync();
+    expect(tracts.showLandmarkTract.mock.calls).toEqual(drawn);
   });
 
   test('a failed download is said once, and tried again on coming back to the landmark', async () => {

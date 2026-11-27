@@ -124,6 +124,10 @@
   "revised": "Content checked",
   "loading": "Opening landmark…",
   "mriNote": "In the linked MRI, the crosshair marks the 3D landmark’s centroid, which may fall outside a curved structure. MRI labels can use a different atlas.",
+  "streamlines": [
+   "[\"Alpha\",\"\"] → \"Streamlines: Alpha, \"",
+   "[\"\",\"Alpha\"] → \"Streamlines: , Alpha\""
+  ],
   "step": [
    "[0,1] → \"Landmark 1 of 1\"",
    "[1,2] → \"Landmark 2 of 2\"",
@@ -2960,11 +2964,15 @@
    "[12345] → \"12345 more profiles map structures this template does not have, and are on CDMD sub_013 only.\""
   ],
   "circuitsElsewhere": [
-   "[0] → \"0 more circuits need tracts or structures this template does not have, and are on CDMD sub_013 only.\"",
-   "[1] → \"1 more circuit needs tracts or structures this template does not have, and is on CDMD sub_013 only.\"",
-   "[2] → \"2 more circuits need tracts or structures this template does not have, and are on CDMD sub_013 only.\"",
-   "[183] → \"183 more circuits need tracts or structures this template does not have, and are on CDMD sub_013 only.\"",
-   "[12345] → \"12345 more circuits need tracts or structures this template does not have, and are on CDMD sub_013 only.\""
+   "[0] → \"0 more circuits need structures this template does not have, and are on CDMD sub_013 only.\"",
+   "[1] → \"1 more circuit needs structures this template does not have, and is on CDMD sub_013 only.\"",
+   "[2] → \"2 more circuits need structures this template does not have, and are on CDMD sub_013 only.\"",
+   "[183] → \"183 more circuits need structures this template does not have, and are on CDMD sub_013 only.\"",
+   "[12345] → \"12345 more circuits need structures this template does not have, and are on CDMD sub_013 only.\""
+  ],
+  "tractElsewhere": [
+   "[\"Alpha\",\"\"] → \"Streamlines: Alpha, on  only; this template has none.\"",
+   "[\"\",\"Alpha\"] → \"Streamlines: , on Alpha only; this template has none.\""
   ],
   "anatomy": {
    "scope": "An average of 152 adults’ brains and the atlases drawn on it.",
@@ -3116,13 +3124,13 @@
   "circuits": {
    "scope": "Tours of pathways described in the literature.",
    "shows": "45 tours of anatomical pathways and loop branches, 124 landmarks in all, through sensory, motor, cerebellar, hippocampal, limbic, association and commissural systems. Each landmark is a labelled region of this brain’s atlases, framed with 12 mm of surrounding anatomy.",
-   "source": "Each tour cites circuit background separately from the patient studies behind its linked deficit. The 262 references are 252 PubMed articles, 9 chapters of Purves et al., Neuroscience, and a StatPearls chapter. The corticospinal tour draws the left corticospinal bundle tracked in this subject’s diffusion MRI.",
-   "caution": "Apart from the corticospinal streamlines, the tours teach connections described in the literature and measure nothing in this brain. Atlas labels approximate the structures, and some projections are known from tracing in monkeys, cats, rabbits or rodents. A deficit study supports a region–deficit association, not the pathway’s connections."
+   "source": "Each tour cites circuit background separately from the patient studies behind its linked deficit. The 262 references are 252 PubMed articles, 9 chapters of Purves et al., Neuroscience, and a StatPearls chapter. A landmark on a bundle the Tracts tab publishes for this brain draws it, and its notes name the bundle and its source.",
+   "caution": "Apart from the streamlines drawn, the tours teach connections described in the literature and measure nothing in this brain. Atlas labels approximate the structures, and some projections are known from tracing in monkeys, cats, rabbits or rodents. A deficit study supports a region–deficit association, not the pathway’s connections."
   },
   "tracts": {
    "scope": "White matter tracked in this brain’s own diffusion scan.",
-   "shows": "30 white-matter bundles reconstructed from the diffusion scan of the same person whose anatomy is shown, so streamlines, MRI and surfaces share one scanner frame without registration. Colour is local direction: red left–right, green front–back, blue up–down.",
-   "source": "MGH CDMD sub_013 (CC0). Seventeen bundles come from DIPY tractography segmented by RecoBundles; thirteen (SLF I–III and seven callosal segments) from TractSeg. Every streamline is trimmed back into the brain at its ends.",
+   "shows": "35 white-matter bundles reconstructed from the diffusion scan of the same person whose anatomy is shown, so streamlines, MRI and surfaces share one scanner frame without registration. Colour is local direction: red left–right, green front–back, blue up–down.",
+   "source": "MGH CDMD sub_013 (CC0). Seventeen bundles come from DIPY tractography segmented by RecoBundles; eighteen (SLF I–III, seven callosal segments, the cerebellar peduncles and the anterior thalamic radiations) from TractSeg. Every streamline is trimmed back into the brain at its ends.",
    "caution": "One individual and one 2 mm diffusion scan: bundles are reconstructions, not observed axons. Streamline counts are not axon counts, and lengths do not measure connection strength. The corticospinal streamlines end near the caudal medulla, above the decussation."
   },
   "section": {

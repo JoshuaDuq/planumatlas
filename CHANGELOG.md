@@ -29,6 +29,12 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   subject's own scan. The MNI template draws the HCP1065 atlas's anterior thalamic radiations. Each passed
   a test of where its streamlines end and run, set before it was tracked; the template's peduncles, and the
   anterior commissure and fornix on both brains, did not and are not drawn.
+- Five guided circuits draw these tracts at the landmarks they run through: the middle cerebellar peduncle
+  at the pontine motor tour's right pons, the inferior cerebellar peduncle at the vestibular, dorsal
+  spinocerebellar and olivocerebellar tours' peduncle, and the left anterior thalamic radiation at both
+  mediodorsal–prefrontal landmarks. **What this atlas shows** names the drawn bundle and its dataset, as
+  **Tracts** names it. On the MNI template, which has no peduncles, the line says these streamlines are
+  on CDMD sub_013 only, and the mediodorsal–prefrontal landmarks draw HCP1065's radiation.
 
 ### Changed
 
@@ -44,6 +50,9 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   lobules there as on the other levels. The pontine motor tour's whole route shows its lobule V.
 - The **Internal anatomy** list marks the **Teaching set** **(Default)**, as the **Atlas** and **Colour**
   lists mark theirs.
+- A guided circuit is no longer left out of a brain that lacks one of its landmarks' tracts: that landmark
+  draws none, and its notes say which brain has them. The corticospinal landmarks name their streamlines
+  in that generated line instead of a written sentence.
 
 ### Fixed
 

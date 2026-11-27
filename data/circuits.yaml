@@ -1890,8 +1890,8 @@ circuits:
           en: Area 4 is the primary motor cortex and contributes fibres to the corticospinal tract. Human diffusion studies also estimate contributions from premotor and primary somatosensory cortex.
           fr: L’aire 4 correspond au cortex moteur primaire et donne naissance à des fibres corticospinales. Les études humaines en IRM de diffusion suggèrent aussi des contributions des cortex prémoteur et somatosensoriel primaire.
         mapping:
-          en: HCP-MMP delineates area 4 on this cortical surface. The superimposed streamlines are estimates from the subject’s diffusion MRI, selected using RecoBundles.
-          fr: La parcelle HCP-MMP délimite l’aire 4 sur cette surface corticale. Les trajectoires superposées sont estimées à partir de l’IRM de diffusion du sujet et sélectionnées avec RecoBundles.
+          en: HCP-MMP delineates area 4 on this cortical surface.
+          fr: La parcelle HCP-MMP délimite l’aire 4 sur cette surface corticale.
         view: left
         plane: axial
       - id: midbrain
@@ -1904,8 +1904,8 @@ circuits:
           en: Fibres descend through the left cerebral peduncle at the base of the midbrain, then pass through the base of the pons and enter the left medullary pyramid.
           fr: Les fibres descendent dans le pédoncule cérébral gauche, à la base du mésencéphale, puis traversent la base du pont et gagnent la pyramide bulbaire gauche.
         mapping:
-          en: This teaching volume combines NextBrain’s broad left midbrain label with the periaqueductal grey, pretectal region, peripeduncular nucleus and dorsal raphe. It is far broader than the cerebral peduncle. The superimposed streamlines show the estimated course of the bundle at this level.
-          fr: Ce volume pédagogique réunit l’étiquette générale du mésencéphale gauche de NextBrain avec la substance grise périaqueducale, la région prétectale, le noyau péripédonculaire et le raphé dorsal. Il couvre un territoire bien plus étendu que le pédoncule cérébral. Les trajectoires superposées représentent le trajet estimé du faisceau à ce niveau.
+          en: This teaching volume combines NextBrain’s broad left midbrain label with the periaqueductal grey, pretectal region, peripeduncular nucleus and dorsal raphe. It is far broader than the cerebral peduncle.
+          fr: Ce volume pédagogique réunit l’étiquette générale du mésencéphale gauche de NextBrain avec la substance grise périaqueducale, la région prétectale, le noyau péripédonculaire et le raphé dorsal. Il couvre un territoire bien plus étendu que le pédoncule cérébral.
         view: anterior
         plane: axial
       - id: crossing
@@ -1918,8 +1918,8 @@ circuits:
           en: Most fibres in the medullary pyramids cross the midline in the caudal medulla. Fibres that cross from the left join the right lateral corticospinal tract.
           fr: La plupart des fibres des pyramides bulbaires franchissent la ligne médiane dans le bulbe caudal. Les fibres qui croisent depuis le côté gauche rejoignent le faisceau corticospinal latéral droit.
         mapping:
-          en: This midline teaching label uses the portion of FreeSurfer’s brainstem label below NextBrain’s medullary coverage. The diffusion streamlines extend into the caudal medulla. Published human anatomy identifies the decussation and its continuation into the right lateral corticospinal tract.
-          fr: Ce repère pédagogique médian correspond à la partie de la segmentation du tronc cérébral de FreeSurfer située sous la portion du bulbe couverte par NextBrain. Les trajectoires estimées par IRM de diffusion atteignent le bulbe caudal. Les études anatomiques humaines situent la décussation et décrivent le trajet qui se poursuit dans le faisceau corticospinal latéral droit.
+          en: This midline teaching label uses the portion of FreeSurfer’s brainstem label below NextBrain’s medullary coverage. Published human anatomy identifies the decussation and its continuation into the right lateral corticospinal tract.
+          fr: Ce repère pédagogique médian correspond à la partie de la segmentation du tronc cérébral de FreeSurfer située sous la portion du bulbe couverte par NextBrain. Les études anatomiques humaines situent la décussation et décrivent le trajet qui se poursuit dans le faisceau corticospinal latéral droit.
         view: anterior
         plane: axial
       - id: spinal-tract
@@ -2123,6 +2123,7 @@ circuits:
       - id: right-pons
         region: nextbrain:right:10580
         source_name: pons
+        tract: mcp
         name: { en: Right pontine territory, fr: Territoire pontique droit }
         role: { en: Passage after the pontine crossing, fr: Passage après la décussation pontique }
         explanation:
@@ -2211,6 +2212,7 @@ circuits:
       - id: inferior-peduncle
         region: learning:left:inferior-cerebellar-peduncle
         source_name: Inferior cerebellar peduncle
+        tract: icp-left
         name: { en: Left inferior cerebellar peduncle, fr: Pédoncule cérébelleux inférieur gauche }
         role: { en: Entry of primary vestibular fibres into the cerebellum, fr: Entrée des fibres vestibulaires primaires dans le cervelet }
         explanation:
@@ -3350,8 +3352,8 @@ circuits:
       en: Left parvocellular mediodorsal thalamic nucleus → middle portion of left dorsal area 46
       fr: Partie parvocellulaire du noyau médiodorsal gauche du thalamus → portion moyenne de la partie dorsale de l’aire 46 gauche
     scope:
-      en: The two landmarks represent an ipsilateral projection traced in macaques. A human diffusion tractography study used the whole mediodorsal nucleus as its thalamic seed and estimated streamlines connecting it to area 9-46d through the anterior limb of the internal capsule. A separate human tractography study compared four regions of the mediodorsal nucleus defined by diffusion data. The estimated connectivity to area 46 in the Brainnetome atlas was stronger for the dorsal region than for the medial and central regions. The dorsal and lateral estimates did not differ significantly. That study used different boundaries for both the thalamic and cortical regions. The exact course, endpoints and direction of the corresponding human projection remain unresolved. The tour omits the intervening white matter and other thalamic inputs to dorsal area 46.
-      fr: Les deux repères représentent une projection ipsilatérale mise en évidence par traçage chez le macaque. Une étude de tractographie de diffusion chez l’humain a pris l’ensemble du noyau médiodorsal comme région de départ thalamique et a estimé des trajectoires reliant ce noyau à l’aire 9-46d par le bras antérieur de la capsule interne. Une autre étude de tractographie chez l’humain a comparé quatre territoires du noyau médiodorsal délimités à partir de données de diffusion. La connectivité estimée avec l’aire 46 de l’atlas Brainnetome était plus forte pour le territoire dorsal que pour les territoires médial et central. La différence entre les territoires dorsal et latéral n’atteignait pas le seuil de signification statistique. Cette étude utilisait d’autres délimitations pour les territoires thalamique et cortical. Le trajet précis, les extrémités et le sens de la projection correspondante chez l’humain restent indéterminés. Le parcours laisse de côté la substance blanche intermédiaire et les autres afférences thalamiques de la partie dorsale de l’aire 46.
+      en: The two landmarks represent an ipsilateral projection traced in macaques. A human diffusion tractography study used the whole mediodorsal nucleus as its thalamic seed and estimated streamlines connecting it to area 9-46d through the anterior limb of the internal capsule. A separate human tractography study compared four regions of the mediodorsal nucleus defined by diffusion data. The estimated connectivity to area 46 in the Brainnetome atlas was stronger for the dorsal region than for the medial and central regions. The dorsal and lateral estimates did not differ significantly. That study used different boundaries for both the thalamic and cortical regions. The exact course, endpoints and direction of the corresponding human projection remain unresolved. The streamlines drawn are the whole left anterior thalamic radiation, not this projection alone. The tour omits other thalamic inputs to dorsal area 46.
+      fr: Les deux repères représentent une projection ipsilatérale mise en évidence par traçage chez le macaque. Une étude de tractographie de diffusion chez l’humain a pris l’ensemble du noyau médiodorsal comme région de départ thalamique et a estimé des trajectoires reliant ce noyau à l’aire 9-46d par le bras antérieur de la capsule interne. Une autre étude de tractographie chez l’humain a comparé quatre territoires du noyau médiodorsal délimités à partir de données de diffusion. La connectivité estimée avec l’aire 46 de l’atlas Brainnetome était plus forte pour le territoire dorsal que pour les territoires médial et central. La différence entre les territoires dorsal et latéral n’atteignait pas le seuil de signification statistique. Cette étude utilisait d’autres délimitations pour les territoires thalamique et cortical. Le trajet précis, les extrémités et le sens de la projection correspondante chez l’humain restent indéterminés. Les trajectoires affichées sont l’ensemble de la radiation thalamique antérieure gauche, et non cette seule projection. Le parcours laisse de côté les autres afférences thalamiques de la partie dorsale de l’aire 46.
     clinical:
       en: Seven veterans with focal lesions involving the left dorsolateral prefrontal cortex scored below healthy veterans on letter–number sequencing. The task requires recalling digits in numerical order followed by letters in alphabetical order. The overall four-group comparison yielded p = 0.05. The only reported significant pairwise difference on this task was against healthy controls. In the broader dorsolateral prefrontal lesion sample, overlap was greatest in Brodmann area 9. In Bellebaum’s series of 13 adults with focal thalamic infarcts, one patient’s backward digit span score four months after stroke was 2.19 standard deviations below the healthy control mean. Follow-up MRI showed a left mediodorsal thalamic lesion. Initial MRI also showed oedema near the left red nucleus. The authors observed no clear pattern of neuropsychological deficits by lesion location across the series. In Geier’s separate 22-person chronic thalamic stroke group, working memory was impaired at the group level. Lesions extended into several other thalamic nuclei across the group, and the authors found no detectable association between cognitive impairment and mediodorsal damage specifically. These studies leave the effects of selective injury to this projection unresolved.
       fr: Sept anciens combattants présentant des lésions focales touchant le cortex préfrontal dorsolatéral gauche ont obtenu de moins bons résultats que des anciens combattants sans lésion cérébrale à l’épreuve de séquences lettres–chiffres. L’épreuve demande de rappeler les chiffres dans l’ordre numérique, puis les lettres dans l’ordre alphabétique. La comparaison globale des quatre groupes donnait p = 0,05. Sur cette épreuve, la seule différence significative rapportée concernait la comparaison avec les témoins sains. Dans l’ensemble du groupe présentant des lésions préfrontales dorsolatérales, le chevauchement lésionnel était maximal dans l’aire 9 de Brodmann. Dans la série de Bellebaum, qui comprenait 13 adultes présentant un infarctus thalamique focal, une patiente testée quatre mois après l’AVC a obtenu à l’épreuve d’empan de chiffres en ordre inverse un score inférieur de 2,19 écarts-types à la moyenne des témoins sains. L’IRM de suivi montrait une lésion du noyau médiodorsal gauche du thalamus. L’IRM initiale montrait aussi un œdème près du noyau rouge gauche. Dans cette série, les auteurs n’ont pas observé de profil neuropsychologique clairement lié au siège des lésions. Dans la série distincte de Geier, les 22 personnes en phase chronique après un AVC thalamique présentaient, à l’échelle du groupe, un déficit de mémoire de travail. Les lésions touchaient aussi plusieurs autres noyaux thalamiques dans ce groupe. Les auteurs n’ont pas détecté d’association spécifique entre l’atteinte du noyau médiodorsal et les troubles cognitifs. Les effets d’une lésion sélective de cette projection restent indéterminés.
@@ -3362,6 +3364,7 @@ circuits:
       - id: parvocellular-mediodorsal
         region: nextbrain:left:313
         source_name: parvocellular_(central)_division_of_md
+        tract: atr-left
         name: { en: Parvocellular division of the left mediodorsal thalamic nucleus, fr: Partie parvocellulaire du noyau médiodorsal gauche du thalamus }
         role: { en: Thalamic source of the projection, fr: Origine thalamique de la projection }
         explanation:
@@ -3375,6 +3378,7 @@ circuits:
       - id: dorsal-prefrontal
         region: hcp-mmp:left:86
         source_name: L_9-46d_ROI
+        tract: atr-left
         name: { en: Left dorsolateral prefrontal cortex (9-46d), fr: Cortex préfrontal dorsolatéral gauche (9-46d) }
         role: { en: Cortical target of the traced projection, fr: Cible corticale de la projection mise en évidence par traçage }
         explanation:
@@ -3407,6 +3411,7 @@ circuits:
       - id: inferior-peduncle
         region: learning:right:inferior-cerebellar-peduncle
         source_name: Inferior cerebellar peduncle
+        tract: icp-right
         name: { en: Right inferior cerebellar peduncle, fr: Pédoncule cérébelleux inférieur droit }
         role: { en: Entry of dorsal spinocerebellar fibres, fr: Entrée des fibres spinocérébelleuses dorsales }
         explanation:
@@ -3705,6 +3710,7 @@ circuits:
       - id: inferior-peduncle
         region: learning:left:inferior-cerebellar-peduncle
         source_name: Inferior cerebellar peduncle
+        tract: icp-left
         name: { en: Left inferior cerebellar peduncle, fr: Pédoncule cérébelleux inférieur gauche }
         role: { en: Passage for crossed olivocerebellar fibres, fr: Passage des fibres olivocérébelleuses croisées }
         explanation:

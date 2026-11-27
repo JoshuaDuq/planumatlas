@@ -15,8 +15,13 @@ import Fixture from './circuits-test-support.svelte';
 
 let world: World;
 
-function mount(lang: 'en' | 'fr' = 'en', explorer = true, lacking: string[] = []) {
-  world = createWorld({ lacking });
+function mount(
+  lang: 'en' | 'fr' = 'en',
+  explorer = true,
+  lacking: string[] = [],
+  tracts?: string[],
+) {
+  world = createWorld({ lacking, tracts });
   if (explorer) world.session.setExplorer('circuits');
   world.session.setLang(lang);
   document.documentElement.lang = lang;
@@ -59,7 +64,7 @@ test('a brain without a cord leaves the cord tours out and says how many are on 
   await expect.poll(() => rows().length).toBe(45 - left.length);
   expect(rowOf('spinothalamic')).toBeNull();
   expect(note()!.textContent).toContain(
-    ` · ${left.length} more circuits need tracts or structures this template does not have, and are on CDMD sub_013 only.`,
+    ` · ${left.length} more circuits need structures this template does not have, and are on CDMD sub_013 only.`,
   );
 });
 
@@ -645,6 +650,52 @@ describe('the landmark sequence', () => {
     await expect.poll(() => world.lesson.state.circuit).toBe('memory');
     expect(summary('Sources').parentElement!.hasAttribute('open')).toBe(false);
   });
+});
+
+describe('a landmark’s streamlines', () => {
+  const mappingNote = (lang: 'en' | 'fr') => [
+    ...summary(t(lang, 'circuits').mapping).parentElement!.querySelectorAll('.body p'),
+  ];
+  const expectMapping = (lang: 'en' | 'fr', ...streamlines: string[]) =>
+    expect
+      .poll(() => mappingNote(lang).map((p) => p.textContent))
+      .toEqual([world.explorer.step!.mapping[lang], ...streamlines, t(lang, 'circuits').mriNote]);
+
+  test.each([
+    ['en', 'Streamlines: Middle cerebellar peduncle, MGH CDMD · sub_013'],
+    ['fr', 'Trajectoires\u202f: Pédoncule cérébelleux moyen, MGH CDMD · sub_013'],
+  ] as const)(
+    'are named with their dataset where the landmark draws them (%s)',
+    async (lang, line) => {
+      mount(lang);
+      await open('pontine-motor');
+      await userEvent.click(summary(t(lang, 'circuits').mapping));
+      await expectMapping(lang);
+      await world.explorer.openStep(2);
+      await expect.poll(() => world.lesson.state.step).toBe(2);
+      await expectMapping(lang, line);
+    },
+  );
+
+  test.each([
+    [
+      'en',
+      'Streamlines: Inferior cerebellar peduncle · left, on MGH CDMD · sub_013 only; this template has none.',
+    ],
+    [
+      'fr',
+      'Trajectoires\u202f: Pédoncule cérébelleux inférieur · gauche, sur MGH CDMD · sub_013 seulement\u202f; ce gabarit n’en a pas.',
+    ],
+  ] as const)(
+    'on a brain without them, the lesson stays and names the dataset that has them (%s)',
+    async (lang, line) => {
+      await loadTemplateCopy();
+      mount(lang, true, ['pam50'], []);
+      await open('vestibular');
+      await userEvent.click(summary(t(lang, 'circuits').mapping));
+      await expectMapping(lang, line);
+    },
+  );
 });
 
 describe('related circuits', () => {

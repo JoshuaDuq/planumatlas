@@ -24,8 +24,9 @@ import {
 } from '../../lib/core/catalog/neuropsych-domains.ts';
 import { createClinicalCatalog } from '../../lib/core/clinical/catalog.ts';
 import type { ClinicalData } from '../../lib/core/clinical/types.ts';
+import { ownTractIds } from '../../lib/core/diffusion/catalogs.ts';
+import { createCircuitCatalog } from '../../lib/core/learning/catalog.ts';
 import type { CircuitData } from '../../lib/core/learning/catalog.ts';
-import { circuitCatalog } from '../../lib/core/learning/load.ts';
 import { parseVisualFieldTerritories } from '../../lib/core/learning/visual-field.ts';
 import type { ReaderFailure, ReaderState } from '../../lib/core/state/reader-state.ts';
 import { createSceneCommands } from '../../lib/core/state/scene-commands.ts';
@@ -54,8 +55,14 @@ export function deferred<T = void>() {
   return { promise, resolve, reject };
 }
 
-/** `lacking`: atlases whose regions the catalogs do without, as on the MNI template. */
-export function createWorld({ lacking = [] }: { lacking?: readonly string[] } = {}) {
+/**
+ * `lacking`: atlases whose regions the catalogs do without, as on the MNI template; `tracts`: the
+ * bundles the brain draws, CDMD's own unless given.
+ */
+export function createWorld({
+  lacking = [],
+  tracts = ownTractIds(manifest.anatomy.id),
+}: { lacking?: readonly string[]; tracts?: readonly string[] } = {}) {
   const regions = new Map(manifest.regions.map((region) => [region.id, region]));
   const domains: NeuropsychDomains = validateNeuropsychDomains(
     domainsFile as unknown as NeuropsychDomains,
@@ -85,7 +92,13 @@ export function createWorld({ lacking = [] }: { lacking?: readonly string[] } = 
     domains.units,
     complete,
   );
-  const circuits = circuitCatalog(circuitRecords as CircuitData, placed, clinical, complete);
+  const circuits = createCircuitCatalog(
+    circuitRecords as CircuitData,
+    placed,
+    clinical.search('', 'en').map((deficit) => deficit.id),
+    tracts,
+    complete,
+  );
   const lesson = createLessonStore(circuits);
   const view = createView({
     engine: engineSync,

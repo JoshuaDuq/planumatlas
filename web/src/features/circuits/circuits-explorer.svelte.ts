@@ -5,7 +5,9 @@
 import { tick } from 'svelte';
 import { createBusyRunner } from '../../lib/core/async/latest.ts';
 import type { RegionLabel } from '../../lib/core/catalog/labels.ts';
-import { t } from '../../lib/core/i18n/index.ts';
+import { TRACT_CATALOGS, tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
+import type { TractCatalog } from '../../lib/core/diffusion/catalogs.ts';
+import { t, templateCopy } from '../../lib/core/i18n/index.ts';
 import { failureNotice } from '../../lib/core/i18n/errors.ts';
 import type { CircuitCatalog } from '../../lib/core/learning/catalog.ts';
 import type { Excursions } from '../../lib/controller/excursion.svelte.ts';
@@ -43,6 +45,15 @@ export interface CircuitExplorerDeps {
 /** What the reader is told could not be done: `failureNotice`'s operation. */
 type Operation = 'landmark' | 'mri' | 'map' | 'bodyMap';
 export type Direction = 'previous' | 'next';
+
+/** The first of `catalogs` that publishes bundle `id`, and the bundle. */
+function bundleIn(id: string, catalogs: readonly TractCatalog[]) {
+  for (const catalog of catalogs) {
+    const bundle = catalog.bundles.find((candidate) => candidate.id === id);
+    if (bundle) return { catalog, bundle };
+  }
+  throw new Error(`Unknown tract bundle: ${id}`);
+}
 
 export function createCircuitExplorer(deps: CircuitExplorerDeps) {
   const { view, circuits, excursions } = deps;
@@ -178,6 +189,20 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
     /** The landmark's group, named under its title. */
     get group() {
       return step ? deps.labelOf(step.region).group : '';
+    },
+    /**
+     * The landmark's streamlines and their dataset, named as the Tracts tab names them; on a brain
+     * without them, the dataset that has them.
+     */
+    get streamlines(): string | null {
+      const { lang, anatomy } = view.current;
+      if (step?.tract) {
+        const { catalog, bundle } = bundleIn(step.tract, [tractCatalog(anatomy)]);
+        return t(lang, 'circuits').streamlines(bundle.name[lang], catalog.text[lang].dataset);
+      }
+      if (!step?.tractElsewhere) return null;
+      const { catalog, bundle } = bundleIn(step.tractElsewhere, TRACT_CATALOGS);
+      return templateCopy(lang).tractElsewhere(bundle.name[lang], catalog.text[lang].dataset);
     },
     /** The lessons through the selected region, outside the Circuits tab. */
     get related() {
