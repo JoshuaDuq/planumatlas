@@ -1,9 +1,10 @@
 // Which regions the stage names, and where: those the reader sees large enough to label, by how much of each
 // shows on the stage, largest first, up to 24, so zooming in names smaller ones and turning names what comes
-// into view; the selection wherever any of it shows (handoff F3). What shows is asked, not reckoned: a grid of
-// rays over the anatomy (`sightGrid`, `EngineModel.seenAt`) says which region, surface or cut face, the reader
-// sees at each cell, so a region behind another is not named and each dot stands in the middle of the widest
-// part of what shows. Under Lobes colour a cortical region is named by its lobe. A name already shown keeps
+// into view; the selection wherever any of it shows (handoff F3); then the structures a cut shows, from a
+// smaller face, before the gyri. What shows is asked, not reckoned: a grid of rays over the anatomy
+// (`sightGrid`, `EngineModel.seenAt`) says which region, surface or cut face, the reader sees at each cell, so
+// a region behind another is not named and each dot stands in the middle of the widest part of what shows.
+// Under Lobes colour a cortical region is named by its lobe. A name already shown keeps
 // its place while it is still in sight and not much smaller, so a small move renames nothing. A name is
 // written once: of two that read the same, as the two sides' frontal lobes do, the first is drawn; and no
 // two dots stand closer than 14 px.
@@ -15,6 +16,12 @@ export const MAX_NAMES = 24;
 export const NAMED_SIZE_PX = 40;
 /** A name already shown is kept until its region shows less than this: a zoom back and forth renames nothing. */
 export const KEPT_SIZE_PX = 30;
+/**
+ * A structure a cut shows is named once its face would fill a square this many pixels a side, before any
+ * other name but the selection: the nuclei are what a section is read for, and small beside the gyri.
+ */
+export const FACE_NAMED_SIZE_PX = 18;
+export const FACE_KEPT_SIZE_PX = 14;
 /** Two names' dots stand at least this far apart, so neither reads as the other's. */
 export const DOT_APART_PX = 14;
 /** The most cells a grid asks: a ray each, some 40 µs. */
@@ -112,8 +119,9 @@ interface Candidate {
   key: string;
   region: string | null;
   lobe: string | null;
-  /** The grid's cells that show it. */
+  /** The grid's cells that show it, and how many of those are a cut face. */
   cells: number[];
+  faceCells: number;
 }
 
 /**
@@ -176,9 +184,10 @@ export function chooseNames(sources: NameSources): Named[] {
   };
 
   const candidates = new Map<string, Candidate>();
-  const claim = (group: Omit<Candidate, 'cells'>, cell: number) => {
-    const candidate = candidates.get(group.key) ?? { ...group, cells: [] };
+  const claim = (group: Omit<Candidate, 'cells' | 'faceCells'>, cell: number, face: boolean) => {
+    const candidate = candidates.get(group.key) ?? { ...group, cells: [], faceCells: 0 };
     candidate.cells.push(cell);
+    if (face) candidate.faceCells += 1;
     candidates.set(group.key, candidate);
   };
   sight.seen.forEach((seen, cell) => {
@@ -187,30 +196,44 @@ export function chooseNames(sources: NameSources): Named[] {
     const region = regions.get(seen.id);
     if (!region) throw new Error(`Unknown region: ${seen.id}`);
     const group = groupOf(region);
-    claim(group, cell);
+    claim(group, cell, seen.face);
     // Under Lobes colour the selection is named as itself too.
     if (region.id === selected && group.key !== region.id) {
-      claim({ key: region.id, region: region.id, lobe: null }, cell);
+      claim({ key: region.id, region: region.id, lobe: null }, cell, seen.face);
     }
   });
   if (selected !== null && selectedAt && !candidates.has(selected)) {
-    candidates.set(selected, { key: selected, region: selected, lobe: null, cells: [] });
+    candidates.set(selected, {
+      key: selected,
+      region: selected,
+      lobe: null,
+      cells: [],
+      faceCells: 0,
+    });
   }
 
-  const sizeOf = ({ cells }: Candidate) => Math.sqrt(cells.length) * sight.cell;
   const ordered = [...candidates.values()]
-    .map((candidate) => ({
-      candidate,
-      size: sizeOf(candidate),
-      kept: kept.has(candidate.key),
-    }))
+    .map((candidate) => {
+      const isKept = kept.has(candidate.key);
+      const face = Math.sqrt(candidate.faceCells) * sight.cell;
+      return {
+        candidate,
+        size: Math.sqrt(candidate.cells.length) * sight.cell,
+        kept: isKept,
+        deep:
+          candidate.region !== null &&
+          regions.get(candidate.region)!.kind === 'structure' &&
+          face >= (isKept ? FACE_KEPT_SIZE_PX : FACE_NAMED_SIZE_PX),
+      };
+    })
     .filter(
-      ({ candidate, size, kept }) =>
-        size >= (kept ? KEPT_SIZE_PX : NAMED_SIZE_PX) || candidate.key === selected,
+      ({ candidate, size, kept, deep }) =>
+        deep || size >= (kept ? KEPT_SIZE_PX : NAMED_SIZE_PX) || candidate.key === selected,
     )
     .sort(
       (a, b) =>
         Number(b.candidate.key === selected) - Number(a.candidate.key === selected) ||
+        Number(b.deep) - Number(a.deep) ||
         Number(b.kept) - Number(a.kept) ||
         b.size - a.size ||
         a.candidate.key.localeCompare(b.candidate.key),

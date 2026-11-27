@@ -1,7 +1,7 @@
 // Which regions the stage names, and where: those a grid of rays shows large enough, largest first, at most
-// 24, the selection wherever it shows (handoff F3), lobes under Lobes colour, cut faces as themselves; each
-// dot in the middle of the widest part of what shows, a kept name where it stands; the grid itself; and when
-// names are drawn at all.
+// 24, the selection wherever it shows (handoff F3), lobes under Lobes colour, cut faces as themselves and
+// their structures first; each dot in the middle of the widest part of what shows, a kept name where it
+// stands; the grid itself; and when names are drawn at all.
 import { describe, expect, test, vi } from 'vitest';
 import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { lobeOf } from '../../lib/core/catalog/lobes.ts';
@@ -195,7 +195,6 @@ describe('chooseNames', () => {
     };
     expect(keys(shown(false))).toEqual(['cortex']);
     expect(shown(true)).toEqual([
-      expect.objectContaining({ key: 'cortex', face: false }),
       {
         key: 'deep',
         region: 'deep',
@@ -205,7 +204,39 @@ describe('chooseNames', () => {
         point: { x: 25, y: 25 },
         drawn: [25, 25, 0],
       },
+      expect.objectContaining({ key: 'cortex', face: false }),
     ]);
+  });
+
+  test('a structure a cut shows is named from an 18 px face, before larger regions and kept names', () => {
+    // 24 gyri of 40 px on the surface fill the names; `deep` shows to the right of them.
+    const gyri = Array.from({ length: MAX_NAMES }, (_, at) => region(`g${at}`));
+    const shown = (
+      width: number,
+      height: number,
+      { face = true, kind = 'structure' as Region['kind'], names = [] as Kept[] } = {},
+    ) => {
+      const { sight, paint } = stage(4 * MAX_NAMES + 3, 4);
+      gyri.forEach(({ id }, at) => paint(id, 4 * at, 0, 4, 4));
+      paint('deep', 4 * MAX_NAMES + 1, 0, width, height, face);
+      const regions = [...gyri, region('deep', { kind })];
+      return keys(chooseNames(sources(regions, sight, { kept: names }).input));
+    };
+    // Four cells of 10 px are a 20 px square's worth; three, 17 px, fall short.
+    expect(shown(2, 2)).toEqual([
+      'deep',
+      ...gyri
+        .map(({ id }) => id)
+        .sort()
+        .slice(0, -1),
+    ]);
+    expect(shown(1, 3)).not.toContain('deep');
+    // Kept, it stays from two cells, before the kept gyri.
+    expect(shown(1, 2, { names: [kept('g5'), kept('deep')] }).slice(0, 2)).toEqual(['deep', 'g5']);
+    expect(shown(1, 1, { names: [kept('deep')] })).not.toContain('deep');
+    // Its surface, or a gyrus on the face, waits its turn by size as anything else.
+    expect(shown(2, 2, { face: false })).not.toContain('deep');
+    expect(shown(2, 2, { kind: 'cortex' })).not.toContain('deep');
   });
 
   test('a region the anatomy does not hold throws', () => {
