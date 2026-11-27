@@ -135,8 +135,9 @@ const onScreen = new Vector3();
 /**
  * Whether each point a name stands on (where `seenAt` met its region) is still in sight: the first
  * thing a ray from the camera meets on its way there is that region, at the point or before it, or, while
- * the region is drawn, anything at the point itself: a point met on the edge two regions share can meet
- * the neighbour's triangle there. One ray each.
+ * the region is drawn, a surface at the point itself: a point met on the edge two regions share can meet
+ * the neighbour's triangle there. A cut face at the point names what it shows there, as a moved cut
+ * does at a name it carried. One ray each.
  */
 export function inSight(
   targets: readonly { id: string; point: Vec3 }[],
@@ -156,6 +157,7 @@ export function inSight(
     if (!hit || hit.distance > reach + FACING_SLACK_M) return false;
     if (hitRegion(hit, regions)?.id === id) return true;
     return (
+      hit.region === undefined &&
       hit.distance >= reach - FACING_SLACK_M &&
       meshes.some((mesh) => mesh.userData['region_id'] === id)
     );
