@@ -24,6 +24,11 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   **Subject**. Each stop opens the lists, points at one and makes a choice in it, so the change shows on the
   brain: HCP-MMP for the atlas, one colour per lobe, and FreeSurfer aseg inside the left hemisphere. A first
   visit's tour includes the Internal anatomy stop. These replace the stop that only named the top bar.
+- **Tracts** on CDMD draws the middle and inferior cerebellar peduncles, under a new **Cerebellar tracts**
+  class, and the anterior thalamic radiations, under **Projection tracts**, all tracked by TractSeg in the
+  subject's own scan. The MNI template draws the HCP1065 atlas's anterior thalamic radiations. Each passed
+  a test of where its streamlines end and run, set before it was tracked; the template's peduncles, and the
+  anterior commissure and fornix on both brains, did not and are not drawn.
 
 ### Changed
 

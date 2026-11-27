@@ -16,8 +16,9 @@ atlas:
   archive: data/cache/hcp1065/hcp1065_avg_tracts_trk.zip
   url: https://github.com/data-others/atlas/releases/download/hcp1065/hcp1065_avg_tracts_trk.zip
   sha256: 344aad4394f18b8926ed5e1bda911ad56e328c6cf75faa45e1302512ad779c67
-  # The atlas draws 252,405 streamlines over these bundles, four times CDMD's 64,109. Every
-  # fourth streamline of each source file is kept, which leaves each bundle's share of the whole.
+  # The atlas draws 253,421 streamlines over these bundles, four times the 64,109 of CDMD's
+  # RecoBundles bundles. Every fourth streamline of each source file is kept, which leaves each
+  # bundle's share of the whole.
   keep_every: 4
   # DSI Studio writes a voxel's centre at its index, TrackVis half a voxel further, so NiBabel
   # reads these files half a voxel off (LPS voxels: -0.5, -0.5, +0.5 mm in RAS). Measured
@@ -165,3 +166,15 @@ bundles:
     name: { en: Superior longitudinal fasciculus III · right, fr: Faisceau longitudinal supérieur III · droit }
     class: association
     sources: [association/SLF3_R]
+  # The atlas's anterior thalamic radiations; its cerebellar peduncles failed the gate CDMD's passed
+  # (2026-11-27): under 0.75 of their length lies in white matter.
+  - id: atr-left
+    file: mni152-hcp1065/atr.left.trk.gz
+    name: { en: Anterior thalamic radiation · left, fr: Radiation thalamique antérieure · gauche }
+    class: projection
+    sources: [projection/TR_A_L]
+  - id: atr-right
+    file: mni152-hcp1065/atr.right.trk.gz
+    name: { en: Anterior thalamic radiation · right, fr: Radiation thalamique antérieure · droite }
+    class: projection
+    sources: [projection/TR_A_R]

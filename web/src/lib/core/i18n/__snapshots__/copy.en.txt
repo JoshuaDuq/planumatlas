@@ -476,7 +476,8 @@
   "classes": {
    "association": "Association tracts",
    "projection": "Projection tracts",
-   "commissural": "Commissural tracts"
+   "commissural": "Commissural tracts",
+   "cerebellar": "Cerebellar tracts"
   },
   "whole": "Whole",
   "brainOpacity": "Brain outline opacity",

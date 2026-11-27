@@ -19,7 +19,7 @@ The lesion publishes no file. It reads, from `public/models/<anatomy>/` and `pub
 | `white-matter.volume` | FreeSurfer `wmparc` gyral white matter (within 5 mm of cortex) |
 | `neuropsych-domains.json` | Each function's group and its territory: HCP-MMP areas and aseg structures with mean consistency z ≥ 3 (`threshold_z` in `config/neuropsych-domains.yaml`) |
 | `data/neuropsychology.yaml` | Each deficit finding's laterality and cited regions (`mappings`) |
-| `*.trk.gz`, `surface-space.json` | RecoBundles and TractSeg streamlines (30 bundle files on CDMD, 29 counted), or, on the [MNI template](mni-template.md) (Montreal Neurological Institute), the HCP1065 atlas's (21, 20 counted), and the scanner-to-surface transform |
+| `*.trk.gz`, `surface-space.json` | RecoBundles and TractSeg streamlines (35 bundle files on CDMD, 33 counted), or, on the [MNI template](mni-template.md) (Montreal Neurological Institute), the HCP1065 atlas's (23, 22 counted), and the scanner-to-surface transform |
 | Visible cortical meshes | The footprint |
 
 Label grids are described in [sections and cuts](sections-and-cuts.md#data), and bundles in [tracts](tracts.md). CDMD and the MNI template both publish the nine atlases of the first row and `white-matter.volume`.
@@ -52,7 +52,7 @@ A territory's share is of the lesion volume that falls in any territory, not of 
 
 ### Streamlines
 
-Bundles are chosen by side: left when $c_x - r < 0$, right when $c_x + r > 0$, plus the seven callosal segments (bundles `callosum-1` to `callosum-7`, files `callosum_1.trk.gz` to `callosum_7.trk.gz`). The whole-callosum file is skipped. The MNI template's atlas has no callosal segments, so there only its 20 lateral bundles are counted and the callosum is not.
+Bundles are chosen by side: left when $c_x - r < 0$, right when $c_x + r > 0$, plus the seven callosal segments (bundles `callosum-1` to `callosum-7`, files `callosum_1.trk.gz` to `callosum_7.trk.gz`). The whole-callosum file is skipped, and so is the middle cerebellar peduncle (`mcp`), whose id names no side. The MNI template's atlas has no callosal segments, so there only its 22 lateral bundles are counted and the callosum is not.
 
 The centre is moved into scanner RAS through `surface-space.json`. A streamline is counted once when any of its points satisfies $\lVert \mathbf{p}-\mathbf{c}\rVert \le r$. A segment passing through the sphere between two outside points is not counted.
 

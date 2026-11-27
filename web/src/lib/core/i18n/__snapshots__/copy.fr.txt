@@ -476,7 +476,8 @@
   "classes": {
    "association": "Faisceaux d’association",
    "projection": "Faisceaux de projection",
-   "commissural": "Faisceaux commissuraux"
+   "commissural": "Faisceaux commissuraux",
+   "cerebellar": "Faisceaux cérébelleux"
   },
   "whole": "Entier",
   "brainOpacity": "Opacité du contour cérébral",

@@ -13,6 +13,7 @@ import {
   lengthSummary,
   settingsReadout,
   bundleName,
+  isWhole,
   tractGroups,
   tractRowName,
   tractRows,
@@ -55,8 +56,30 @@ test('numbered segments share a row named without the number', () => {
   assert.equal(tractRowName(row!, 'fr'), 'Corps calleux · segment source');
 });
 
-test('a bundle with neither side nor segment, or members that disagree, is an error', () => {
-  assert.throws(() => tractRows([bundle('fornix', 'Fornix')]), /neither a side nor a segment/);
+test('a bundle whose id names neither side nor segment is a whole tract under its own name', () => {
+  const [row] = tractRows([
+    bundle('mcp', 'Middle cerebellar peduncle', 'Pédoncule cérébelleux moyen', 'cerebellar'),
+  ]);
+  assert.equal(row!.key, 'mcp');
+  assert.equal(row!.sided, false);
+  assert.ok(isWhole(row!));
+  assert.equal(tractRowName(row!, 'en'), 'Middle cerebellar peduncle');
+  assert.equal(tractRowName(row!, 'fr'), 'Pédoncule cérébelleux moyen');
+});
+
+test('a qualified name without a side or segment in its id, or members that disagree, is an error', () => {
+  assert.throws(
+    () => tractRows([bundle('fornix', 'Fornix · left', 'Fornix · gauche')]),
+    /neither a side nor a segment/,
+  );
+  assert.throws(
+    () => tractRows([bundle('cc', 'Corpus callosum'), bundle('cc-1', 'Corpus callosum · whole')]),
+    /one bundle and shares its row/,
+  );
+  assert.throws(
+    () => tractRows([bundle('cc-1', 'Corpus callosum · whole'), bundle('cc', 'Corpus callosum')]),
+    /one bundle and shares its row/,
+  );
   const [row] = tractRows([bundle('x-left', 'One · left'), bundle('x-right', 'Other · right')]);
   assert.throws(() => tractRowName(row!, 'en'), /disagree/);
   assert.throws(
@@ -82,6 +105,7 @@ test('rows group by fibre class in anatomical order, keeping list order inside a
     bundle('cc-1', 'Corpus callosum · whole', 'Corps calleux · entier', 'commissural'),
     bundle('af-left', 'Arcuate · left'),
     bundle('cst-left', 'Corticospinal · left', 'Corticospinal · gauche', 'projection'),
+    bundle('mcp', 'Middle cerebellar peduncle', 'Pédoncule cérébelleux moyen', 'cerebellar'),
     bundle('uf-left', 'Uncinate · left'),
   ]);
   assert.deepEqual(
@@ -90,11 +114,12 @@ test('rows group by fibre class in anatomical order, keeping list order inside a
       ['association', ['af', 'uf']],
       ['projection', ['cst']],
       ['commissural', ['cc']],
+      ['cerebellar', ['mcp']],
     ],
   );
   assert.deepEqual(
     tractGroups(rows.filter((row) => row.fibreClass !== 'projection')).map((g) => g.fibreClass),
-    ['association', 'commissural'],
+    ['association', 'commissural', 'cerebellar'],
   );
 });
 
@@ -125,7 +150,7 @@ test('a segment’s name carries its anatomical part, and the search finds it', 
 });
 
 test('each published collection reads as one row per tract in both languages', () => {
-  const tracts: Record<string, number> = { 'cdmd-sub-013': 13, 'mni152-hcp1065': 11 };
+  const tracts: Record<string, number> = { 'cdmd-sub-013': 16, 'mni152-hcp1065': 12 };
   const { tract_catalogs: paths } = readRepoYaml<{ tract_catalogs: string[] }>('config/model.yaml');
   for (const path of paths) {
     const catalog = readRepoYaml<TractCatalog>(path);
@@ -139,7 +164,7 @@ test('each published collection reads as one row per tract in both languages', (
       for (const lang of ['en', 'fr'] as const) assert.ok(tractRowName(row, lang));
     }
   }
-  assert.equal(TRACT_CATALOGS[0]!.bundles.length, 30);
+  assert.equal(TRACT_CATALOGS[0]!.bundles.length, 35);
 });
 
 test('tract lengths read in the reader’s notation, and the settings readout names opacity and filter', () => {
@@ -216,9 +241,9 @@ test('a bundle with no length left after the filter exports blank metrics', () =
   assert.equal(csv.split('\n')[1], '"Arcuate · left",1234,0,250,,,');
 });
 
-test('TRACT-02: the 30 catalog bundles read as 13 rows whose names include the known tracts', () => {
+test('TRACT-02: the 35 catalog bundles read as 16 rows whose names include the known tracts', () => {
   const rows = tractRows(TRACT_CATALOGS[0]!.bundles);
-  assert.equal(rows.length, 13);
+  assert.equal(rows.length, 16);
   const names = rows.map((row) => tractRowName(row, 'en'));
   for (const name of [
     'Arcuate fasciculus',
@@ -226,14 +251,18 @@ test('TRACT-02: the 30 catalog bundles read as 13 rows whose names include the k
     'Cingulum',
     'Corpus callosum',
     'Corpus callosum \u00b7 TractSeg segment',
+    'Anterior thalamic radiation',
+    'Middle cerebellar peduncle',
+    'Inferior cerebellar peduncle',
   ])
     assert.ok(names.includes(name), name);
   assert.deepEqual(
-    tractGroups(rows).map(({ fibreClass, rows }) => [fibreClass, rows.length]),
+    tractGroups(rows).map(({ fibreClass, rows }) => [fibreClass, rows.map((row) => row.key)]),
     [
-      ['association', 10],
-      ['projection', 1],
-      ['commissural', 2],
+      ['association', ['af', 'cg', 'uf', 'ifof', 'ilf', 'mdlf', 'slf', 'slf1', 'slf2', 'slf3']],
+      ['projection', ['cst', 'atr']],
+      ['commissural', ['cc', 'callosum']],
+      ['cerebellar', ['mcp', 'icp']],
     ],
   );
   const segments = TRACT_CATALOGS[0]!.bundles.filter((bundle) => bundle.id.startsWith('callosum-'));
@@ -273,16 +302,16 @@ test('TRACT-19: the download is named planum-streamline-lengths.csv and typed te
   assert.equal(LENGTHS_CSV_TYPE, 'text/csv;charset=utf-8');
 });
 
-test('TRACT-19: a CSV of the 30 catalog bundles has a header, 30 rows in catalog order and a final newline', () => {
+test('TRACT-19: a CSV of the 35 catalog bundles has a header, 35 rows in catalog order and a final newline', () => {
   const bundles = TRACT_CATALOGS[0]!.bundles;
   const lines = buildLengthsCsv(
     bundles.map((b) => loaded({ id: b.id, name: b.name.en })),
     1,
   ).split('\n');
-  assert.equal(lines.length, 32);
-  assert.equal(lines[31], '');
+  assert.equal(lines.length, 37);
+  assert.equal(lines[36], '');
   assert.deepEqual(
-    lines.slice(1, 31).map((line) => line.split(',')[0]),
+    lines.slice(1, 36).map((line) => line.split(',')[0]),
     bundles.map((b) => `"${b.name.en}"`),
   );
 });

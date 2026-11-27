@@ -12,7 +12,7 @@ export interface TractMap {
 }
 
 /** The anatomical fibre classes, in the order the Tracts list shows them. */
-export const TRACT_CLASSES = ['association', 'projection', 'commissural'] as const;
+export const TRACT_CLASSES = ['association', 'projection', 'commissural', 'cerebellar'] as const;
 export type TractClass = (typeof TRACT_CLASSES)[number];
 
 export interface TractBundle {

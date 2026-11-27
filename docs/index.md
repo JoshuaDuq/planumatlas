@@ -49,7 +49,7 @@ Each figure is measured on CDMD `sub_013`, except where the template is named, a
 | A coordinate from an MNI template | Deep grey matter and the lateral ventricles overlap at Dice 0.80–0.92 and cortex at 0.72–0.74 across the two templates; a point carried there and back returns within 0.06 mm (median) | [Published coordinates](features/published-coordinates.md) |
 | A structure carried from the template | Its centre lands a median 1.2 mm from this brain's own (90th percentile 2.9 mm); a structure under 100 mm³ takes no values from registered maps | [Registration landing](features/registration-landing.md) |
 | A cortical parcel looked up from template space | Agrees with this brain's own parcellation for about 60% of cortex, a miss lying a median 2.2 mm away, so Coordinate reports shares of a 5 mm sphere | [Published coordinates](features/published-coordinates.md) |
-| Tracts | 95.1% of the streamline length of the subject's 17 RecoBundles bundles lies in its own white matter; 93.4% for the averaged atlas's 21 bundles on the template | [Tracts](features/tracts.md) |
+| Tracts | 95.1% of the streamline length of the subject's 17 RecoBundles bundles lies in its own white matter; 93.4% for the averaged atlas's 23 bundles on the template | [Tracts](features/tracts.md) |
 
 (methods)=
 ## Methods by feature

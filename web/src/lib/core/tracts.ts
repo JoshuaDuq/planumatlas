@@ -15,13 +15,18 @@ export interface TractRow {
   members: { bundle: TractBundle; part: string }[];
 }
 
-/** One row per tract: a bundle's left and right files pair up, numbered segments share a row. */
+/**
+ * One row per tract: a bundle's left and right files pair up, numbered segments share a row, and a
+ * bundle whose id names neither (`mcp`) is a tract of its own, named without a qualifier.
+ */
 export function tractRows(bundles: readonly TractBundle[]): TractRow[] {
   const rows = new Map<string, TractRow>();
   for (const bundle of bundles) {
     const match = bundle.id.match(/^(.+)-(left|right|\d+)$/);
-    if (!match) throw new Error(`Tract bundle ${bundle.id} names neither a side nor a segment.`);
-    const [, key, part] = match as unknown as [string, string, string];
+    const [key, part] = match ? [match[1]!, match[2]!] : [bundle.id, ''];
+    if (!part && Object.values(bundle.name).some((name) => name.includes(' · '))) {
+      throw new Error(`Tract bundle ${bundle.id} names neither a side nor a segment.`);
+    }
     if (!TRACT_CLASSES.includes(bundle.class)) {
       throw new Error(`Tract bundle ${bundle.id} has no known fibre class.`);
     }
@@ -29,6 +34,8 @@ export function tractRows(bundles: readonly TractBundle[]): TractRow[] {
     if (!row) {
       row = { key, sided: SIDES.includes(part), fibreClass: bundle.class, members: [] };
       rows.set(key, row);
+    } else if (!part || !row.members[0]!.part) {
+      throw new Error(`Tract ${key} is one bundle and shares its row.`);
     }
     if (row.sided !== SIDES.includes(part)) {
       throw new Error(`Tract ${key} mixes sides and segments.`);
@@ -57,11 +64,12 @@ export const isWhole = (row: TractRow) => !row.sided && row.members.length === 1
 
 /**
  * What the members' names share: the tract before " · side" (or " · whole"), or before the
- * segment number.
+ * segment number; a tract of one bundle without a side or segment is that bundle's name.
  */
 export function tractRowName(row: TractRow, lang: Language): string {
-  const stems = row.members.map(({ bundle }) => {
+  const stems = row.members.map(({ bundle, part }) => {
     const name = bundle.name[lang];
+    if (!part) return name;
     const cut = name.lastIndexOf(' · ');
     if (cut < 0) throw new Error(`Tract name "${name}" has no qualifier.`);
     return row.sided || isWhole(row) ? name.slice(0, cut) : name.replace(/\s*\d+$/, '');

@@ -1300,6 +1300,88 @@
           0.051
         ]
       ]
+    },
+    "mcp": {
+      "ends": 4000,
+      "regions": []
+    },
+    "icp-left": {
+      "ends": 4000,
+      "regions": []
+    },
+    "icp-right": {
+      "ends": 4000,
+      "regions": []
+    },
+    "atr-left": {
+      "ends": 4000,
+      "regions": [
+        [
+          "destrieux:left:15",
+          0.184
+        ],
+        [
+          "destrieux:left:14",
+          0.139
+        ],
+        [
+          "destrieux:left:53",
+          0.124
+        ],
+        [
+          "destrieux:left:24",
+          0.096
+        ],
+        [
+          "destrieux:left:63",
+          0.07
+        ],
+        [
+          "destrieux:left:13",
+          0.061
+        ]
+      ]
+    },
+    "atr-right": {
+      "ends": 4000,
+      "regions": [
+        [
+          "destrieux:right:24",
+          0.134
+        ],
+        [
+          "destrieux:right:53",
+          0.12
+        ],
+        [
+          "destrieux:right:63",
+          0.114
+        ],
+        [
+          "destrieux:right:15",
+          0.108
+        ],
+        [
+          "destrieux:right:14",
+          0.102
+        ],
+        [
+          "destrieux:right:54",
+          0.086
+        ],
+        [
+          "destrieux:right:39",
+          0.061
+        ],
+        [
+          "destrieux:right:1",
+          0.06
+        ],
+        [
+          "destrieux:right:13",
+          0.058
+        ]
+      ]
     }
   }
 }

@@ -43,7 +43,7 @@
   },
   "processing": "A population-averaged atlas built from the diffusion scans of 1,065 people, not tracked on this brain. Every 4th streamline of each atlas file kept, by its position in the file; its points moved by [-0.5, -0.5, 0.5] mm (the files write a voxel's centre at its index, which NiBabel reads half a voxel off) and multiplied by 0.9, the template's scale, with no registration; the runs of points at its ends outside the brain volume (ribbon.mgz, or aseg tissue other than [3, 42, 24]; nearest voxel) dropped, a streamline with fewer than two points inside left out; and resampled to 0.5 mm arc-length steps by linear interpolation.",
   "white_matter_share": {
-    "published_length": 0.9341276577922853,
+    "published_length": 0.9341409301805953,
     "minimum": 0.9
   },
   "spatial_validation": "The template T1's shape and affine agree with every TRK header at absolute tolerance 1e-5.",
@@ -1600,6 +1600,154 @@
           "mean_mm": 100.15688650615505,
           "min_mm": 100.15688650615505,
           "max_mm": 100.15688650615505
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "atr.left.trk.gz",
+      "sources": {
+        "projection/TR_A_L": 602
+      },
+      "streamlines_kept": 151,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "fa71e4cad3ec1bc0fa9f0857b206b5ca16f425f329474b25d31745f5218f71cc",
+      "published_sha256": "9859497f881831d0192189a3b7f40b82c6a62f8b7e9669477ebb5a7f49e4daac",
+      "published_bytes": 209865,
+      "white_matter_share": 0.9325925925925926,
+      "end_trimming": {
+        "points_removed": 52,
+        "streamlines_trimmed": 13
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 7,
+          "median": 0.05828942267053635,
+          "max": 0.15200145690516279
+        }
+      },
+      "streamlines": 151,
+      "points": 20250,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -28.518749237060547,
+            51.243743896484375,
+            11.137496948242188
+          ]
+        },
+        {
+          "index": 10125,
+          "position": [
+            -12.845428466796875,
+            15.028915405273438,
+            0.45513153076171875
+          ]
+        },
+        {
+          "index": 20249,
+          "position": [
+            -8.4375,
+            -8.578125,
+            8.550003051757812
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 151,
+          "mean_mm": 66.4801712332618,
+          "min_mm": 48.59219094362119,
+          "max_mm": 94.49308641129738
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "atr.right.trk.gz",
+      "sources": {
+        "projection/TR_A_R": 414
+      },
+      "streamlines_kept": 104,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "001bceedca07abb220c4f11e594696f50902cdd7b8d48f13a12733706f8ccc5a",
+      "published_sha256": "82980f9881b09fab6b01756bacae8c9a3e9a7e2cb3a172a56354b1422b2aa1bd",
+      "published_bytes": 144892,
+      "white_matter_share": 0.9495072132552492,
+      "end_trimming": {
+        "points_removed": 52,
+        "streamlines_trimmed": 11
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 5,
+          "median": 0.10022666380066127,
+          "max": 0.13418523874443802
+        }
+      },
+      "streamlines": 104,
+      "points": 14002,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            23.118751525878906,
+            44.296875,
+            -3.9937515258789062
+          ]
+        },
+        {
+          "index": 7001,
+          "position": [
+            11.318466186523438,
+            6.320770263671875,
+            2.1044845581054688
+          ]
+        },
+        {
+          "index": 14001,
+          "position": [
+            9.5625,
+            -9.224998474121094,
+            0.6750030517578125
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 104,
+          "mean_mm": 66.75514113892362,
+          "min_mm": 49.493900723901675,
+          "max_mm": 86.41682303178351
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
         },
         {
           "minimum_mm": 200,

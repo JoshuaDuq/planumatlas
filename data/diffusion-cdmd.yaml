@@ -5,8 +5,9 @@ name:
 source: https://doi.org/10.6084/m9.figshare.c.5315474.v1
 license: CC0-1.0
 # Tracked here from the subject's own diffusion scan: RecoBundles tracts by
-# scripts/cdmd_pilot.py; SLF I–III, the callosal segments and FA by
-# scripts/tractseg_cdmd.py; all packaged by scripts/prepare_diffusion_cdmd.py.
+# scripts/cdmd_pilot.py; SLF I–III, the callosal segments, the cerebellar
+# peduncles, the anterior thalamic radiations and FA by scripts/tractseg_cdmd.py;
+# all packaged by scripts/prepare_diffusion_cdmd.py.
 provenance: cdmd-sub-013/provenance.json
 anatomy: cdmd
 reference_space: cdmd-sub-013/surface-space.json
@@ -185,3 +186,25 @@ bundles:
     name: { en: Corpus callosum · TractSeg segment 7, fr: Corps calleux · segment TractSeg 7 }
     class: commissural
     segment: { en: splenium, fr: splénium }
+# TractSeg's cerebellar peduncles and anterior thalamic radiations, added 2026-11-27 once
+# each had passed a gate set before they were tracked (docs/features/tracts.md).
+  - id: mcp
+    file: cdmd-sub-013/mcp.trk.gz
+    name: { en: Middle cerebellar peduncle, fr: Pédoncule cérébelleux moyen }
+    class: cerebellar
+  - id: icp-left
+    file: cdmd-sub-013/icp.left.trk.gz
+    name: { en: Inferior cerebellar peduncle · left, fr: Pédoncule cérébelleux inférieur · gauche }
+    class: cerebellar
+  - id: icp-right
+    file: cdmd-sub-013/icp.right.trk.gz
+    name: { en: Inferior cerebellar peduncle · right, fr: Pédoncule cérébelleux inférieur · droit }
+    class: cerebellar
+  - id: atr-left
+    file: cdmd-sub-013/atr.left.trk.gz
+    name: { en: Anterior thalamic radiation · left, fr: Radiation thalamique antérieure · gauche }
+    class: projection
+  - id: atr-right
+    file: cdmd-sub-013/atr.right.trk.gz
+    name: { en: Anterior thalamic radiation · right, fr: Radiation thalamique antérieure · droite }
+    class: projection

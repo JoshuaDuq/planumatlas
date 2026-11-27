@@ -1,4 +1,4 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transformWithOxc, type Plugin, type ResolvedConfig } from 'vite';
@@ -89,23 +89,15 @@ export function publishedAssets(): Plugin {
       const index = JSON.parse(
         readFileSync(resolve(publicDirectory, 'models/anatomies.json'), 'utf8'),
       ) as { default: string; anatomies?: { id: string }[] };
-      // A tract dataset's reference space names the anatomy it is drawn on.
-      const tracts = readdirSync(resolve(publicDirectory, 'diffusion'), { withFileTypes: true })
-        .filter((entry) => entry.isDirectory())
-        .map(({ name }) => `diffusion/${name}/`)
-        .filter((prefix) => {
-          const space = JSON.parse(
-            readFileSync(resolve(publicDirectory, prefix, 'surface-space.json'), 'utf8'),
-          ) as { anatomy: string };
-          return space.anatomy !== index.default;
-        });
       const others = (index.anatomies ?? [])
         .map(({ id }) => `models/${id}/`)
-        .filter((prefix) => prefix !== `models/${index.default}/`)
-        .concat(tracts);
-      // No first visit draws another atlas's borders, so those files stay off the entry too.
+        .filter((prefix) => prefix !== `models/${index.default}/`);
+      // No first visit draws tracts, the default anatomy's included, or another atlas's borders,
+      // so those files stay off the entry too.
       const elsewhere = (path: string) =>
-        others.some((prefix) => path.startsWith(prefix)) || /\/borders-[^/]+\.field$/.test(path);
+        others.some((prefix) => path.startsWith(prefix)) ||
+        path.startsWith('diffusion/') ||
+        /\/borders-[^/]+\.field$/.test(path);
       // The app derives each version from the sha256 (`versionOf`), so neither map carries it.
       const files = Object.fromEntries(
         Object.entries(published)

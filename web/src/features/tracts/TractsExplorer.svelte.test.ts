@@ -115,7 +115,7 @@ describe('the list', () => {
   test('one group per tract, one checkbox per bundle, each named in full', async () => {
     await ready();
     const groups = document.querySelectorAll('section [role="group"]');
-    expect(groups).toHaveLength(13);
+    expect(groups).toHaveLength(16);
     const boxes = [
       ...document.querySelectorAll<HTMLInputElement>('section input[type="checkbox"]'),
     ];
@@ -130,6 +130,9 @@ describe('the list', () => {
     const splenium = el('Corpus callosum · TractSeg segment 7 · splenium');
     expect(splenium.dataset.tooltip).toBe('Corpus callosum · TractSeg segment 7 · splenium');
     expect(splenium.parentElement!.textContent!.trim()).toBe('7');
+    // A tract of one bundle with neither side nor segment is a row of its own with a "Whole" key.
+    await expect.element(group('Middle cerebellar peduncle')).toBeVisible();
+    expect(el('Middle cerebellar peduncle').parentElement!.textContent!.trim()).toBe('Whole');
   });
 
   test('tracts are grouped under their fibre class, in anatomical order', async () => {
@@ -139,8 +142,9 @@ describe('the list', () => {
     );
     expect(captions).toEqual([
       'Association tracts, 20',
-      'Projection tracts, 2',
+      'Projection tracts, 4',
       'Commissural tracts, 8',
+      'Cerebellar tracts, 3',
     ]);
     const rows = (fibreClass: string) =>
       [
@@ -148,8 +152,12 @@ describe('the list', () => {
           `[aria-labelledby="native-tract-class-${fibreClass}"] section .name`,
         ),
       ].map((n) => n.textContent);
-    expect(rows('projection')).toEqual(['Corticospinal tract']);
+    expect(rows('projection')).toEqual(['Corticospinal tract', 'Anterior thalamic radiation']);
     expect(rows('commissural')).toEqual(['Corpus callosum', 'Corpus callosum · TractSeg segment']);
+    expect(rows('cerebellar')).toEqual([
+      'Middle cerebellar peduncle',
+      'Inferior cerebellar peduncle',
+    ]);
     expect(rows('association').slice(-4)).toEqual([
       'Superior longitudinal fasciculus',
       'Superior longitudinal fasciculus I',
@@ -325,7 +333,7 @@ describe('the search', () => {
     expect(document.querySelectorAll('section:not([hidden])')).toHaveLength(1);
     await expect.element(group('Cingulum')).toBeVisible();
     await search().fill('');
-    expect(document.querySelectorAll('section:not([hidden])')).toHaveLength(13);
+    expect(document.querySelectorAll('section:not([hidden])')).toHaveLength(16);
   });
 
   test('each class caption counts the bundles kept, and a class with none is hidden', async () => {
@@ -362,7 +370,15 @@ describe('the search', () => {
     await search().fill('ARQUE');
     expect(document.querySelectorAll('section:not([hidden])')).toHaveLength(1);
     await search().fill('gauche');
-    expect(document.querySelectorAll('section:not([hidden])')).toHaveLength(11);
+    expect(document.querySelectorAll('section:not([hidden])')).toHaveLength(13);
+    await search().fill('pedoncule');
+    await expect
+      .poll(() =>
+        [...document.querySelectorAll<HTMLElement>('#native-tract-bundles h4')]
+          .filter((heading) => heading.checkVisibility())
+          .map((heading) => heading.textContent),
+      )
+      .toEqual(['Faisceaux cérébelleux, 3']);
   });
 
   test('Escape with text clears it and keeps focus in the field; on an empty field it bubbles', async () => {

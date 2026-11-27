@@ -1,4 +1,5 @@
-"""TractSeg's SLF I–III and callosal segments, and a tensor FA map, for MGH CDMD sub_013.
+"""TractSeg's SLF I–III, callosal segments, cerebellar peduncles and anterior thalamic
+radiations, and a tensor FA map, for MGH CDMD sub_013.
 
 Follows TractSeg's own `csd_msmt` recipe (README, "Use existing peaks") with
 MRtrix3: Dhollander responses, multi-shell multi-tissue CSD and `sh2peaks`, on
@@ -15,7 +16,12 @@ frame of CDMD's other tracts. The FA map is resampled onto the T1 grid the same
 way, trilinearly. Outputs go to <pilot>/derived/, where
 scripts/prepare_diffusion_cdmd.py packages them.
 
+`--add` tracks the named bundles from the peaks, TOM and alignment a full run left
+in <pilot>, leaves every bundle tracked before as it is, and records them in
+tractseg.json as a further tracking run.
+
     uv run python scripts/tractseg_cdmd.py /Volumes/KINGSTON/neuroatlas/cdmd-pilot
+    uv run python scripts/tractseg_cdmd.py /Volumes/KINGSTON/neuroatlas/cdmd-pilot --add MCP ICP_left ...
 """
 
 import argparse
@@ -69,6 +75,9 @@ BUNDLES = {
     **{f"SLF_{numeral}_{side}": f"slf{index}.{side}"
        for index, numeral in enumerate(("I", "II", "III"), 1) for side in ("left", "right")},
     **{f"CC_{index}": f"callosum_{index}" for index in range(1, 8)},
+    # Added by --add on 2026-11-27, after passing a gate set before they were tracked.
+    "MCP": "mcp",
+    **{f"{bundle}_{side}": f"{bundle.lower()}.{side}" for bundle in ("ICP", "ATR") for side in ("left", "right")},
 }
 # TractSeg's Tracking passes its worker state through module globals, which
 # only reach the workers under the fork start method; macOS defaults to spawn.
@@ -146,8 +155,12 @@ def tractseg(work):
     for output in ("tract_segmentation", "endings_segmentation", "TOM"):
         run(VENV / "TractSeg", "-i", "peaks.nii.gz", "-o", "tractseg", "--output_type", output,
             "--nr_cpus", "6", cwd=work)
+    track(work, list(BUNDLES))
+
+
+def track(work, bundles):
     run(VENV / "python", "-c", TRACK, SEED, VENV / "Tracking", "-i", "peaks.nii.gz", "-o", "tractseg",
-        "--nr_cpus", "6", "--tracking_format", "trk", "--bundles", ",".join(BUNDLES), cwd=work)
+        "--nr_cpus", "6", "--tracking_format", "trk", "--bundles", ",".join(bundles), cwd=work)
 
 
 def mni_to_t1(work, derived):
@@ -171,10 +184,11 @@ def check_alignment(work, mni_to_dwi):
     return mean
 
 
-def write_bundles(work, derived, t1, transform):
+def write_bundles(work, derived, t1, transform, bundles):
     out = derived / "bundles"
     counts = {}
-    for name, filename in BUNDLES.items():
+    for name in bundles:
+        filename = BUNDLES[name]
         source = nib.streamlines.load(work / "tractseg/TOM_trackings" / f"{name}.trk")
         lines = [apply_affine(transform, line).astype(np.float32) for line in source.streamlines]
         tractogram = nib.streamlines.Tractogram(lines, affine_to_rasmm=np.eye(4))
@@ -201,15 +215,41 @@ def write_fa(work, derived, t1, to_t1):
     nib.save(image, derived / "fa_t1.nii.gz")
 
 
+def add(pilot, names):
+    """Tracks `names` from the peaks, TOM and alignment of the run tractseg.json records."""
+    work, derived = pilot / "tractseg", pilot / "derived"
+    record = json.loads((derived / "tractseg.json").read_text())
+    tracked = record["tractseg"]["bundles"]
+    if again := [name for name in names if name in tracked]:
+        raise SystemExit(f"Already tracked: {', '.join(again)}")
+    to_dwi, to_t1 = mni_to_t1(work, derived)
+    if not np.array_equal(to_dwi, record["mni_alignment"]["mni_to_dwi_world"]):
+        raise SystemExit("fa_to_mni.txt is not the alignment tractseg.json records")
+    track(work, names)
+    t1 = nib.load(pilot / "source/sub_013/anat/sub_013_t1w.nii.gz")
+    counts = write_bundles(work, derived, t1, to_t1 @ to_dwi, names)
+    # The first run's record predates the list: its bundles were tracked in one run.
+    record["tractseg"].setdefault("tracking_runs", [list(tracked)]).append(names)
+    record["tractseg"]["bundles"] = {name: BUNDLES[name] for name in [*tracked, *names]}
+    record["tractseg"]["streamlines"].update(counts)
+    (derived / "tractseg.json").write_text(json.dumps(record, indent=2) + "\n")
+    print(f"{sum(counts.values())} streamlines in {len(counts)} added bundles")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("pilot", type=Path, help="scripts/cdmd_pilot.py's work directory")
+    parser.add_argument("--add", nargs="+", choices=BUNDLES, metavar="BUNDLE",
+                        help="track only these TractSeg bundles and add them to tractseg.json")
     args = parser.parse_args()
     source, derived = args.pilot / "source", args.pilot / "derived"
     for relative, digest in INPUTS.items():
         if sha256(source / relative) != digest:
             raise SystemExit(f"CDMD input checksum mismatch: {relative}")
     verify_runtime()
+    if args.add:
+        add(args.pilot, args.add)
+        return
     work = args.pilot / "tractseg"
     work.mkdir(exist_ok=True)
     shells = select_shells(source, work)
@@ -218,7 +258,7 @@ def main():
     to_dwi, to_t1 = mni_to_t1(work, derived)
     alignment = check_alignment(work, to_dwi)
     t1 = nib.load(source / "sub_013/anat/sub_013_t1w.nii.gz")
-    counts = write_bundles(work, derived, t1, to_t1 @ to_dwi)
+    counts = write_bundles(work, derived, t1, to_t1 @ to_dwi, list(BUNDLES))
     write_fa(work, derived, t1, to_t1)
     record = {
         "procedure": "scripts/tractseg_cdmd.py",
@@ -233,7 +273,8 @@ def main():
         },
         "tractseg": {"version": TRACTSEG_VERSION, "outputs": ["tract_segmentation", "endings_segmentation", "TOM"],
                      "tracking": "TractSeg probabilistic TOM tracking, 2,000 streamlines per bundle",
-                     "numpy_seed": SEED, "weights_sha256": WEIGHTS, "bundles": BUNDLES, "streamlines": counts},
+                     "numpy_seed": SEED, "weights_sha256": WEIGHTS, "bundles": BUNDLES, "streamlines": counts,
+                     "tracking_runs": [list(BUNDLES)]},
         "mrtrix": {key: MRTRIX[key] for key in ("url", "sha256")},
         "fa": {"tensor_shells": FA_SHELLS, "resampling": "trilinear onto the T1 grid through dwi_to_t1_world"},
         "runtime_workarounds": {

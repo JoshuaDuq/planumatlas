@@ -50,7 +50,8 @@ export const versionOf = (record: PublishedRecord): string => record.sha256.slic
 
 /**
  * Adds the published files kept off the first visit's map: the anatomies other than the default,
- * before one of them is opened, and every anatomy's atlas borders, before one is drawn.
+ * before one of them is opened, every tract dataset, before its files are read, and every
+ * anatomy's atlas borders, before one is drawn.
  */
 export async function loadOtherAnatomyFiles(): Promise<void> {
   if (!PUBLISHED.files) return;

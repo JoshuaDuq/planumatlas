@@ -162,7 +162,7 @@ describe('the dev server watcher', () => {
       const elsewhere = JSON.parse(
         (hook(plugin, 'load')(elsewhereModule) as string).replace(/^export default |;$/g, ''),
       ) as Record<string, unknown>;
-      expect(Object.keys(elsewhere)).toEqual([path]);
+      expect(Object.keys(elsewhere).sort()).toEqual([FIXTURE_GZ.path, path].sort());
       expect(loadedFiles(plugin)).not.toHaveProperty(path);
     } finally {
       rmSync(resolve(fixture, path), { force: true });
@@ -180,7 +180,7 @@ describe('the dev server watcher', () => {
       const elsewhere = JSON.parse(
         (hook(plugin, 'load')(elsewhereModule) as string).replace(/^export default |;$/g, ''),
       ) as Record<string, unknown>;
-      expect(Object.keys(elsewhere)).toEqual([path]);
+      expect(Object.keys(elsewhere).sort()).toEqual([FIXTURE_GZ.path, path].sort());
       expect(elsewhere[path]).not.toHaveProperty('version');
       expect(loadedFiles(plugin)).not.toHaveProperty(path);
       expect(loadedFiles(plugin)).toHaveProperty('models/bert/manifest.json');
@@ -189,8 +189,7 @@ describe('the dev server watcher', () => {
     }
   });
 
-  it('BUILD-16 leaves the tracts drawn on another anatomy to that chunk too', () => {
-    // public/diffusion/mni152-hcp1065's reference space names mni152, which is not the default.
+  it('BUILD-16 leaves every tract dataset to that chunk too, the default anatomy’s included', () => {
     const path = 'diffusion/mni152-hcp1065/af.left.trk.gz';
     mkdirSync(resolve(fixture, 'diffusion/mni152-hcp1065'), { recursive: true });
     copyFileSync(resolve(fixture, FIXTURE_GZ.path), resolve(fixture, path));
@@ -200,10 +199,11 @@ describe('the dev server watcher', () => {
       const elsewhere = JSON.parse(
         (hook(plugin, 'load')(elsewhereModule) as string).replace(/^export default |;$/g, ''),
       ) as Record<string, unknown>;
-      expect(Object.keys(elsewhere)).toEqual([path]);
+      expect(Object.keys(elsewhere).sort()).toEqual([FIXTURE_GZ.path, path].sort());
       expect(loadedFiles(plugin)).not.toHaveProperty(path);
-      // A dataset drawn on the default anatomy stays with the entry.
-      expect(loadedFiles(plugin)).toHaveProperty(FIXTURE_GZ.path);
+      // No first visit draws tracts, so a dataset drawn on the default anatomy leaves the entry too.
+      expect(loadedFiles(plugin)).not.toHaveProperty(FIXTURE_GZ.path);
+      expect(loadedFiles(plugin)).toHaveProperty('models/bert/manifest.json');
     } finally {
       rmSync(resolve(fixture, 'diffusion/mni152-hcp1065'), { recursive: true, force: true });
     }

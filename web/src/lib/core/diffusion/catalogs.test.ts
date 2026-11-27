@@ -18,7 +18,7 @@ const catalogs = paths.map((path) => readRepoYaml<TractCatalog>(path));
 // The legacy test read catalogs.js as text to compare its imports with config/model.yaml;
 // the behavioural equivalent is that the catalogs it serves are exactly the files named there.
 test('the viewer holds the default anatomy’s catalog, and each other one once its brain is opened', async () => {
-  // First visit: CDMD's alone, so the template's 21 bundles stay off the entry (BUILD-15).
+  // First visit: CDMD's alone, so the template's 23 bundles stay off the entry (BUILD-15).
   assert.deepEqual(TRACT_CATALOGS, [catalogs[0]]);
   assert.equal(tractCatalog('mni152'), TRACT_CATALOGS[0]);
   assert.deepEqual(ownTractIds('mni152'), []);
@@ -32,7 +32,7 @@ test('the viewer holds the default anatomy’s catalog, and each other one once 
   await loadTractCatalog('mni152');
   assert.equal(TRACT_CATALOGS.length, catalogs.length);
   assert.equal(tractCatalog('mni152').id, 'mni152-hcp1065');
-  assert.equal(ownTractIds('mni152').length, 21);
+  assert.equal(ownTractIds('mni152').length, 23);
 });
 
 test('each catalog belongs to one published anatomy and carries the same dataset copy', () => {
@@ -57,7 +57,7 @@ test('an anatomy with tracts of its own gets them, any other the CDMD reference'
   assert.equal(tractCatalog('aomic'), TRACT_CATALOGS[0]);
 });
 
-test('CAT-61 · the CDMD tract catalog: its subject, maps, 30 bundles with two initial, overlay and copy keys', () => {
+test('CAT-61 · the CDMD tract catalog: its subject, maps, 35 bundles with two initial, overlay and copy keys', () => {
   const [cdmd] = TRACT_CATALOGS;
   assert.deepEqual(paths, ['data/diffusion-cdmd.yaml', 'data/diffusion-mni152.yaml']);
   assert.equal(cdmd.id, 'cdmd-sub-013');
@@ -67,7 +67,7 @@ test('CAT-61 · the CDMD tract catalog: its subject, maps, 30 bundles with two i
     cdmd.maps.map((map) => map.id),
     ['t1', 'fa'],
   );
-  assert.equal(cdmd.bundles.length, 30);
+  assert.equal(cdmd.bundles.length, 35);
   assert.deepEqual(
     cdmd.bundles.filter((bundle) => bundle.initial).map((bundle) => bundle.id),
     ['af-left', 'cst-right'],
@@ -101,7 +101,7 @@ test('the template’s catalog is an averaged atlas whose bundles are CDMD’s b
   assert.deepEqual(template.maps, []);
   assert.equal(template.atlas!.keep_every, 4);
   assert.deepEqual(template.atlas!.voxel_centre_correction_mm, [-0.5, -0.5, 0.5]);
-  assert.equal(template.bundles.length, 21);
+  assert.equal(template.bundles.length, 23);
   assert.deepEqual(
     template.bundles.filter((bundle) => bundle.initial).map((bundle) => bundle.id),
     cdmd.bundles.filter((bundle) => bundle.initial).map((bundle) => bundle.id),
@@ -117,4 +117,24 @@ test('the template’s catalog is an averaged atlas whose bundles are CDMD’s b
   // Each atlas file goes to one bundle: no streamline is published twice.
   const files = template.bundles.flatMap((bundle) => bundle.sources!);
   assert.equal(new Set(files).size, files.length);
+});
+
+test('TRACT-55 · the bundles that passed the 2026-11-27 gate: peduncles and radiations on CDMD, radiations alone on the template', () => {
+  const [cdmd, template] = catalogs as [TractCatalog, TractCatalog];
+  const gated = (catalog: TractCatalog) =>
+    catalog.bundles
+      .filter((bundle) => /^(mcp|icp|atr|ac|fx|fornix)(-|$)/.test(bundle.id))
+      .map((bundle) => [bundle.id, bundle.class, bundle.sources]);
+  assert.deepEqual(gated(cdmd), [
+    ['mcp', 'cerebellar', undefined],
+    ['icp-left', 'cerebellar', undefined],
+    ['icp-right', 'cerebellar', undefined],
+    ['atr-left', 'projection', undefined],
+    ['atr-right', 'projection', undefined],
+  ]);
+  // HCP1065's peduncles failed the gate on the template; its radiations passed.
+  assert.deepEqual(gated(template), [
+    ['atr-left', 'projection', ['projection/TR_A_L']],
+    ['atr-right', 'projection', ['projection/TR_A_R']],
+  ]);
 });

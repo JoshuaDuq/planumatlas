@@ -58,7 +58,7 @@ const catalogs = paths.map((path) => {
 const T1_SOURCE = readRepoYaml<{
   anatomies: Record<string, { reconstruction: { input: string } }>;
 }>('config/model.yaml').anatomies.cdmd!.reconstruction.input;
-const BUNDLES: Record<string, number> = { 'cdmd-sub-013': 30, 'mni152-hcp1065': 21 };
+const BUNDLES: Record<string, number> = { 'cdmd-sub-013': 35, 'mni152-hcp1065': 23 };
 const digest = (buffer: Uint8Array) => createHash('sha256').update(buffer).digest('hex');
 const arrayBuffer = (buffer: Uint8Array) =>
   buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;

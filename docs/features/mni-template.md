@@ -1,6 +1,6 @@
 # MNI template
 
-The **Subject** choice offers a second brain beside sub_013 of the MGH Connectome Diffusion Microstructure Dataset (CDMD): the ICBM 152 2009c nonlinear asymmetric template of the Montreal Neurological Institute (MNI; MNI152NLin2009cAsym), an average of 152 young adults' magnetic resonance imaging (MRI) scans (Fig. 1). Its header was scaled by 0.90, which brings it to the mean brain size of the CDMD adults, and it was reconstructed and segmented the way CDMD was. It carries the same five cortical atlases, FreeSurfer's automatic subcortical segmentation (aseg), NextBrain, the teaching set and CerebNet's 25 cerebellar lobules, and its **Tracts** tab draws 21 bundles of an averaged tract atlas. A coordinate or map in its own space is placed on it by that scale alone, with no registration. An average smooths the folds, blurs small structures and no longer shows the fissures of the cerebellar hemispheres, so its anatomy is nobody's, and it has no spinal cord.
+The **Subject** choice offers a second brain beside sub_013 of the MGH Connectome Diffusion Microstructure Dataset (CDMD): the ICBM 152 2009c nonlinear asymmetric template of the Montreal Neurological Institute (MNI; MNI152NLin2009cAsym), an average of 152 young adults' magnetic resonance imaging (MRI) scans (Fig. 1). Its header was scaled by 0.90, which brings it to the mean brain size of the CDMD adults, and it was reconstructed and segmented the way CDMD was. It carries the same five cortical atlases, FreeSurfer's automatic subcortical segmentation (aseg), NextBrain, the teaching set and CerebNet's 25 cerebellar lobules, and its **Tracts** tab draws 23 bundles of an averaged tract atlas. A coordinate or map in its own space is placed on it by that scale alone, with no registration. An average smooths the folds, blurs small structures and no longer shows the fissures of the cerebellar hemispheres, so its anatomy is nobody's, and it has no spinal cord.
 
 ```{figure} figures/mni-template-1-light.webp
 :alt: Two rows of three panels on black. Top row, the individual brain: a brain coloured by Destrieux regions with deep, narrow folds, seen from the left; a coronal cut seen from the front with every structure capped in colour; the same plane on its T1-weighted MRI, with sharp grey and white matter. Bottom row, the MNI template in the same three views: a brain of about the same size with broader, smoother folds and a cerebellum divided into smooth coloured lobules; a coronal cut with the same structures capped; its MRI plane, smooth and blurred, with no skull or neck detail.
@@ -18,12 +18,12 @@ The **Subject** choice offers a second brain beside sub_013 of the MGH Connectom
 | Cortical atlases | Destrieux and Desikan-Killiany from `recon-all`'s own classifiers; HCP-MMP1.0, Julich-Brain 3.1 and Schaefer-400 carried from `fsaverage` through the registered spheres, as on CDMD ([cortical atlases](cortical-atlases.md)) | `data/sources.json`; `data/mni152/*-registration.json` |
 | NextBrain | `nextbrain-mni152.mgz` and its near-tie volume, 0.4 mm, segmented as CDMD's ([internal anatomy](internal-anatomy.md)) | `data/sources.json` |
 | Cerebellar lobules | CerebNet (FastSurfer v2.6.0) on the template's conformed `orig.mgz`, as on CDMD ([internal anatomy](internal-anatomy.md)) | `data/sources.json` |
-| HCP1065 tract atlas (Yeh 2022; CC BY-SA 4.0) | 21 bundles placed on the template ({ref}`tracts <tracts-template>`) | `data/diffusion-mni152.yaml` |
+| HCP1065 tract atlas (Yeh 2022; CC BY-SA 4.0) | 23 bundles placed on the template ({ref}`tracts <tracts-template>`) | `data/diffusion-mni152.yaml` |
 | Arterial territory atlas (Liu et al. 2023) | Registered onto the template as onto CDMD ([arterial territories](arterial-territories.md)) | `data/sources.json`; `data/mni152/arterial-registration.json` |
 | SPM12 tissue probability maps | Registered onto the template as onto CDMD ([published coordinates](published-coordinates.md)) | `data/sources.json`; `data/mni152/coordinate-registration.json` |
 | Harvard Ascending Arousal Network Atlas 2.0 | Ten brainstem nuclei placed on the template by both of CDMD's methods ([arousal nuclei](arousal-nuclei.md)) | `config/arousal-nuclei.yaml`; `data/sources.json`; `data/mni152/arousal-registration.json` |
 
-The build is published under `public/models/mni152/` (84 files, 276 MB) and `public/diffusion/mni152-hcp1065/` (21 gzip-compressed TrackVis (TRK) files, 139 MB, with `surface-space.json`, the brain outline and `provenance.json`). `public/models/anatomies.json` lists the template beside CDMD as `"individual": false`. Citations and licences are in [references](../reference/references.md#group-data-and-templates).
+The build is published under `public/models/mni152/` (84 files, 276 MB) and `public/diffusion/mni152-hcp1065/` (23 gzip-compressed TrackVis (TRK) files, 139 MB, with `surface-space.json`, the brain outline and `provenance.json`). `public/models/anatomies.json` lists the template beside CDMD as `"individual": false`. Citations and licences are in [references](../reference/references.md#group-data-and-templates).
 
 ## Method
 
@@ -61,7 +61,7 @@ SPM12's space is not the template's, so it is registered as on CDMD. `scripts/re
 
 ### Tracts
 
-The template has no diffusion scan. Its **Tracts** tab draws 21 bundles of the HCP1065 population-averaged atlas, which is in ICBM 2009a millimetres, an earlier version of the template's ICBM 2009c average in the same space. They were placed by the 0.9 scale with no registration. One streamline in four was kept, trimmed into the brain and resampled to 0.5 mm steps ({ref}`tracts <tracts-template>`).
+The template has no diffusion scan. Its **Tracts** tab draws 23 bundles of the HCP1065 population-averaged atlas, which is in ICBM 2009a millimetres, an earlier version of the template's ICBM 2009c average in the same space. They were placed by the 0.9 scale with no registration. One streamline in four was kept, trimmed into the brain and resampled to 0.5 mm steps ({ref}`tracts <tracts-template>`).
 
 ### Registered group maps
 
@@ -91,7 +91,7 @@ On the template, **Deficits** lists all 149 profiles, coma among them. **Circuit
 
 On this brain **Coordinate** and **Overlay** offer MNI152NLin2009cAsym, SPM12 (TPM), and MNI with no template stated, which is read as MNI152NLin2009cAsym. Nothing is downloaded to place the template's own space; SPM12's field is downloaded when first used. The coordinate report adds that the landing is a location on an average brain.
 
-**Tracts** lists 18 association, 2 projection and 1 commissural bundle. It offers **MRI with tracts** with no fractional anisotropy (FA) layer and no tract profile. A [lesion](lesion-report.md#streamlines) counts streamlines in the 20 lateral bundles; the whole callosum is not counted.
+**Tracts** lists 18 association, 4 projection and 1 commissural bundle; the cerebellar peduncles drawn on CDMD failed their gate on this atlas ({ref}`tracts <tracts-template>`). It offers **MRI with tracts** with no fractional anisotropy (FA) layer and no tract profile. A [lesion](lesion-report.md#streamlines) counts streamlines in the 22 lateral bundles; the whole callosum is not counted.
 
 **Linked MRI** shows the template's T1, windowed 0–256 (CDMD's 0–188; Fig. 1c, f). The visual field map is not offered on the template.
 
