@@ -61,7 +61,7 @@ SPM12's space is not the template's, so it is registered as on CDMD. `scripts/re
 
 ### Tracts
 
-The template has no diffusion scan. Its **Tracts** tab draws 21 bundles of the HCP1065 population-averaged atlas, which is in ICBM 2009a millimetres, the template's own space. They were placed by the 0.9 scale with no registration. One streamline in four was kept, trimmed into the brain and resampled to 0.5 mm steps ({ref}`tracts <tracts-template>`).
+The template has no diffusion scan. Its **Tracts** tab draws 21 bundles of the HCP1065 population-averaged atlas, which is in ICBM 2009a millimetres, an earlier version of the template's ICBM 2009c average in the same space. They were placed by the 0.9 scale with no registration. One streamline in four was kept, trimmed into the brain and resampled to 0.5 mm steps ({ref}`tracts <tracts-template>`).
 
 ### Registered group maps
 

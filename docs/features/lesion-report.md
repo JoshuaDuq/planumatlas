@@ -22,7 +22,7 @@ The lesion publishes no file. It reads, from `public/models/<anatomy>/` and `pub
 | `*.trk.gz`, `surface-space.json` | RecoBundles and TractSeg streamlines (30 bundle files on CDMD, 29 counted), or, on the [MNI template](mni-template.md) (Montreal Neurological Institute), the HCP1065 atlas's (21, 20 counted), and the scanner-to-surface transform |
 | Visible cortical meshes | The footprint |
 
-Label grids are described in [sections and cuts](sections-and-cuts.md#data), and bundles in [tracts](tracts.md). The nine atlases of the first row are CDMD's. The MNI template publishes eight of the nine atlases, without the arterial territories, and no `white-matter.volume`.
+Label grids are described in [sections and cuts](sections-and-cuts.md#data), and bundles in [tracts](tracts.md). CDMD and the MNI template both publish the nine atlases of the first row and `white-matter.volume`.
 
 ## Method
 
