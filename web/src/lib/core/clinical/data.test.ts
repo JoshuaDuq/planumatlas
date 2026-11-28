@@ -387,12 +387,12 @@ describe('published clinical content: fixed values', () => {
   const [, manifest] = manifests[0];
   const catalog = createClinicalCatalog(data, manifest, {});
 
-  test('CAT-50 · the published records are the revision of 2026-11-28: 6 groups, 177 deficits, 1281 references, 476 associations', () => {
+  test('CAT-50 · the published records are the revision of 2026-11-28: 6 groups, 177 deficits, 1286 references, 477 associations', () => {
     assert.equal(catalog.revised, '2026-11-28');
     assert.equal(data.groups.length, 6);
     assert.equal(data.deficits.length, 177);
-    assert.equal(data.references.length, 1281);
-    assert.equal(data.associations.length, 476);
+    assert.equal(data.references.length, 1286);
+    assert.equal(data.associations.length, 477);
   });
 
   test('reviewed motor-neglect and aprosodia findings preserve their mapping limits', () => {
@@ -908,6 +908,8 @@ describe('published clinical content: fixed values', () => {
       [...catalog.paint('sma-syndrome', 'sma-speech').paint.colors.keys()],
       ['destrieux:left:16', 'destrieux:right:16'],
     );
+    // The frontal aslant reports describe white-matter injury, not a cortical parcel.
+    assert.equal(catalog.paint('sma-syndrome', 'sma-frontal-aslant').paint.colors.size, 0);
     assert.deepEqual(catalog.mappedRegions('recollection-familiarity'), [
       'aseg:left:17',
       'aseg:right:53',
@@ -1109,6 +1111,7 @@ describe('published clinical content: fixed values', () => {
       'nextbrain:right:12035',
     ]);
     assert.deepEqual(keys('amnesia', 'amnesia-basal-forebrain'), ['nextbrain:right:10111']);
+    assert.deepEqual(keys('amnesia', 'amnesia-thalamic-free-recall'), []);
     assert.deepEqual(keys('semantic-memory', 'semantic-controlled-retrieval'), []);
     assert.equal(catalog.forDeficit('working-memory').length, 6);
     assert.equal(catalog.forDeficit('amnesia').length, 6);

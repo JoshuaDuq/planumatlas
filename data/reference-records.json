@@ -6979,27 +6979,6 @@
    "pages": "e2-e2",
    "corrections": []
   },
-  "pmid:15758033": {
-   "pmid": "15758033",
-   "pmcid": null,
-   "doi": "10.1093/brain/awh474",
-   "doi_source": "pubmed",
-   "title": "The role of the human thalamus in processing corollary discharge",
-   "authors": [
-    "Bellebaum C",
-    "Daum I",
-    "Koch B",
-    "Schwarz M",
-    "Hoffmann KP"
-   ],
-   "year": 2005,
-   "pubdate": "2005 May",
-   "journal": "Brain",
-   "volume": "128",
-   "issue": "5",
-   "pages": "1139-1154",
-   "corrections": []
-  },
   "pmid:15774432": {
    "pmid": "15774432",
    "pmcid": "PMC1739601",
@@ -13087,6 +13066,26 @@
    "pages": "457-497",
    "corrections": []
   },
+  "pmid:22257705": {
+   "pmid": "22257705",
+   "pmcid": null,
+   "doi": "10.1111/j.1748-6653.2011.02019.x",
+   "doi_source": "pubmed",
+   "title": "Impairment in material-specific long-term memory following unilateral mediodorsal thalamic damage and presumed partial disconnection of the mammillo-thalamic tract",
+   "authors": [
+    "Edelstyn NM",
+    "Mayes AR",
+    "Denby C",
+    "Ellis SJ"
+   ],
+   "year": 2012,
+   "pubdate": "2012 Mar",
+   "journal": "Journal of Neuropsychology",
+   "volume": "6",
+   "issue": "1",
+   "pages": "119-140",
+   "corrections": []
+  },
   "pmid:22261698": {
    "pmid": "22261698",
    "pmcid": null,
@@ -13892,6 +13891,25 @@
    "volume": "135",
    "issue": "9",
    "pages": "2726-2735",
+   "corrections": []
+  },
+  "pmid:23030052": {
+   "pmid": "23030052",
+   "pmcid": null,
+   "doi": "10.1080/13554794.2012.713497",
+   "doi_source": "pubmed",
+   "title": "Damage to the dorsomedial thalamic nucleus, central lateral intralaminar thalamic nucleus, and midline thalamic nuclei on the right-side impair executive function and attention under conditions of high demand but not low demand",
+   "authors": [
+    "Edelstyn NM",
+    "Mayes AR",
+    "Ellis SJ"
+   ],
+   "year": 2014,
+   "pubdate": "2014 Apr",
+   "journal": "Neurocase",
+   "volume": "20",
+   "issue": "2",
+   "pages": "121-132",
    "corrections": []
   },
   "pmid:23036522": {
@@ -23961,6 +23979,30 @@
    "pages": "354",
    "corrections": []
   },
+  "pmid:33807749": {
+   "pmid": "33807749",
+   "pmcid": "PMC7961364",
+   "doi": "10.3390/cancers13051116",
+   "doi_source": "pubmed",
+   "title": "The Frontal Aslant Tract and Supplementary Motor Area Syndrome: Moving towards a Connectomic Initiation Axis",
+   "authors": [
+    "Briggs RG",
+    "Allan PG",
+    "Poologaindran A",
+    "Dadario NB",
+    "Young IM",
+    "Ahsan SA",
+    "Teo C",
+    "Sughrue ME"
+   ],
+   "year": 2021,
+   "pubdate": "2021 Mar 05",
+   "journal": "Cancers",
+   "volume": "13",
+   "issue": "5",
+   "pages": "1116",
+   "corrections": []
+  },
   "pmid:33811370": {
    "pmid": "33811370",
    "pmcid": null,
@@ -25059,6 +25101,33 @@
    "pages": "105025",
    "corrections": []
   },
+  "pmid:34598138": {
+   "pmid": "34598138",
+   "pmcid": null,
+   "doi": "10.3171/2021.4.jns21187",
+   "doi_source": "pubmed",
+   "title": "Resection of supplementary motor area gliomas: revisiting supplementary motor syndrome and the role of the frontal aslant tract",
+   "authors": [
+    "Young JS",
+    "Gogos AJ",
+    "Aabedi AA",
+    "Morshed RA",
+    "Pereira MP",
+    "Lashof-Regas S",
+    "Mansoori Z",
+    "Luks T",
+    "Hervey-Jumper SL",
+    "Villanueva-Meyer JE",
+    "Berger MS"
+   ],
+   "year": 2022,
+   "pubdate": "2022 May 01",
+   "journal": "Journal of Neurosurgery",
+   "volume": "136",
+   "issue": "5",
+   "pages": "1278-1284",
+   "corrections": []
+  },
   "pmid:34624261": {
    "pmid": "34624261",
    "pmcid": null,
@@ -25986,26 +26055,6 @@
    "volume": "11",
    "issue": null,
    "pages": "e76334",
-   "corrections": []
-  },
-  "pmid:35526498": {
-   "pmid": "35526498",
-   "pmcid": "PMC9095886",
-   "doi": "10.1016/j.nicl.2022.103020",
-   "doi_source": "pubmed",
-   "title": "The unique role of the frontal aslant tract in speech and language processing",
-   "authors": [
-    "Zhong AJ",
-    "Baldo JV",
-    "Dronkers NF",
-    "Ivanova MV"
-   ],
-   "year": 2022,
-   "pubdate": "2022",
-   "journal": "NeuroImage: Clinical",
-   "volume": "34",
-   "issue": null,
-   "pages": "103020",
    "corrections": []
   },
   "pmid:35547388": {
@@ -27329,6 +27378,30 @@
    "volume": "159",
    "issue": null,
    "pages": "118-130",
+   "corrections": []
+  },
+  "pmid:36625909": {
+   "pmid": "36625909",
+   "pmcid": "PMC10477090",
+   "doi": "10.1007/s00701-022-05466-6",
+   "doi_source": "pubmed",
+   "title": "Two cases of SMA syndrome after neurosurgical injury to the frontal aslant tract",
+   "authors": [
+    "Agyemang K",
+    "Rose A",
+    "Sheikh ME",
+    "Asha M",
+    "Molinari E",
+    "Fullerton NE",
+    "Brennan D",
+    "Grivas A"
+   ],
+   "year": 2023,
+   "pubdate": "2023 Sep",
+   "journal": "Acta Neurochirurgica",
+   "volume": "165",
+   "issue": "9",
+   "pages": "2473-2478",
    "corrections": []
   },
   "pmid:36653066": {
@@ -29912,6 +29985,48 @@
    "volume": "16",
    "issue": "8",
    "pages": "e66681",
+   "corrections": []
+  },
+  "pmid:39282422": {
+   "pmid": "39282422",
+   "pmcid": "PMC11398375",
+   "doi": "10.1101/2024.09.03.611112",
+   "doi_source": "pubmed",
+   "title": "A conserved cell-type gradient across the human mediodorsal and paraventricular thalamus",
+   "authors": [
+    "Schulmann A",
+    "Feng N",
+    "Auluck PK",
+    "Mukherjee A",
+    "Komal R",
+    "Leng Y",
+    "Gao C",
+    "Williams Avram SK",
+    "Roy S",
+    "Usdin TB",
+    "Xu Q",
+    "Imamovic V",
+    "Patel Y",
+    "Akula N",
+    "Raznahan A",
+    "Menon V",
+    "Roussos P",
+    "Duncan L",
+    "Elkahloun A",
+    "Singh J",
+    "Kelly MC",
+    "Halassa MM",
+    "Hattar S",
+    "Penzo MA",
+    "Marenco S",
+    "McMahon FJ"
+   ],
+   "year": 2024,
+   "pubdate": "2024 Sep 05",
+   "journal": "bioRxiv",
+   "volume": null,
+   "issue": null,
+   "pages": null,
    "corrections": []
   },
   "pmid:39286472": {

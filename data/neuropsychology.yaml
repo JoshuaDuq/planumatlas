@@ -13211,6 +13211,45 @@ references:
       en: Twenty-four consecutive adults aged 25–62 years with a glioma near the supplementary motor area. Postoperative MRI defined three groups by the depth of resection, with weekly motor assessments through two months.
       fr: Vingt-quatre adultes consécutifs de 25 à 62 ans opérés d’un gliome proche de l’aire motrice supplémentaire. L’IRM postopératoire définissait trois groupes selon la profondeur de la résection. La motricité était évaluée chaque semaine jusqu’à deux mois.
 
+  - id: agyemang-2023-aslant-sma
+    title: Two cases of SMA syndrome after neurosurgical injury to the frontal aslant tract.
+    authors: Agyemang K, Rose A, Sheikh ME, Asha M, Molinari E, Fullerton NE, Brennan D, Grivas A
+    year: 2023
+    journal: Acta Neurochirurgica
+    doi: 10.1007/s00701-022-05466-6
+    pmid: '36625909'
+    method: case-series
+    scope: full-text
+    population:
+      en: Two right-handed women, one in her fifties and one in her thirties, with SMA syndrome after left frontal tumour surgery. They were consecutive cases among six with SMA syndrome at one centre, with preoperative and postoperative structural MRI, functional MRI and diffusion tractography.
+      fr: Deux femmes droitières, l’une dans la cinquantaine et l’autre dans la trentaine, présentant un syndrome de l’AMS après une chirurgie tumorale frontale gauche. Il s’agissait de cas consécutifs parmi six syndromes de l’AMS dans un même centre, avec IRM structurelle, IRM fonctionnelle et tractographie de diffusion avant et après l’intervention.
+
+  - id: young-2022-aslant-sma
+    title: 'Resection of supplementary motor area gliomas: revisiting supplementary motor syndrome and the role of the frontal aslant tract.'
+    authors: Young JS, Gogos AJ, Aabedi AA, Morshed RA, Pereira MP, Lashof-Regas S, Mansoori Z, Luks T, Hervey-Jumper SL, Villanueva-Meyer JE, Berger MS
+    year: 2022
+    journal: Journal of Neurosurgery
+    doi: 10.3171/2021.4.JNS21187
+    pmid: '34598138'
+    method: case-series
+    scope: abstract
+    population:
+      en: Fifty-six patients from one surgeon’s registry who underwent resection of a newly diagnosed diffuse glioma in the supplementary motor area region between 2010 and 2019, with at least three months of follow-up.
+      fr: Cinquante-six patients du registre d’un même chirurgien opérés entre 2010 et 2019 d’un gliome diffus nouvellement diagnostiqué dans la région de l’aire motrice supplémentaire, avec un suivi d’au moins trois mois.
+
+  - id: briggs-2021-aslant-sma
+    title: 'The Frontal Aslant Tract and Supplementary Motor Area Syndrome: Moving towards a Connectomic Initiation Axis.'
+    authors: Briggs RG, Allan PG, Poologaindran A, Dadario NB, Young IM, Ahsan SA, Teo C, Sughrue ME
+    year: 2021
+    journal: Cancers
+    doi: 10.3390/cancers13051116
+    pmid: '33807749'
+    method: case-series
+    scope: full-text
+    population:
+      en: Forty-five patients operated on for an infiltrating posteromedial frontal glioma by one surgeon. Twenty-three were operated on with the earlier technique and 22 later with tractography-guided preservation of the frontal aslant tract. Mean ages were 44 and 49 years.
+      fr: Quarante-cinq patients opérés par un même chirurgien d’un gliome infiltrant frontal postéro-médial. Vingt-trois ont été opérés selon la technique antérieure et 22 plus tard avec préservation du faisceau frontal oblique guidée par tractographie. L’âge moyen était de 44 et 49 ans.
+
   - id: levy-2025-self-generated-speech
     title: Role for Left Dorsomedial Prefrontal Cortex in Self-Generated, but not Externally Cued, Language Production
     authors: Levy D, Greicius Q, Wang C, Ko E, Xu D, Andrews J, Chang EF
@@ -18646,6 +18685,32 @@ references:
       en: Seventeen adults with chronic thalamic infarcts and 28 healthy controls completed memory testing. Twelve patients with unilateral infarcts and 18 controls contributed to the lesion analyses. The parvocellular mediodorsal analysis included nine patients.
       fr: Dix-sept adultes présentant un infarctus thalamique chronique et 28 témoins sains ont passé les épreuves de mémoire. Douze patients ayant un infarctus unilatéral et 18 témoins ont contribué aux analyses lésionnelles. L’analyse de la subdivision parvocellulaire du noyau médiodorsal portait sur neuf patients.
 
+  - id: edelstyn-2012-thalamic-material-specific
+    title: Impairment in material-specific long-term memory following unilateral mediodorsal thalamic damage and presumed partial disconnection of the mammillo-thalamic tract.
+    authors: Edelstyn NM, Mayes AR, Denby C, Ellis SJ
+    year: 2012
+    journal: Journal of Neuropsychology
+    doi: 10.1111/j.1748-6653.2011.02019.x
+    pmid: '22257705'
+    method: case-series
+    scope: abstract
+    population:
+      en: Two patients with unilateral mediodorsal thalamic damage, one right-sided and one left-sided, each with probable damage to the mammillothalamic tract on the same side. Each was compared with healthy volunteers matched for demographic characteristics, premorbid IQ and current level of functioning.
+      fr: Deux patients présentant une atteinte unilatérale du noyau médiodorsal du thalamus, à droite chez l’un et à gauche chez l’autre, avec une atteinte probable du faisceau mamillothalamique du même côté. Chacun était comparé à des volontaires sains appariés pour les caractéristiques démographiques, le quotient intellectuel prémorbide et le niveau de fonctionnement actuel.
+
+  - id: edelstyn-2014-thalamic-executive
+    title: Damage to the dorsomedial thalamic nucleus, central lateral intralaminar thalamic nucleus, and midline thalamic nuclei on the right-side impair executive function and attention under conditions of high demand but not low demand.
+    authors: Edelstyn NM, Mayes AR, Ellis SJ
+    year: 2014
+    journal: Neurocase
+    doi: 10.1080/13554794.2012.713497
+    pmid: '23030052'
+    method: case-report
+    scope: abstract
+    population:
+      en: One patient with a unilateral right thalamic lesion mapped on high-resolution 3 T MRI, compared with six age- and IQ-matched controls on executive and attention tasks.
+      fr: Un patient présentant une lésion thalamique droite unilatérale cartographiée par IRM à haute résolution à 3 T, comparé à six témoins appariés pour l’âge et le quotient intellectuel lors d’épreuves exécutives et attentionnelles.
+
   - id: vidal-2025
     title: A reappraisal of the role of the mammillothalamic tract in memory deficits following stroke in the thalamus.
     authors: Vidal JP, Danet L, Pariente J, Albucher JF, Péran P, Barbeau EJ
@@ -19779,24 +19844,27 @@ associations:
 
   - id: amnesia-thalamic-free-recall
     deficit: amnesia
-    title: {en: Free word recall after left thalamic infarction, fr: Rappel libre de mots après un infarctus thalamique gauche}
+    title: {en: Recall after thalamic injury, fr: Rappel après une lésion thalamique}
     network: {en: Thalamic episodic memory, fr: Mémoire épisodique thalamique}
-    laterality: left
+    laterality: bilateral
     finding:
-      en: In a study of 40 adults with chronic thalamic infarction and 45 healthy controls, participants with unilateral left infarcts recalled fewer words across three free-recall learning trials and after a 20-minute delay. In a corrected analysis accounting for lesion volume, poorer delayed free recall was associated with a left anterolateral cluster overlapping the estimated location of the mammillothalamic tract and parts of the ventral anterior and ventral lateral posterior nuclei.
-      fr: Dans une étude portant sur 40 adultes présentant un infarctus thalamique chronique et 45 témoins sains, les participants présentant un infarctus thalamique unilatéral gauche rappelaient moins de mots au total sur les trois essais d’apprentissage en rappel libre et après un délai de 20 minutes. Dans une analyse corrigée tenant compte du volume lésionnel, un rappel libre différé plus faible était associé à une zone thalamique antérolatérale gauche recoupant le trajet estimé du faisceau mamillothalamique et une partie des noyaux ventral antérieur et ventral latéral postérieur.
+      en: In a study of 40 adults with chronic thalamic infarction and 45 healthy controls, participants with unilateral left infarcts recalled fewer words across three free-recall learning trials and after a 20-minute delay. In a corrected analysis accounting for lesion volume, poorer delayed free recall was associated with a left anterolateral cluster overlapping the estimated location of the mammillothalamic tract and parts of the ventral anterior and ventral lateral posterior nuclei. In 17 adults tested more than a year after thalamic infarction, recognition of studied picture pairs and cued recall of the paired picture were poorer than in 28 matched controls. Among nine patients with unilateral lesions involving the parvocellular mediodorsal nucleus, greater estimated volume loss there was associated with poorer cued recall. A man with right mediodorsal thalamic damage and probable involvement of the mammillothalamic tract on the same side was impaired on tests of visual recall and recognition, but not verbal ones, compared with matched healthy volunteers.
+      fr: Dans une étude portant sur 40 adultes présentant un infarctus thalamique chronique et 45 témoins sains, les participants présentant un infarctus thalamique unilatéral gauche rappelaient moins de mots au total sur les trois essais d’apprentissage en rappel libre et après un délai de 20 minutes. Dans une analyse corrigée tenant compte du volume lésionnel, un rappel libre différé plus faible était associé à une zone thalamique antérolatérale gauche recoupant le trajet estimé du faisceau mamillothalamique et une partie des noyaux ventral antérieur et ventral latéral postérieur. Chez 17 adultes évalués plus d’un an après un infarctus thalamique, la reconnaissance de paires d’images étudiées et le rappel indicé de l’image associée étaient moins bons que chez 28 témoins appariés. Parmi neuf patients présentant une lésion unilatérale touchant le noyau médiodorsal parvocellulaire, une perte de volume estimée plus importante dans ce noyau était associée à un rappel indicé plus faible. Un homme présentant une atteinte médiodorsale droite du thalamus, avec une atteinte probable du faisceau mamillothalamique du même côté, avait des résultats déficitaires aux épreuves de rappel et de reconnaissance visuelles, mais pas verbales, comparativement à des volontaires sains appariés.
     limitation:
-      en: In a separate study, seven adults selected for memory complaints three or more years after thalamic stroke recalled fewer words than controls during learning and after 30 minutes. All had left mediodorsal involvement, with other nuclear lesions in some cases. The word-list comparisons used nominal significance tests. Imaging measures of the mammillothalamic tract detected no significant group difference within the resolution of the method. In an earlier Toulouse subgroup of five with apparent tract sparing, free word recall was also lower than in healthy controls. The larger corrected study recruited some of the same patients. A small study of cued recall of pictured pairs found a model-dependent association with parvocellular mediodorsal injury. A later analysis of broader cognitive outcomes reported no specific mediodorsal association, with participant overlap unresolved in the accessible report. An independent cohort recruited 37 adults with first-ever thalamic infarction and had MRI for 35. A corrected one-month analysis linked left anterior thalamic injury to a broader verbal-memory measure based on story recall and digit span. The analysis reported no lesion-volume covariate. The cluster covered several nuclear territories and the mammillothalamic tract.
-      fr: Dans une étude distincte, sept adultes sélectionnés pour des plaintes mnésiques au moins trois ans après un AVC thalamique rappelaient moins de mots que les témoins pendant l’apprentissage et après 30 minutes. Tous présentaient une atteinte du noyau médiodorsal gauche, avec des lésions d’autres noyaux chez certains patients. Les comparaisons sur les listes de mots reposaient sur des seuils de significativité nominaux. Les mesures du faisceau mamillothalamique par imagerie n’ont détecté aucune différence significative entre les groupes dans les limites de résolution de la méthode. Dans un sous-groupe toulousain antérieur de cinq patients dont le faisceau était apparemment épargné, le rappel libre de mots était aussi plus faible que chez les témoins sains. L’étude corrigée de plus grande taille a recruté une partie des mêmes patients. Dans une petite étude du rappel indicé de paires d’images, l’association avec l’atteinte médiodorsale parvocellulaire dépendait du modèle de régression. Une analyse ultérieure de résultats cognitifs plus larges n’a pas retrouvé d’association médiodorsale spécifique. Un chevauchement des participants reste indéterminé dans le texte accessible. Une cohorte indépendante regroupait 37 adultes présentant un premier infarctus thalamique, dont 35 disposaient d’une IRM. Une analyse corrigée à un mois associait l’atteinte du thalamus antérieur gauche à une mesure plus large de mémoire verbale fondée sur le rappel d’un récit et l’empan de chiffres. L’analyse ne rapportait aucun ajustement sur le volume lésionnel. La zone recouvrait plusieurs territoires nucléaires et le faisceau mamillothalamique.
+      en: In a separate study, seven adults selected for memory complaints three or more years after thalamic stroke recalled fewer words than controls during learning and after 30 minutes. All had left mediodorsal involvement, with other nuclear lesions in some cases. The word-list comparisons used nominal significance tests. Imaging measures of the mammillothalamic tract detected no significant group difference within the resolution of the method. In an earlier Toulouse subgroup of five with apparent tract sparing, free word recall was also lower than in healthy controls. The larger corrected study recruited some of the same patients. The parvocellular mediodorsal association pooled left and right lesions and came from regression through the origin. Ordinary regression with an intercept was not significant, and the lesions also involved other thalamic nuclei. A later analysis of broader cognitive outcomes reported no specific mediodorsal association, with participant overlap unresolved in the accessible report. The right mediodorsal case is one patient, and the accessible reports do not state the cause of his injury. Later reports on the same patient describe a lesion centred on the magnocellular division that also involved the parvocellular division and intralaminar and midline nuclei. They also report a deficit in familiarity-based recognition of faces, with word recognition preserved. An independent cohort recruited 37 adults with first-ever thalamic infarction and had MRI for 35. A corrected one-month analysis linked left anterior thalamic injury to a broader verbal-memory measure based on story recall and digit span. The analysis reported no lesion-volume covariate. The cluster covered several nuclear territories and the mammillothalamic tract.
+      fr: Dans une étude distincte, sept adultes sélectionnés pour des plaintes mnésiques au moins trois ans après un AVC thalamique rappelaient moins de mots que les témoins pendant l’apprentissage et après 30 minutes. Tous présentaient une atteinte du noyau médiodorsal gauche, avec des lésions d’autres noyaux chez certains patients. Les comparaisons sur les listes de mots reposaient sur des seuils de significativité nominaux. Les mesures du faisceau mamillothalamique par imagerie n’ont détecté aucune différence significative entre les groupes dans les limites de résolution de la méthode. Dans un sous-groupe toulousain antérieur de cinq patients dont le faisceau était apparemment épargné, le rappel libre de mots était aussi plus faible que chez les témoins sains. L’étude corrigée de plus grande taille a recruté une partie des mêmes patients. L’association avec la subdivision parvocellulaire du noyau médiodorsal regroupait des lésions gauches et droites et reposait sur une régression passant par l’origine. Une régression ordinaire avec ordonnée à l’origine n’était pas significative, et les lésions touchaient aussi d’autres noyaux thalamiques. Une analyse ultérieure de résultats cognitifs plus larges n’a pas retrouvé d’association médiodorsale spécifique. Un chevauchement des participants reste indéterminé dans le texte accessible. Le cas médiodorsal droit concerne un seul patient, et les publications accessibles ne précisent pas la cause de sa lésion. D’autres publications sur ce patient décrivent une lésion centrée sur la subdivision magnocellulaire, qui touchait aussi la subdivision parvocellulaire et des noyaux intralaminaires et médians. Elles rapportent aussi un déficit de la reconnaissance des visages fondée sur la familiarité, avec une reconnaissance des mots préservée. Une cohorte indépendante regroupait 37 adultes présentant un premier infarctus thalamique, dont 35 disposaient d’une IRM. Une analyse corrigée à un mois associait l’atteinte du thalamus antérieur gauche à une mesure plus large de mémoire verbale fondée sur le rappel d’un récit et l’empan de chiffres. L’analyse ne rapportait aucun ajustement sur le volume lésionnel. La zone recouvrait plusieurs territoires nucléaires et le faisceau mamillothalamique.
     mapping_note:
-      en: The left anterolateral cluster overlapped the estimated tract and several nuclear territories. The smaller mediodorsal series also included other nuclear injuries, including one small additional right anterior lesion. These results leave a precise parcel assignment unresolved.
-      fr: La zone antérolatérale gauche recoupait le trajet estimé du faisceau et plusieurs territoires nucléaires. La plus petite série portant sur l’atteinte médiodorsale comprenait aussi d’autres lésions nucléaires, dont une petite lésion antérieure droite supplémentaire. Ces résultats laissent indéterminé le choix d’une parcelle précise.
+      en: The left anterolateral cluster overlapped the estimated tract and several nuclear territories. The smaller mediodorsal series also included other nuclear injuries, including one small additional right anterior lesion. The parvocellular association pooled left and right lesions, and the right-sided case involved several medial nuclei. These results leave a precise parcel assignment unresolved.
+      fr: La zone antérolatérale gauche recoupait le trajet estimé du faisceau et plusieurs territoires nucléaires. La plus petite série portant sur l’atteinte médiodorsale comprenait aussi d’autres lésions nucléaires, dont une petite lésion antérieure droite supplémentaire. L’association parvocellulaire regroupait des lésions gauches et droites, et le cas droit touchait plusieurs noyaux thalamiques médiaux. Ces résultats laissent indéterminé le choix d’une parcelle précise.
     mappings: []
     evidence:
       - {reference: vidal-2025, role: supporting}
       - {reference: tu-2014, role: supporting}
+      - {reference: pergola-2012, role: supporting}
+      - {reference: edelstyn-2012-thalamic-material-specific, role: supporting}
       - {reference: danet-2015, role: qualifying}
-      - {reference: pergola-2012, role: qualifying}
+      - {reference: edelstyn-2014-thalamic-executive, role: qualifying}
+      - {reference: edelstyn-2016-thalamic-familiarity, role: qualifying}
       - {reference: geier-2026, role: qualifying}
       - {reference: scharf-2022, role: qualifying}
 
@@ -26793,6 +26861,26 @@ associations:
       - {reference: mahesparan-2026, role: qualifying}
       - {reference: grande-2025, role: qualifying}
       - {reference: levy-2025-self-generated-speech, role: qualifying}
+
+  - id: sma-frontal-aslant
+    deficit: sma-syndrome
+    title: {en: Supplementary motor area syndrome after frontal aslant tract injury, fr: Syndrome de l’aire motrice supplémentaire après atteinte du faisceau frontal oblique}
+    network: {en: Frontal aslant tract of the supplementary motor complex, fr: Faisceau frontal oblique du complexe moteur supplémentaire}
+    laterality: left
+    finding:
+      en: Two adults developed a supplementary motor area syndrome after left frontal tumour surgery. Postoperative MRI showed the supplementary motor area intact, and diffusion imaging showed injury to the left frontal aslant tract. One operation resected a left frontal opercular tumour and the other passed through the superior frontal sulcus to reach a ventricular tumour. Both patients had impaired speech and right-sided weakness of voluntary movement after surgery and walked independently one month later.
+      fr: Deux adultes ont présenté un syndrome de l’aire motrice supplémentaire après une chirurgie tumorale frontale gauche. L’IRM postopératoire montrait une aire motrice supplémentaire intacte et l’imagerie de diffusion une atteinte du faisceau frontal oblique gauche. L’une des interventions a réséqué une tumeur operculaire frontale gauche et l’autre a traversé le sillon frontal supérieur pour atteindre une tumeur ventriculaire. Après l’intervention, les deux patientes avaient une parole altérée et une faiblesse des mouvements volontaires du côté droit, et toutes deux marchaient de façon autonome un mois plus tard.
+    limitation:
+      en: The two consecutive cases came from six with SMA syndrome at one centre. The tract was identified retrospectively on clinical diffusion imaging, and the first patient’s tract was only partly disrupted. In a retrospective series of 56 patients after resection of gliomas in the supplementary motor area region, all those whose tract was disrupted during surgery developed the syndrome, compared with half of those whose tract was preserved (p = 0.06). The syndrome was also associated with larger resection cavities in the supplementary motor area region and with cavities placed more posteriorly there and in the cingulate gyrus. In a separate series of 45 patients with posteromedial frontal gliomas, transient SMA syndrome followed surgery in 2 of 22 operated on with tractography-guided preservation of the tract and in 11 of 23 operated on earlier without it. Permanent syndrome rates did not differ significantly. The groups were not randomised, avoiding the tract also kept resections away from the supplementary motor area, and the authors state that postoperative oedema prevented confirming on tractography that the tract was preserved.
+      fr: Les deux cas consécutifs provenaient de six syndromes de l’AMS observés dans un même centre. Le faisceau a été identifié rétrospectivement sur l’imagerie de diffusion clinique, et il n’était que partiellement interrompu chez la première patiente. Dans une série rétrospective de 56 patients opérés d’un gliome de la région de l’aire motrice supplémentaire, tous ceux dont le faisceau avait été interrompu pendant l’intervention ont présenté le syndrome, contre la moitié de ceux dont le faisceau était préservé (p = 0,06). Le syndrome était aussi associé à des cavités de résection plus étendues dans la région de l’aire motrice supplémentaire et à des cavités plus postérieures dans cette région et dans le gyrus cingulaire. Dans une autre série de 45 patients opérés d’un gliome frontal postéro-médial, un syndrome de l’AMS transitoire est survenu chez 2 des 22 patients opérés avec préservation du faisceau guidée par tractographie et chez 11 des 23 patients opérés plus tôt sans cette précaution. Les taux de syndrome permanent ne différaient pas significativement. Les groupes n’étaient pas randomisés, éviter le faisceau éloignait aussi la résection de l’aire motrice supplémentaire, et selon les auteurs l’œdème postopératoire empêchait de confirmer par tractographie que le faisceau était préservé.
+    mapping_note:
+      en: The frontal aslant tract is white matter between the superior and inferior frontal gyri. The reports describe injury to the tract as a whole, without separating its branches, and do not isolate a cortical parcel.
+      fr: Le faisceau frontal oblique appartient à la substance blanche et relie les gyri frontaux supérieur et inférieur. Les publications décrivent une atteinte du faisceau dans son ensemble, sans distinguer ses branches, et n’isolent pas de parcelle corticale.
+    mappings: []
+    evidence:
+      - {reference: agyemang-2023-aslant-sma, role: supporting}
+      - {reference: young-2022-aslant-sma, role: qualifying}
+      - {reference: briggs-2021-aslant-sma, role: qualifying}
 
   - id: recollection-hippocampus
     deficit: recollection-familiarity

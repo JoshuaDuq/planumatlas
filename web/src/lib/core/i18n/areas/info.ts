@@ -26,7 +26,7 @@ export const en = {
     shows:
       '177 acquired adult deficits, each mapped onto the atlas regions that published patient studies associate with it. A profile holds one to six findings, each painted in its own colour. Each finding cites supporting and qualifying studies and states its limitation and how the study’s anatomy became atlas parcels.',
     source:
-      'A curated selection of 1,281 PubMed-indexed studies: lesion-mapping studies, case series, case reports and meta-analyses. 214 of them were extracted from the abstract only. The parcels are atlas labels on one reference brain, not lesion volumes.',
+      'A curated selection of 1,286 PubMed-indexed studies: lesion-mapping studies, case series, case reports and meta-analyses. 217 of them were extracted from the abstract only. The parcels are atlas labels on one reference brain, not lesion volumes.',
     caution:
       'The literature is selected, not systematically reviewed, and the catalogue is not diagnostic or prognostic. Group associations drawn on one reference brain do not predict an individual patient’s deficit. A whole parcel can be drawn where a study implicated part of it; white matter is left uncoloured.',
   },
@@ -35,7 +35,7 @@ export const en = {
     shows:
       '43 tours of anatomical pathways and loop branches, 121 landmarks in all, through sensory, motor, cerebellar, hippocampal, limbic, association and commissural systems. Each landmark is a labelled region of this brain’s atlases, framed with 12 mm of surrounding anatomy.',
     source:
-      'Each tour cites circuit background separately from the patient studies behind its linked deficit. The 312 references are 298 PubMed articles and 14 book chapters, 10 of them from Purves et al., Neuroscience. A landmark on a bundle the Tracts tab publishes for this brain draws it, and its notes name the bundle and its source.',
+      'Each tour cites circuit background separately from the patient studies behind its linked deficit. The 315 references are 301 PubMed articles and 14 book chapters, 10 of them from Purves et al., Neuroscience. A landmark on a bundle the Tracts tab publishes for this brain draws it, and its notes name the bundle and its source.',
     caution:
       'Apart from the streamlines drawn, the tours teach connections described in the literature and measure nothing in this brain. Atlas labels approximate the structures, and some projections are known from tracing in monkeys, cats, rabbits or rodents. A deficit study supports a region–deficit association, not the pathway’s connections.',
   },
@@ -117,7 +117,7 @@ export const fr: typeof en = {
     shows:
       '177 déficits acquis de l’adulte, chacun rapporté sur les régions d’atlas que des études de patients publiées y associent. Un profil réunit une à six observations, chacune peinte dans sa propre couleur. Chaque observation cite des études qui l’appuient ou la nuancent, et indique sa limite et la façon dont l’anatomie de l’étude est devenue des parcelles d’atlas.',
     source:
-      'Une sélection choisie de 1\u202f281 études indexées dans PubMed\u202f: cartographies lésionnelles, séries de cas, études de cas et méta-analyses. 214 d’entre elles ont été extraites du seul résumé. Les parcelles sont des étiquettes d’atlas sur un cerveau de référence, et non des volumes lésionnels.',
+      'Une sélection choisie de 1\u202f286 études indexées dans PubMed\u202f: cartographies lésionnelles, séries de cas, études de cas et méta-analyses. 217 d’entre elles ont été extraites du seul résumé. Les parcelles sont des étiquettes d’atlas sur un cerveau de référence, et non des volumes lésionnels.',
     caution:
       'La littérature est sélectionnée, sans revue systématique, et le catalogue n’est ni diagnostique ni pronostique. Des associations de groupe tracées sur un seul cerveau de référence ne prédisent pas le déficit d’un patient individuel. Une parcelle peut être tracée entière là où une étude n’en impliquait qu’une partie\u202f; la substance blanche reste sans couleur.',
   },
@@ -126,7 +126,7 @@ export const fr: typeof en = {
     shows:
       '43 parcours de voies anatomiques et de branches de boucles, 121 repères en tout, dans les systèmes sensoriels, moteurs, cérébelleux, hippocampiques, limbiques, d’association et commissuraux. Chaque repère est une région étiquetée des atlas de ce cerveau, cadrée avec 12\u00a0mm d’anatomie environnante.',
     source:
-      'Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 312 références sont 298 articles PubMed et 14 chapitres d’ouvrages, dont 10 de Purves et al., Neuroscience. Un repère sur un faisceau que l’onglet Faisceaux publie pour ce cerveau le trace, et ses notes nomment le faisceau et sa source.',
+      'Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 315 références sont 301 articles PubMed et 14 chapitres d’ouvrages, dont 10 de Purves et al., Neuroscience. Un repère sur un faisceau que l’onglet Faisceaux publie pour ce cerveau le trace, et ses notes nomment le faisceau et sa source.',
     caution:
       'Hormis les trajectoires tracées, les parcours enseignent des connexions décrites dans la littérature et ne mesurent rien dans ce cerveau. Les étiquettes d’atlas approchent les structures, et certaines projections ne sont connues que par traçage chez le singe, le chat, le lapin ou les rongeurs. Une étude de déficit appuie une association région–déficit, et non les connexions de la voie.',
   },

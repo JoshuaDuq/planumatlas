@@ -58,14 +58,14 @@ const ACTIVE = [
   ['gustatory-insulo-orbitofrontal', 2, 'taste-impairment'],
   ['uncinate-temporopolar', 2, 'cognitive-estimation'],
   ['arcuate-dorsal-frontotemporal', 2, 'aphasia'],
-  ['basal-amygdala-mediodorsal', 2, 'emotion-recognition'],
-  ['frontal-aslant-opercular', 2, 'speech-apraxia'],
+  ['basal-amygdala-mediodorsal', 2, 'amnesia'],
+  ['frontal-aslant-opercular', 2, 'sma-syndrome'],
   ['motor-hyperdirect', 2, 'hemichorea'],
   ['anterior-commissure-temporal', 4, 'cognitive-estimation'],
   ['slf2-dorsal-frontoparietal', 2, 'neglect'],
   ['inferior-pulvinar-mt', 2, 'akinetopsia'],
   ['rubrospinal-crossed', 2, 'holmes-tremor'],
-  ['mediodorsal-prefrontal', 2, 'working-memory'],
+  ['mediodorsal-prefrontal', 2, 'amnesia'],
   ['dorsal-spinocerebellar', 2, 'ataxia'],
   ['mdlf-parietotemporal', 2, 'aphasia'],
   ['septohippocampal-ca1-oriens', 2, 'amnesia'],
@@ -624,11 +624,11 @@ describe('CAT-52 · a landmark resolves to one form and uncovers what others cov
   });
 });
 
-test('CAT-53 · the published pathways: revision, margin, 312 references, 43 tours with their deficits and landmark counts', () => {
+test('CAT-53 · the published pathways: revision, margin, 315 references, 43 tours with their deficits and landmark counts', () => {
   const catalog = create(data);
   assert.equal(catalog.revised, '2026-11-28');
   assert.equal(catalog.contextMarginMm, 12);
-  assert.equal(data.references.length, 312);
+  assert.equal(data.references.length, 315);
   for (const reference of data.references) {
     assert.ok(catalog.reference(reference.id).url.startsWith('https://'), reference.id);
   }

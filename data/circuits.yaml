@@ -696,6 +696,17 @@ references:
     pmid: '39924186'
     pmcid: PMC12061554
     url: https://pmc.ncbi.nlm.nih.gov/articles/PMC12061554/
+  - id: clinical-agyemang-2023
+    title: Two cases of SMA syndrome after neurosurgical injury to the frontal aslant tract.
+    citation: Agyemang et al. · Acta Neurochirurgica · 2023
+    pmid: '36625909'
+    pmcid: PMC10477090
+    url: https://pmc.ncbi.nlm.nih.gov/articles/PMC10477090/
+  - id: clinical-young-2022
+    title: 'Resection of supplementary motor area gliomas: revisiting supplementary motor syndrome and the role of the frontal aslant tract.'
+    citation: Young et al. · Journal of Neurosurgery · 2022
+    pmid: '34598138'
+    url: https://pubmed.ncbi.nlm.nih.gov/34598138/
   - id: gustatory-orbitofrontal-tracing
     title: Afferent connections of the caudolateral orbitofrontal cortex taste area of the primate.
     citation: Baylis, Rolls & Baylis · Neuroscience · 1995
@@ -837,17 +848,6 @@ references:
     pmid: '42251063'
     pmcid: PMC13396381
     url: https://pmc.ncbi.nlm.nih.gov/articles/PMC13396381/
-  - id: speech-frontal
-    title: Re-examining the brain regions crucial for orchestrating speech articulation.
-    citation: Hillis et al. · Brain · 2004
-    pmid: '15090478'
-    url: https://pubmed.ncbi.nlm.nih.gov/15090478/
-  - id: clinical-zhong-2022
-    title: The unique role of the frontal aslant tract in speech and language processing.
-    citation: 'Zhong et al. · NeuroImage: Clinical · 2022'
-    pmid: '35526498'
-    pmcid: PMC9095886
-    url: https://pmc.ncbi.nlm.nih.gov/articles/PMC9095886/
   - id: clinical-stevenson-insular-taste-2013
     title: The lateralization of gustatory function and the flow of information from tongue to cortex.
     citation: Stevenson, Miller & McGrillen · Neuropsychologia · 2013
@@ -1076,11 +1076,6 @@ references:
     pmid: '22789779'
     pmcid: PMC3495093
     url: https://pmc.ncbi.nlm.nih.gov/articles/PMC3495093/
-  - id: clinical-geier-mediodorsal-stroke-2026
-    title: Examination of the role of the mediodorsal thalamus in supporting frontal cortical processes.
-    citation: Geier et al. · Cortex · 2026
-    pmid: '41747374'
-    url: https://pubmed.ncbi.nlm.nih.gov/41747374/
   - id: dorsal-spinocerebellar-human-tractography
     title: A multi-subject tractography atlas of human cerebellar connections.
     citation: Guerrero et al. · Brain Structure and Function · 2026
@@ -1314,11 +1309,32 @@ references:
     citation: Li et al. · NeuroImage · 2022
     pmid: '34998970'
     url: https://pubmed.ncbi.nlm.nih.gov/34998970/
-  - id: clinical-bellebaum-thalamic-working-memory-2005
-    title: The role of the human thalamus in processing corollary discharge.
-    citation: Bellebaum et al. · Brain · 2005
-    pmid: '15758033'
-    url: https://pubmed.ncbi.nlm.nih.gov/15758033/
+  - id: mediodorsal-human-transcriptomic-divisions
+    title: A conserved cell-type gradient across the human mediodorsal and paraventricular thalamus.
+    citation: Schulmann et al. · bioRxiv · 2024
+    pmid: '39282422'
+    pmcid: PMC11398375
+    url: https://pmc.ncbi.nlm.nih.gov/articles/PMC11398375/
+  - id: clinical-pergola-2012
+    title: Recall deficits in stroke patients with thalamic lesions covary with damage to the parvocellular mediodorsal nucleus of the thalamus.
+    citation: Pergola et al. · Neuropsychologia · 2012
+    pmid: '22750446'
+    url: https://pubmed.ncbi.nlm.nih.gov/22750446/
+  - id: clinical-edelstyn-2012
+    title: Impairment in material-specific long-term memory following unilateral mediodorsal thalamic damage and presumed partial disconnection of the mammillo-thalamic tract.
+    citation: Edelstyn et al. · Journal of Neuropsychology · 2012
+    pmid: '22257705'
+    url: https://pubmed.ncbi.nlm.nih.gov/22257705/
+  - id: clinical-edelstyn-2014
+    title: Damage to the dorsomedial thalamic nucleus, central lateral intralaminar thalamic nucleus, and midline thalamic nuclei on the right-side impair executive function and attention under conditions of high demand but not low demand.
+    citation: Edelstyn, Mayes & Ellis · Neurocase · 2014
+    pmid: '23030052'
+    url: https://pubmed.ncbi.nlm.nih.gov/23030052/
+  - id: clinical-edelstyn-2016
+    title: A deficit in familiarity-driven recognition in a right-sided mediodorsal thalamic lesion patient.
+    citation: Edelstyn et al. · Neuropsychology · 2016
+    pmid: '26192538'
+    url: https://pubmed.ncbi.nlm.nih.gov/26192538/
   - id: septohippocampal-barany-human-dissection-2024
     title: Topographical anatomy of the septum verum and its white matter connections.
     citation: Barany et al. · Scientific Reports · 2024
@@ -3165,11 +3181,11 @@ circuits:
       en: The two right-sided landmarks represent a same-side projection described by tracing in macaques. In cynomolgus macaques, most traced amygdalothalamic fibres joined the inferior thalamic peduncle. Human fibre dissection describes amygdalothalamic fibres above the anterior perforated substance within the extracapsular inferior thalamic peduncle. A human diffusion tractography study estimated same-side streamlines between a region combining the medial and lateral mediodorsal subdivisions and a basolateral amygdalar region containing the lateral, basal and accessory basal nuclei. The precise endpoints and direction of the corresponding human projection remain unresolved. The intervening white matter and the onward thalamocortical projection are outside the tour.
       fr: Les deux repères du côté droit représentent une projection ipsilatérale mise en évidence par traçage chez le macaque. Chez le macaque crabier, la plupart des fibres amygdalothalamiques marquées rejoignaient le pédoncule thalamique inférieur. La dissection chez l’humain décrit des fibres amygdalothalamiques au-dessus de la substance perforée antérieure, dans le pédoncule thalamique inférieur extracapsulaire. Une étude de tractographie par IRM de diffusion chez l’humain a estimé des trajectoires ipsilatérales entre une région regroupant les subdivisions médiale et latérale du noyau médiodorsal et une région amygdalienne comprenant les noyaux latéral, basal et basal accessoire. Les extrémités précises et le sens de la projection correspondante restent indéterminés chez l’humain. Le trajet dans la substance blanche et la projection thalamocorticale en aval restent hors du parcours.
     clinical:
-      en: The clinical link is partial and concerns wider amygdalar involvement at the origin of the pathway. After herpes simplex encephalitis, three adults with large bilateral anterior temporal lesions labelled fear and sadness in photographs of faces less accurately as a group than six healthy controls in a six-choice task. The lesions involved both amygdalae, the hippocampal region and nearby temporal cortex. In a separate study of 30 adults with acute right-hemisphere ischaemic stroke and 30 healthy controls, mean accuracy for fearful faces was 34% in the stroke group and 54% in controls. The association with right amygdala damage was inconclusive. The effects of injury confined to the basal nucleus or its thalamic projection remain unresolved.
-      fr: Le lien clinique est partiel et concerne une atteinte amygdalienne étendue à l’origine de la voie. Après une encéphalite herpétique, trois adultes présentant des lésions temporales antérieures bilatérales étendues identifiaient en moyenne moins bien que six témoins sains la peur et la tristesse sur des photographies de visages, dans une épreuve à six choix. Les lésions touchaient les deux amygdales, la région hippocampique et le cortex temporal adjacent. Dans une étude distincte portant sur 30 adultes ayant subi un AVC ischémique aigu de l’hémisphère droit et 30 témoins sains, l’exactitude moyenne pour les visages exprimant la peur était de 34 % après AVC et de 54 % chez les témoins. Le lien avec une lésion de l’amygdale droite restait incertain. Les effets d’une lésion limitée au noyau basal ou à sa projection thalamique restent indéterminés.
-    deficit: emotion-recognition
-    references: [amygdalothalamic-aggleton-1984, amygdalothalamic-russchen-1987, amygdalothalamic-relay-tracing-2015, amygdalothalamic-synapses-2020, amygdalothalamic-ribas-human-dissection-2018, amygdalothalamic-kosteletou-kassotaki-human-diffusion-2026, clinical-schmolck-2001, clinical-tippett-2018]
-    clinical_references: [clinical-schmolck-2001, clinical-tippett-2018]
+      en: The clinical link with anterograde amnesia is partial at the mediodorsal endpoint. A man with right mediodorsal thalamic damage and probable involvement of the mammillothalamic tract on the same side was impaired on tests of visual recall and recognition, compared with healthy volunteers matched for demographic characteristics and premorbid IQ. His verbal recall and recognition were not significantly impaired. Later reports on the same patient describe a lesion centred on the magnocellular division that also involved the parvocellular division and intralaminar and midline nuclei. The evidence rests on one patient whose cause of injury the accessible reports do not state, and the contribution of the amygdalar input to this division remains unresolved.
+      fr: Le lien clinique avec l’amnésie antérograde est partiel, au niveau de la cible médiodorsale. Un homme présentant une atteinte médiodorsale droite du thalamus, avec une atteinte probable du faisceau mamillothalamique du même côté, avait des résultats déficitaires aux épreuves de rappel et de reconnaissance visuelles, comparativement à des volontaires sains appariés pour les caractéristiques démographiques et le quotient intellectuel prémorbide. Son rappel et sa reconnaissance verbaux n’étaient pas significativement altérés. D’autres publications sur ce patient décrivent une lésion centrée sur la subdivision magnocellulaire, qui touchait aussi la subdivision parvocellulaire et des noyaux intralaminaires et médians. Ces données reposent sur un seul patient, dont les publications accessibles ne précisent pas la cause de la lésion, et la contribution des afférences amygdaliennes à cette subdivision reste indéterminée.
+    deficit: amnesia
+    references: [amygdalothalamic-aggleton-1984, amygdalothalamic-russchen-1987, amygdalothalamic-relay-tracing-2015, amygdalothalamic-synapses-2020, amygdalothalamic-ribas-human-dissection-2018, amygdalothalamic-kosteletou-kassotaki-human-diffusion-2026, clinical-edelstyn-2012, clinical-edelstyn-2014, clinical-edelstyn-2016]
+    clinical_references: [clinical-edelstyn-2012, clinical-edelstyn-2014, clinical-edelstyn-2016]
     steps:
       - id: basal-amygdala
         region: nextbrain:right:10216
@@ -3210,11 +3226,11 @@ circuits:
       en: Comparative diffusion tractography estimates broad precentral and prefrontal segments of the frontal aslant tract. In eight patients operated on in the hemisphere dominant for language, stimulation in the opercular or triangular part of the inferior frontal gyrus evoked responses in the superior frontal gyrus. Responses were recorded at supplementary motor sites in four patients. In a separate case, stimulation near the posterior pre-SMA evoked responses in the right posterior inferior frontal gyrus within 30 ms. The fibres carrying these responses, the precise correspondence of this branch between species and the direction of its fibres in humans remain unresolved. The tour leaves out branches to SMA proper and other inferior frontal territories.
       fr: Les comparaisons par tractographie de diffusion estiment de larges segments précentral et préfrontal du faisceau frontal oblique. Chez huit patients opérés dans l’hémisphère dominant pour le langage, la stimulation de la région operculaire ou triangulaire du gyrus frontal inférieur a évoqué des réponses dans le gyrus frontal supérieur. Des réponses ont été enregistrées dans les aires motrices supplémentaires chez quatre patients. Dans une observation distincte, la stimulation à proximité de la partie postérieure de la pré-AMS a évoqué des réponses dans la partie postérieure du gyrus frontal inférieur droit en moins de 30 ms. Les fibres à l’origine de ces réponses, la correspondance précise de cette branche entre les espèces et le sens de projection de ses fibres chez l’humain restent indéterminés. Le parcours laisse de côté les branches qui rejoignent l’aire motrice supplémentaire proprement dite et les autres territoires frontaux inférieurs.
     clinical:
-      en: In 80 patients with acute non-lacunar left-hemisphere stroke, apraxia of speech was associated with injury or hypoperfusion of the left posterior inferior frontal gyrus. In 32 patients with chronic aphasia after left-hemisphere stroke, greater overlap of the lesion with the atlas-defined left frontal aslant tract was associated with apraxia of speech after adjustment for total lesion volume and sex. The model that included nearby cortical lesions and sex dropped the tract-overlap measure. The contribution of the specific branch shown here remains unresolved.
-      fr: Chez 80 patients examinés à la phase aiguë d’un AVC non lacunaire de l’hémisphère gauche, l’apraxie de la parole était associée à une lésion ou à une hypoperfusion de la partie postérieure du gyrus frontal inférieur gauche. Chez 32 patients présentant une aphasie chronique après un AVC de l’hémisphère gauche, un chevauchement plus important de la lésion avec le faisceau frontal oblique gauche délimité dans un atlas était associé à l’apraxie de la parole, après ajustement sur le volume lésionnel total et le sexe. Le modèle intégrant les lésions corticales voisines et le sexe a écarté la mesure du chevauchement avec le faisceau. La contribution propre de la branche présentée ici reste indéterminée.
-    deficit: speech-apraxia
-    references: [frontal-aslant-macaque-tracing, sma-callosal-bozkurt-2017, sma-callosal-vergani-2014, frontal-aslant-tractography, cortical-parcellation, frontal-aslant-comparative, frontal-aslant-human-evoked-potential-series, frontal-aslant-human-evoked-potential-case, speech-frontal, clinical-zhong-2022]
-    clinical_references: [speech-frontal, clinical-zhong-2022]
+      en: The clinical link with supplementary motor area syndrome is partial and concerns the whole left frontal aslant tract. Two adults developed the syndrome after left frontal tumour surgery that injured the tract on diffusion imaging while postoperative MRI showed the supplementary motor area intact. One operation resected a left frontal opercular tumour and the other passed through the superior frontal sulcus to reach a ventricular tumour. Both patients had impaired speech and right-sided weakness of voluntary movement after surgery and walked independently one month later. In a series of 56 patients after resection of gliomas in the supplementary motor area region, all those whose tract was disrupted during surgery developed the syndrome, compared with half of those whose tract was preserved, a difference that did not reach statistical significance. Neither report separates the opercular branch to the pre-supplementary motor region from the rest of the tract, and its own contribution remains unresolved.
+      fr: Le lien clinique avec le syndrome de l’aire motrice supplémentaire est partiel et concerne l’ensemble du faisceau frontal oblique gauche. Deux adultes ont présenté ce syndrome après une chirurgie tumorale frontale gauche qui avait atteint le faisceau à l’imagerie de diffusion, alors que l’IRM postopératoire montrait une aire motrice supplémentaire intacte. L’une des interventions a réséqué une tumeur operculaire frontale gauche et l’autre a traversé le sillon frontal supérieur pour atteindre une tumeur ventriculaire. Après l’intervention, les deux patientes avaient une parole altérée et une faiblesse des mouvements volontaires du côté droit, et toutes deux marchaient de façon autonome un mois plus tard. Dans une série de 56 patients opérés d’un gliome de la région de l’aire motrice supplémentaire, tous ceux dont le faisceau avait été interrompu pendant l’intervention ont présenté le syndrome, contre la moitié de ceux dont le faisceau était préservé, une différence qui n’atteignait pas le seuil de signification statistique. Aucune de ces publications ne distingue la branche operculaire qui rejoint la région motrice présupplémentaire du reste du faisceau, et sa contribution propre reste indéterminée.
+    deficit: sma-syndrome
+    references: [frontal-aslant-macaque-tracing, sma-callosal-bozkurt-2017, sma-callosal-vergani-2014, frontal-aslant-tractography, cortical-parcellation, frontal-aslant-comparative, frontal-aslant-human-evoked-potential-series, frontal-aslant-human-evoked-potential-case, clinical-agyemang-2023, clinical-young-2022]
+    clinical_references: [clinical-agyemang-2023, clinical-young-2022]
     steps:
       - id: inferior-frontal-area-44
         region: hcp-mmp:left:74
@@ -3506,11 +3522,11 @@ circuits:
       en: The two landmarks represent an ipsilateral projection traced in macaques. A human diffusion tractography study used the whole mediodorsal nucleus as its thalamic seed and estimated streamlines connecting it to area 9-46d through the anterior limb of the internal capsule. A separate human tractography study compared four regions of the mediodorsal nucleus defined by diffusion data. The estimated connectivity to area 46 in the Brainnetome atlas was stronger for the dorsal region than for the medial and central regions. The dorsal and lateral estimates did not differ significantly. That study used different boundaries for both the thalamic and cortical regions. The exact course, endpoints and direction of the corresponding human projection remain unresolved. The streamlines drawn are the whole left anterior thalamic radiation, not this projection alone. The tour omits other thalamic inputs to dorsal area 46.
       fr: Les deux repères représentent une projection ipsilatérale mise en évidence par traçage chez le macaque. Une étude de tractographie de diffusion chez l’humain a pris l’ensemble du noyau médiodorsal comme région de départ thalamique et a estimé des trajectoires reliant ce noyau à l’aire 9-46d par le bras antérieur de la capsule interne. Une autre étude de tractographie chez l’humain a comparé quatre territoires du noyau médiodorsal délimités à partir de données de diffusion. La connectivité estimée avec l’aire 46 de l’atlas Brainnetome était plus forte pour le territoire dorsal que pour les territoires médial et central. La différence entre les territoires dorsal et latéral n’atteignait pas le seuil de signification statistique. Cette étude utilisait d’autres délimitations pour les territoires thalamique et cortical. Le trajet précis, les extrémités et le sens de la projection correspondante chez l’humain restent indéterminés. Les trajectoires affichées sont l’ensemble de la radiation thalamique antérieure gauche, et non cette seule projection. Le parcours laisse de côté les autres afférences thalamiques de la partie dorsale de l’aire 46.
     clinical:
-      en: Seven veterans with focal lesions involving the left dorsolateral prefrontal cortex scored below healthy veterans on letter–number sequencing. The task requires recalling digits in numerical order followed by letters in alphabetical order. The overall four-group comparison yielded p = 0.05. The only reported significant pairwise difference on this task was against healthy controls. In the broader dorsolateral prefrontal lesion sample, overlap was greatest in Brodmann area 9. In Bellebaum’s series of 13 adults with focal thalamic infarcts, one patient’s backward digit span score four months after stroke was 2.19 standard deviations below the healthy control mean. Follow-up MRI showed a left mediodorsal thalamic lesion. Initial MRI also showed oedema near the left red nucleus. The authors observed no clear pattern of neuropsychological deficits by lesion location across the series. In Geier’s separate 22-person chronic thalamic stroke group, working memory was impaired at the group level. Lesions extended into several other thalamic nuclei across the group, and the authors found no detectable association between cognitive impairment and mediodorsal damage specifically. These studies leave the effects of selective injury to this projection unresolved.
-      fr: Sept anciens combattants présentant des lésions focales touchant le cortex préfrontal dorsolatéral gauche ont obtenu de moins bons résultats que des anciens combattants sans lésion cérébrale à l’épreuve de séquences lettres–chiffres. L’épreuve demande de rappeler les chiffres dans l’ordre numérique, puis les lettres dans l’ordre alphabétique. La comparaison globale des quatre groupes donnait p = 0,05. Sur cette épreuve, la seule différence significative rapportée concernait la comparaison avec les témoins sains. Dans l’ensemble du groupe présentant des lésions préfrontales dorsolatérales, le chevauchement lésionnel était maximal dans l’aire 9 de Brodmann. Dans la série de Bellebaum, qui comprenait 13 adultes présentant un infarctus thalamique focal, une patiente testée quatre mois après l’AVC a obtenu à l’épreuve d’empan de chiffres en ordre inverse un score inférieur de 2,19 écarts-types à la moyenne des témoins sains. L’IRM de suivi montrait une lésion du noyau médiodorsal gauche du thalamus. L’IRM initiale montrait aussi un œdème près du noyau rouge gauche. Dans cette série, les auteurs n’ont pas observé de profil neuropsychologique clairement lié au siège des lésions. Dans la série distincte de Geier, les 22 personnes en phase chronique après un AVC thalamique présentaient, à l’échelle du groupe, un déficit de mémoire de travail. Les lésions touchaient aussi plusieurs autres noyaux thalamiques dans ce groupe. Les auteurs n’ont pas détecté d’association spécifique entre l’atteinte du noyau médiodorsal et les troubles cognitifs. Les effets d’une lésion sélective de cette projection restent indéterminés.
-    deficit: working-memory
-    references: [mediodorsal-prefrontal-macaque-tracing, mediodorsal-prefrontal-human-diffusion, mediodorsal-prefrontal-human-subdivision, cortical-parcellation, clinical-barbey-working-memory-2013, clinical-bellebaum-thalamic-working-memory-2005, clinical-geier-mediodorsal-stroke-2026]
-    clinical_references: [clinical-barbey-working-memory-2013, clinical-bellebaum-thalamic-working-memory-2005, clinical-geier-mediodorsal-stroke-2026]
+      en: The clinical link with anterograde amnesia is partial at the parvocellular mediodorsal stop. In 17 adults tested more than a year after thalamic infarction, recognition of studied picture pairs and cued recall of the paired picture were poorer than in 28 matched healthy controls. Among nine patients with unilateral lesions involving the parvocellular mediodorsal nucleus, greater estimated volume loss there was associated with poorer cued recall. That association pooled left and right lesions and came from regression through the origin; ordinary regression with an intercept was not significant. The lesions also involved other thalamic nuclei, and the contribution of the projection to dorsal prefrontal cortex remains unresolved.
+      fr: Le lien clinique avec l’amnésie antérograde est partiel, au niveau du repère médiodorsal parvocellulaire. Chez 17 adultes évalués plus d’un an après un infarctus thalamique, la reconnaissance de paires d’images étudiées et le rappel indicé de l’image associée étaient moins bons que chez 28 témoins sains appariés. Parmi neuf patients présentant une lésion unilatérale touchant le noyau médiodorsal parvocellulaire, une perte de volume estimée plus importante dans ce noyau était associée à un rappel indicé plus faible. Cette association regroupait des lésions gauches et droites et reposait sur une régression passant par l’origine ; une régression ordinaire avec ordonnée à l’origine n’était pas significative. Les lésions touchaient aussi d’autres noyaux thalamiques, et la contribution de la projection vers le cortex préfrontal dorsal reste indéterminée.
+    deficit: amnesia
+    references: [mediodorsal-prefrontal-macaque-tracing, mediodorsal-prefrontal-human-diffusion, mediodorsal-prefrontal-human-subdivision, mediodorsal-human-transcriptomic-divisions, cortical-parcellation, clinical-pergola-2012]
+    clinical_references: [clinical-pergola-2012]
     steps:
       - id: parvocellular-mediodorsal
         region: nextbrain:left:313
@@ -3522,8 +3538,8 @@ circuits:
           en: In macaques, retrograde tracer injections into dorsal area 46 labelled neurons mainly in the middle of the dorsal part of the parvocellular division.
           fr: Chez le macaque, les injections de traceur rétrograde dans l’aire 46 dorsale ont surtout marqué des neurones dans la portion moyenne de la partie dorsale de la division parvocellulaire.
         mapping:
-          en: NextBrain labels the whole parvocellular division. The traced neurons were concentrated in a subregion of this division.
-          fr: NextBrain délimite l’ensemble de la division parvocellulaire. Les neurones marqués se concentraient dans une région de cette division.
+          en: The human mediodorsal nucleus is traditionally divided into a medial magnocellular, a lateral-ventral parvocellular and a lateral-dorsal multiform part. In two coronal sections of post-mortem human thalamus, spatial transcriptomics mapped distinct excitatory neuron populations preferentially onto the magnocellular and parvocellular parts. NextBrain labels the whole parvocellular division. The traced neurons were concentrated in a subregion of this division.
+          fr: Le noyau médiodorsal humain est classiquement divisé en une partie magnocellulaire médiale, une partie parvocellulaire latéro-ventrale et une partie multiforme latéro-dorsale. Sur deux coupes coronales de thalamus humain post mortem, la transcriptomique spatiale a situé des populations distinctes de neurones excitateurs de préférence dans les parties magnocellulaire et parvocellulaire. NextBrain délimite l’ensemble de la division parvocellulaire. Les neurones marqués se concentraient dans une région de cette division.
         view: anterior
         plane: coronal
       - id: dorsal-prefrontal

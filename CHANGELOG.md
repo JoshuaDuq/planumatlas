@@ -11,7 +11,7 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 - **Circuits** has two new tours: the posterior inferior longitudinal fasciculus's input to left
   occipitotemporal reading cortex, whose second landmark draws the left inferior longitudinal fasciculus,
   and the projection between the primary auditory cortices across the corpus callosum.
-- **Deficits** has 177 profiles, 476 findings and 1,281 references, up from 149, 271 and 472, among them
+- **Deficits** has 177 profiles, 477 findings and 1,286 references, up from 149, 271 and 472, among them
   optic aphasia, heautoscopy, autotopagnosia, symptomatic palatal tremor, ocular bobbing, Foix–Chavany–Marie
   syndrome and acquired central hypoventilation.
 
@@ -24,6 +24,12 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   input to the flocculus to gaze-evoked nystagmus, the basal amygdalar projection to area 25 to impaired
   emotion recognition, and the callosal pathway between supplementary motor areas to supplementary motor
   area syndrome.
+- Three more tours link to the deficit their patient evidence supports: the amygdalar input to the
+  mediodorsal thalamus and the mediodorsal projection to dorsal prefrontal cortex to amnesia, and the
+  opercular branch of the frontal aslant tract to supplementary motor area syndrome. Amnesia's thalamic
+  finding now covers recall after thalamic injury, including parvocellular mediodorsal damage and a right
+  mediodorsal case, and supplementary motor area syndrome has a finding for injury to the frontal aslant
+  tract.
 - Several findings colour fewer or narrower regions where the study did not support the whole parcel:
   hippocampal amnesia marks CA1's pyramidal layer rather than the whole hippocampus, abulia the caudate
   heads, and nine findings whose results were exploratory, in white matter or unplaced no longer colour
