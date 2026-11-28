@@ -51,6 +51,8 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   lobules there as on the other levels. The pontine motor tour's whole route shows its lobule V.
 - The **Internal anatomy** list marks the **Teaching set** **(Default)**, as the **Atlas** and **Colour**
   lists mark theirs.
+- A lesion report's **Tracts** section folds the bundles the lesion misses under one line that counts
+  them, such as "32 bundles not reached", where it listed every name in a paragraph.
 - A guided circuit is no longer left out of a brain that lacks one of its landmarks' tracts: that landmark
   draws none, and its notes say which brain has them. The corticospinal landmarks name their streamlines
   in that generated line instead of a written sentence.

@@ -112,6 +112,7 @@ const KINDS: Record<string, string> = {
   'mri.dialog.moved': 'd',
   'viewport.loadingWithTotal': 'nn',
   'lesion.cited': 'sn',
+  'lesion.notReached': 'n',
   'overlay.reasons.fileSize': 'nn',
   'overlay.reasons.declared': 'nn',
   'overlay.reasons.inflated': 'n',

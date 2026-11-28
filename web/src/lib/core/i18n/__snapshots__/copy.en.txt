@@ -1478,8 +1478,11 @@
    "[\"\",\"Alpha\"] → \" of Alpha\""
   ],
   "notReached": [
-   "[\"Alpha\"] → \"Not reached: Alpha\"",
-   "[\"\"] → \"Not reached: \""
+   "[0] → \"0 bundles not reached\"",
+   "[1] → \"1 bundle not reached\"",
+   "[2] → \"2 bundles not reached\"",
+   "[183] → \"183 bundles not reached\"",
+   "[12345] → \"12345 bundles not reached\""
   ],
   "tractsChoose": "Choose a bundle to draw only its streamlines through the lesion.",
   "showTract": [

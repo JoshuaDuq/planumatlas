@@ -9,6 +9,7 @@
   import { sharePercent, tractRows } from '../../lib/core/lesion/report.ts';
   import type { LesionStore } from '../../lib/state/lesion.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
+  import Disclosure from '../../lib/ui/Disclosure.svelte';
   import StatusLine from '../../lib/ui/StatusLine.svelte';
   import Swatch from '../../lib/ui/Swatch.svelte';
 
@@ -111,7 +112,13 @@
     {/each}
   </ul>
   {#if tracts.missed.length}
-    <p class="detail-note">{copy.notReached(tracts.missed.map(bundleName).join(', '))}</p>
+    <Disclosure summary={copy.notReached(tracts.missed.length)}>
+      <ul class="lesion-missed">
+        {#each tracts.missed as id (id)}
+          <li>{bundleName(id)}</li>
+        {/each}
+      </ul>
+    </Disclosure>
   {/if}
   <p class="detail-note">{copy.tractsCaveat}</p>
 {/if}
@@ -180,6 +187,15 @@
       .lesion-tract {
         min-height: 44px;
       }
+    }
+    /* Under the summary's text, past its chevron. */
+    .lesion-missed {
+      margin: 0 0 var(--space-2);
+      padding: 0 0 0 calc(12px + var(--space-2));
+      list-style: none;
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      color: var(--text-secondary);
     }
     :global(.lesion-tract-status:empty) {
       display: none;

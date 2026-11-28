@@ -1478,8 +1478,11 @@
    "[\"\",\"Alpha\"] → \" sur Alpha\""
   ],
   "notReached": [
-   "[\"Alpha\"] → \"Non atteints<NNBSP>: Alpha\"",
-   "[\"\"] → \"Non atteints<NNBSP>: \""
+   "[0] → \"0 faisceau non atteint\"",
+   "[1] → \"1 faisceau non atteint\"",
+   "[2] → \"2 faisceaux non atteints\"",
+   "[183] → \"183 faisceaux non atteints\"",
+   "[12345] → \"12345 faisceaux non atteints\""
   ],
   "tractsChoose": "Choisissez un faisceau pour n’afficher que ses trajectoires traversant la lésion.",
   "showTract": [

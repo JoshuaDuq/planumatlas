@@ -39,7 +39,8 @@ export const en = {
   counting: (counted: string, total: string) => `Counting bundle ${counted} of ${total}…`,
   tractsFailed: 'The tracts could not be counted.',
   ofTotal: (crossing: string, total: string) => `${crossing} of ${total}`,
-  notReached: (names: string) => `Not reached: ${names}`,
+  notReached: (count: number) =>
+    count === 1 ? '1 bundle not reached' : `${count} bundles not reached`,
   tractsChoose: 'Choose a bundle to draw only its streamlines through the lesion.',
   showTract: (bundle: string, crossing: string) =>
     `Draw the ${crossing} streamlines of ${bundle} through the lesion`,
@@ -130,7 +131,8 @@ export const fr: typeof en = {
   counting: (counted: string, total: string) => `Faisceau ${counted} sur ${total} en cours…`,
   tractsFailed: 'Les faisceaux n’ont pas pu être comptés.',
   ofTotal: (crossing: string, total: string) => `${crossing} sur ${total}`,
-  notReached: (names: string) => `Non atteints : ${names}`,
+  notReached: (count: number) =>
+    count <= 1 ? `${count} faisceau non atteint` : `${count} faisceaux non atteints`,
   tractsChoose: 'Choisissez un faisceau pour n’afficher que ses trajectoires traversant la lésion.',
   showTract: (bundle: string, crossing: string) =>
     `Afficher les ${crossing} trajectoires de ${bundle} traversant la lésion`,
