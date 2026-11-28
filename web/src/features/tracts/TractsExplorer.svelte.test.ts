@@ -84,7 +84,17 @@ function props(engine: Engine, extra: Record<string, unknown> = {}) {
   };
 }
 
-const key = (name: string) => page.getByRole('checkbox', { name, exact: true });
+// A key's name is its bundle's with the text the key shows: "Arcuate fasciculus · left" has the key
+// "Arcuate fasciculus L, left", and the middle peduncle, a tract of one bundle, the key "…, whole".
+const GLYPHS: Record<string, string> = { left: 'L', right: 'R', gauche: 'G', droite: 'D' };
+const keyName = (bundle: string) =>
+  bundle === 'Middle cerebellar peduncle'
+    ? `${bundle}, whole`
+    : bundle.replace(
+        / · (left|right|gauche|droite)$/,
+        (_, side: string) => ` ${GLYPHS[side]}, ${side}`,
+      );
+const key = (bundle: string) => page.getByRole('checkbox', { name: keyName(bundle), exact: true });
 const el = (name: string) => key(name).element() as HTMLInputElement;
 const search = () => page.getByRole('searchbox');
 const searchEl = () => search().element() as HTMLInputElement;
@@ -119,9 +129,20 @@ describe('the list', () => {
     const boxes = [
       ...document.querySelectorAll<HTMLInputElement>('section input[type="checkbox"]'),
     ];
-    expect(boxes.map((box) => box.getAttribute('aria-label'))).toEqual(names('en'));
+    expect(boxes.map((box) => box.getAttribute('aria-label'))).toEqual(names('en').map(keyName));
+    // Label in name (WCAG 2.5.3): each key's name holds, as a word, the text the key shows.
+    for (const box of boxes) {
+      const words = box
+        .getAttribute('aria-label')!
+        .toLowerCase()
+        .split(/[\s,·]+/);
+      expect(words).toContain(box.parentElement!.textContent!.trim().toLowerCase());
+    }
     await expect.element(group('Arcuate fasciculus')).toBeVisible();
-    // The key shows a letter; its tooltip and its name are the whole bundle name.
+    // The key shows a letter; its tooltip is the whole bundle name, its name holds the letter too.
+    expect(el('Arcuate fasciculus · left').getAttribute('aria-label')).toBe(
+      'Arcuate fasciculus L, left',
+    );
     expect(el('Arcuate fasciculus · left').dataset.tooltip).toBe('Arcuate fasciculus · left');
     expect(el('Arcuate fasciculus · left').parentElement!.textContent!.trim()).toBe('L');
     // The whole callosum is one "Whole" key on a row named for the tract; a segment's key names its part.

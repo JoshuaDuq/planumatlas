@@ -168,7 +168,7 @@ describe('selection', () => {
     const other = rows.find((row) => row.region.id !== REGION && row.region.hemisphere === 'left')!;
     const name = nameOf(other.region.id);
     page
-      .getByRole('button', { name: `${name}, left`, exact: true })
+      .getByRole('button', { name: `${name} L, left`, exact: true })
       .element()
       .focus();
     await userEvent.keyboard('v');

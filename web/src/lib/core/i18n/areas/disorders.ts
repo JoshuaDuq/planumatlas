@@ -27,7 +27,7 @@ export const en = {
   } satisfies Record<DisorderMeasure, { smaller: string; larger: string }>,
   none: 'No disorder’s difference here survives its table’s false discovery rate.',
   // A row paints its disorder; said with the row's name.
-  paint: (name: string) => `Paint ${name} on the brain`,
+  paint: (name: string, meta: string) => `Paint ${name}, ${meta}, on the brain`,
   shown: (name: string) => `On the brain: ${name}.`,
   cohort: (patients: string, controls: string) => `${patients} patients, ${controls} controls`,
   note: (rate: string) =>
@@ -63,7 +63,7 @@ export const fr: typeof en = {
     volume: { smaller: 'plus petit', larger: 'plus grand' },
   },
   none: 'Aucune différence d’un trouble ne survit ici au taux de fausses découvertes de son tableau.',
-  paint: (name: string) => `Peindre ${name} sur le cerveau`,
+  paint: (name: string, meta: string) => `Peindre ${name}, ${meta}, sur le cerveau`,
   shown: (name: string) => `Sur le cerveau\u202f: ${name}.`,
   cohort: (patients: string, controls: string) => `${patients} patients, ${controls} témoins`,
   note: (rate: string) =>

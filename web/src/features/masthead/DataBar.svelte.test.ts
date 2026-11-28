@@ -69,11 +69,9 @@ const chosen = (name: string) => {
   const [button] = pressed(name);
   return [nameOf(button), asideOf(button)].filter(Boolean).join(' · ');
 };
-// What an option says under its name: its description.
+// What an option says under its name.
 const noteOf = (button: HTMLElement) =>
-  button.hasAttribute('aria-describedby')
-    ? document.getElementById(button.getAttribute('aria-describedby')!)!.textContent
-    : null;
+  button.querySelector('.data-option-note')?.textContent ?? null;
 const note = (name: string) => noteOf(pressed(name)[0])!;
 const notes = (name: string) => options(name).map(noteOf);
 // Named for what it draws first: the subject's kind (FR « Sujet »), or the atlas where that is unknown.
@@ -115,7 +113,7 @@ async function expectAxeClean(
         // The summary refits in the frame after its size changes.
         await settle();
         const results = await axe.run(document.body, {
-          runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'],
+          runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'],
           rules: { region: { enabled: false } },
         });
         expect(
@@ -180,7 +178,7 @@ describe('DataBar lists', () => {
     expect(names('Subject')).toEqual(['CDMD sub_013', 'CDMD sub_014']);
   });
 
-  test('every atlas and level says what it is, the chosen one in full; an option is named by its name alone', async () => {
+  test('every atlas and level says what it is, the chosen one in full; an option is named by all it shows', async () => {
     const view = await wide(barProps({ atlas: 'hcp-mmp' }));
     expect(notes('Atlas')).toEqual([
       'Sulcal and gyral regions, 74 per hemisphere',
@@ -196,9 +194,10 @@ describe('DataBar lists', () => {
       'One colour per lobe',
     ]);
     expect(notes('Subject')).toEqual(['One individual’s MRI reconstruction', null]);
+    // Named by all it shows, the note too, so the visible text is the name (WCAG 2.5.3).
     await expect
-      .element(list('Atlas').getByRole('button', { name: 'HCP-MMP', exact: true }))
-      .toHaveAccessibleDescription('Multimodal areas, 180 per hemisphere (Glasser 2016)');
+      .element(list('Atlas').getByRole('button', { name: /^HCP-MMP / }))
+      .toHaveAccessibleName('HCP-MMP Multimodal areas, 180 per hemisphere (Glasser 2016)');
     await view.rerender({ bar: barProps({ atlas: 'destrieux', lang: 'fr' }) });
     expect(notes('Atlas').slice(0, 2)).toEqual([
       'Régions des sillons et des gyrus, 74 par hémisphère',

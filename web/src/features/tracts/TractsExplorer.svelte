@@ -501,7 +501,7 @@
                 {lang}
                 {loaded}
                 {pending}
-                glyphs={t(lang, 'sides').glyphs}
+                sides={t(lang, 'sides')}
                 {text}
                 hidden={!kept.has(row.key)}
                 ontoggle={toggle}

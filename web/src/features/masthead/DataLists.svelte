@@ -280,8 +280,9 @@
   <button
     type="button"
     class="data-option"
-    aria-labelledby={option.aside ? `${id}-name ${id}-aside` : `${id}-name`}
-    aria-describedby={option.note ? `${id}-note` : undefined}
+    aria-labelledby={[`${id}-name`, option.aside && `${id}-aside`, option.note && `${id}-note`]
+      .filter(Boolean)
+      .join(' ')}
     aria-pressed={option.value === pressed}
     aria-disabled={unavailable || undefined}
     onpointerenter={name === 'atlas' ? onAtlasIntent : undefined}

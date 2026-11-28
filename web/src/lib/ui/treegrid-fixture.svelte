@@ -96,7 +96,7 @@
       {#key hidden.has(node.id)}
         <button
           type="button"
-          aria-label={`Toggle ${node.label}`}
+          aria-label={`Toggle ${node.label}, ${hidden.has(node.id) ? 'off' : 'on'}`}
           disabled={wide && node.id === 'precentral'}
           onclick={() => flip(node.id)}
         >

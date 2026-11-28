@@ -288,10 +288,8 @@
   ],
   "partner": "Compare with",
   "denominator": "Shares of this region’s full pial surface.",
-  "highlight": [
-   "[\"Alpha\",\"\",\"Alpha\"] → \"Highlight overlap with Alpha, , Alpha of this region\"",
-   "[\"\",\"Alpha\",\"\"] → \"Highlight overlap with , Alpha,  of this region\""
-  ],
+  "highlightWith": "Highlight overlap with",
+  "ofRegion": "of this region",
   "more": [
    "[0] → \"0 more overlapping regions\"",
    "[1] → \"1 more overlapping region\"",
@@ -1659,7 +1657,7 @@
   "clearSearch": "Clear search",
   "expandAll": "Expand all",
   "collapseAll": "Collapse all",
-  "downloadTable": "Download table (CSV)",
+  "downloadTable": "Download table as CSV",
   "tableDownloaded": "Region table CSV downloaded.",
   "searchLabel": "Search regions",
   "searchResults": "Search results",
@@ -2273,8 +2271,8 @@
   },
   "none": "No disorder’s difference here survives its table’s false discovery rate.",
   "paint": [
-   "[\"Alpha\"] → \"Paint Alpha on the brain\"",
-   "[\"\"] → \"Paint  on the brain\""
+   "[\"Alpha\",\"\"] → \"Paint Alpha, , on the brain\"",
+   "[\"\",\"Alpha\"] → \"Paint , Alpha, on the brain\""
   ],
   "shown": [
    "[\"Alpha\"] → \"On the brain: Alpha.\"",

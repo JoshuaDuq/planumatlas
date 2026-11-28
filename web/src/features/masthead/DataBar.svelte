@@ -399,11 +399,12 @@
     onfocus={intent}
   >
     <span bind:this={summaryNode} class="data-summary">
+      <!-- The space keeps the parts apart as words, where the flex gap only parts them on screen. -->
       {#each summaryShown as { part, text } (part)}
         <span class="data-summary-part" data-part={part}>
           <span class="data-summary-caption">{captions[part]}</span>
           <span class="data-summary-value">{text}</span>
-        </span>
+        </span>{' '}
       {/each}
     </span>
   </button>

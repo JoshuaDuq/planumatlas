@@ -2,8 +2,9 @@ export const en = {
   heading: (target: string) => `Overlap with ${target}`,
   partner: 'Compare with',
   denominator: 'Shares of this region’s full pial surface.',
-  highlight: (name: string, area: string, share: string) =>
-    `Highlight overlap with ${name}, ${area}, ${share} of this region`,
+  // A row's name, around what it shows: "Highlight overlap with X 956.4 mm², 34.4 % of this region".
+  highlightWith: 'Highlight overlap with',
+  ofRegion: 'of this region',
   more: (count: number) => `${count} more overlapping ${count === 1 ? 'region' : 'regions'}`,
   columns: ['Region', 'Area (mm²)', 'Share (%)'],
   unassigned: 'Unassigned',
@@ -35,8 +36,8 @@ export const fr: typeof en = {
   heading: (target: string) => `Recouvrement avec ${target}`,
   partner: 'Comparer avec',
   denominator: 'Parts de toute la surface piale de cette région.',
-  highlight: (name: string, area: string, share: string) =>
-    `Tracer le recouvrement avec ${name}, ${area}, ${share} de cette région`,
+  highlightWith: 'Tracer le recouvrement avec',
+  ofRegion: 'de cette région',
   more: (count: number) =>
     count === 1 ? '1 autre région en recouvrement' : `${count} autres régions en recouvrement`,
   columns: ['Région', 'Surface (mm²)', 'Part (%)'],

@@ -553,7 +553,7 @@ describe('axe', () => {
   const run = async () =>
     (
       await axe.run(grid().parentElement!, {
-        runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'],
+        runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'],
       })
     ).violations;
 

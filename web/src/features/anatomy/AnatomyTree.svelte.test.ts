@@ -140,11 +140,11 @@ describe('structure', () => {
     const calls = mount({ open: ALL, groups: [{ ...frontal, rows: hiddenRight }, ...others] });
     const left = key('d:left:1', 'left');
     const right = key('d:left:1', 'right');
-    expect(left.getAttribute('aria-label')).toBe('Precentral gyrus, left');
+    expect(left.getAttribute('aria-label')).toBe('Precentral gyrus L, left');
     expect(left.dataset.tooltip).toBeUndefined();
     expect(left.dataset.state).toBe('shown');
     expect(right.getAttribute('aria-label')).toBe(
-      'Precentral gyrus, right: Hidden. Activate to reveal.',
+      'Precentral gyrus R, right: Hidden. Activate to reveal.',
     );
     expect(right.dataset.tooltip).toBe(right.getAttribute('aria-label'));
     expect(right.dataset.state).toBe('hidden');
@@ -479,7 +479,7 @@ describe('visibility eyes', () => {
   test('the name is the action; pressing flips it in place, says so, and keeps focus', async () => {
     const calls = mount({ open: ALL });
     const eye = eyes('cortex:Limbic')[0];
-    expect(eye.getAttribute('aria-label')).toBe('Hide Limbic, left');
+    expect(eye.getAttribute('aria-label')).toBe('Hide Limbic L, left');
     expect(eye.hasAttribute('aria-pressed')).toBe(false);
     expect(eye.dataset.state).toBe('shown');
     expect(eye.querySelector('path[d="m3 3 18 18"]')).toBeNull();
@@ -488,7 +488,7 @@ describe('visibility eyes', () => {
     expect(calls).toEqual(['hide d:left:3']);
     expect(eyes('cortex:Limbic')[0]).toBe(eye);
     expect(active()).toBe(eye);
-    expect(eye.getAttribute('aria-label')).toBe('Show Limbic, left');
+    expect(eye.getAttribute('aria-label')).toBe('Show Limbic L, left');
     expect(eye.dataset.state).toBe('hidden');
     expect(eye.querySelector('path[d="m3 3 18 18"]')).not.toBeNull();
     expect(eye.querySelector('.visibility-side')!.textContent).toBe('L');
@@ -502,29 +502,29 @@ describe('visibility eyes', () => {
   test('a group’s side is partly hidden when one of its regions is, and says so in name and tooltip', async () => {
     const calls = mount({ open: ALL });
     const side = eyes('cortex:Frontal')[1];
-    expect(side.getAttribute('aria-label')).toBe('Hide Frontal, right');
+    expect(side.getAttribute('aria-label')).toBe('Hide Frontal R, right');
     key('d:left:1', 'right').focus();
     await press('v');
     expect(side.dataset.partial).toBe('true');
     expect(side.dataset.state).toBe('shown');
-    expect(side.getAttribute('aria-label')).toBe('Hide Frontal, right, partially hidden');
-    expect(side.dataset.tooltip).toBe('Hide Frontal, right · partially hidden');
+    expect(side.getAttribute('aria-label')).toBe('Hide Frontal R, right, partially hidden');
+    expect(side.dataset.tooltip).toBe('Hide Frontal R, right · partially hidden');
     await userEvent.click(side);
     expect(side.dataset.state).toBe('hidden');
     expect(side.dataset.partial).toBe('false');
-    expect(side.getAttribute('aria-label')).toBe('Show Frontal, right');
+    expect(side.getAttribute('aria-label')).toBe('Show Frontal R, right');
     expect(calls).toEqual(['hide d:right:1', 'hide d:right:1,d:right:2']);
   });
 
   test('French: names, glyphs and the announcement', async () => {
     mount({ open: ALL, lang: 'fr' });
     const eye = eyes('cortex:Frontal')[1];
-    expect(eye.getAttribute('aria-label')).toBe('Masquer Frontal, droite');
+    expect(eye.getAttribute('aria-label')).toBe('Masquer Frontal D, droite');
     expect(eye.querySelector('.visibility-side')!.textContent).toBe('D');
     await userEvent.click(eye);
     expect(announced()).toBe('');
     expect(row('d:left:1').getAttribute('aria-label')).toBe('Precentral gyrus, gauche et droite');
-    expect(key('d:left:1', 'right').getAttribute('aria-label')).toBe('Precentral gyrus, droite');
+    expect(key('d:left:1', 'right').getAttribute('aria-label')).toBe('Precentral gyrus D, droite');
     expect(keys('d:left:1').map((entry) => entry.textContent!.trim())).toEqual(['G', 'D']);
     expect(grid().getAttribute('aria-label')).toBe('Parcourir l’anatomie');
     expect(row('cortex:Frontal').getAttribute('aria-label')).toBe('Frontal, 3 régions');
@@ -564,7 +564,7 @@ describe('selection and focus', () => {
     await userEvent.click(page.getByRole('button', { name: 'Expand all' }));
     expect(tabStops()).toEqual([row('d:left:3')]);
     // The table download is the header's last control, just before the grid.
-    page.getByRole('button', { name: 'Download table (CSV)' }).element().focus();
+    page.getByRole('button', { name: 'Download table as CSV' }).element().focus();
     await press('{Tab}');
     expect(active()).toBe(row('d:left:3'));
     await press('{Tab}');

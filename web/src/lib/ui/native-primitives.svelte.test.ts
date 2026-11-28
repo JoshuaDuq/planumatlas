@@ -18,7 +18,7 @@ import StatusLine from './StatusLine.svelte';
 import Swatch from './Swatch.svelte';
 import { scrollToTop, showOpenedRegion } from './scroll.ts';
 
-const WCAG = ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'];
+const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 async function expectAxeClean() {
   const results = await axe.run(document.body, {

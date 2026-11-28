@@ -288,10 +288,8 @@
   ],
   "partner": "Comparer avec",
   "denominator": "Parts de toute la surface piale de cette région.",
-  "highlight": [
-   "[\"Alpha\",\"\",\"Alpha\"] → \"Tracer le recouvrement avec Alpha, , Alpha de cette région\"",
-   "[\"\",\"Alpha\",\"\"] → \"Tracer le recouvrement avec , Alpha,  de cette région\""
-  ],
+  "highlightWith": "Tracer le recouvrement avec",
+  "ofRegion": "de cette région",
   "more": [
    "[0] → \"0 autres régions en recouvrement\"",
    "[1] → \"1 autre région en recouvrement\"",
@@ -1659,7 +1657,7 @@
   "clearSearch": "Effacer la recherche",
   "expandAll": "Tout déplier",
   "collapseAll": "Tout replier",
-  "downloadTable": "Télécharger le tableau (CSV)",
+  "downloadTable": "Télécharger le tableau en CSV",
   "tableDownloaded": "Fichier CSV du tableau des régions téléchargé.",
   "searchLabel": "Rechercher des régions",
   "searchResults": "Résultats de recherche",
@@ -2273,8 +2271,8 @@
   },
   "none": "Aucune différence d’un trouble ne survit ici au taux de fausses découvertes de son tableau.",
   "paint": [
-   "[\"Alpha\"] → \"Peindre Alpha sur le cerveau\"",
-   "[\"\"] → \"Peindre  sur le cerveau\""
+   "[\"Alpha\",\"\"] → \"Peindre Alpha, , sur le cerveau\"",
+   "[\"\",\"Alpha\"] → \"Peindre , Alpha, sur le cerveau\""
   ],
   "shown": [
    "[\"Alpha\"] → \"Sur le cerveau<NNBSP>: Alpha.\"",

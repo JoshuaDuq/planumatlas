@@ -6,9 +6,9 @@ import { expect } from 'vitest';
 import { cdp, page } from 'vitest/browser';
 import '../../styles/index.css';
 
-const TAGS = ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'];
+const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
-/** axe (wcag2a/aa, 21aa, 22aa) on what is rendered now, in one theme and at one width. */
+/** axe (wcag2a/aa, 21a/aa, 22aa) on what is rendered now, in one theme and at one width. */
 export async function expectAxeCleanOnce(
   theme: 'light' | 'dark',
   width: 1280 | 390,

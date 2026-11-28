@@ -97,7 +97,7 @@ describe('bindRoving against the APG toolbar keyboard table', () => {
     html(toolbar);
     bindRoving(host.firstElementChild as HTMLElement);
     const { violations } = await axe.run(host, {
-      runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'],
+      runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'],
     });
     expect(violations).toEqual([]);
   });

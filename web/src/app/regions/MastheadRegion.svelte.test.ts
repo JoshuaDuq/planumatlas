@@ -251,9 +251,12 @@ describe('Full screen and Save image', () => {
 describe('the data bar', () => {
   // The data lists are behind the masthead's one summary, at every width.
   const openData = () => userEvent.click(page.getByRole('button', { name: /^Subject / }));
+  // An option is named by its name, then the note under it.
   const choose = (list: string, name: string) =>
     userEvent.click(
-      page.getByRole('toolbar', { name: list, exact: true }).getByRole('button', { name }),
+      page
+        .getByRole('toolbar', { name: list, exact: true })
+        .getByRole('button', { name: new RegExp(`^${name}( |$)`) }),
     );
 
   test('Colour lifts the paint, then chooses the colouring', async () => {

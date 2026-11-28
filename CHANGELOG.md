@@ -6,6 +6,18 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
 
+### Fixed
+
+- A control's spoken name now holds the words it shows, so voice control finds it by what is on screen
+  (WCAG 2.5.3, Label in Name). This covers:
+  - a side key's and an eye's **L**, **R** or **Mid** in the Anatomy list and in Tracts
+  - the middle cerebellar peduncle's **Whole**
+  - a disorder's direction and cohort
+  - the figures of an atlas comparison row
+  - the note under each choice in the top bar's lists
+
+  The region table's download is named **Download table as CSV**.
+
 ## [0.1.3] - 2026-11-27
 
 Archived at [doi:10.5281/zenodo.24616739](https://doi.org/10.5281/zenodo.24616739).

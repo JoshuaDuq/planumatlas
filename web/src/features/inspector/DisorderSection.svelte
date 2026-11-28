@@ -72,7 +72,7 @@
                   type="button"
                   class="network-row-name disorder-name"
                   aria-pressed={painted === disorder.id}
-                  aria-label={copy.paint(name)}
+                  aria-label={copy.paint(name, [direction, population].filter(Boolean).join(', '))}
                   onclick={() => onpaint(disorder.id)}
                 >
                   {name} <span class="disorder-meta">{meta}</span>

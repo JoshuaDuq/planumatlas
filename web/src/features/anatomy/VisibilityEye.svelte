@@ -1,6 +1,6 @@
 <!--
   A reversible visibility action for a group's side (viewer/ui/panels/visibility-control.js).
-  The name is the action ("Hide X, left"), so there is no aria-pressed, which would read backwards
+  The name is the action ("Hide X L, left"), so there is no aria-pressed, which would read backwards
   against it. It lives in its own treegrid cell and is patched in place, so focus stays on it. What
   a press says is S1's: the part and the hidden count in one sentence (decisions 32 and 36).
 -->
@@ -27,8 +27,12 @@
 
   const state = $derived(visibilityStateOf(ids, hiddenRegions));
   const copy = $derived(t(lang, 'dissection'));
-  const sideWord = $derived(t(lang, 'sides').words[side]);
-  const label = $derived((state === 'hidden' ? copy.showPart : copy.hidePart)(name, sideWord));
+  const sides = $derived(t(lang, 'sides'));
+  const sideWord = $derived(sides.words[side]);
+  // The name holds the glyph the eye shows (WCAG 2.5.3), as a side key's does.
+  const label = $derived(
+    (state === 'hidden' ? copy.showPart : copy.hidePart)(`${name} ${sides.glyphs[side]}`, sideWord),
+  );
 
   function toggle() {
     if (state === 'hidden') onShow(ids, copy.partShown(name, sideWord));
@@ -47,5 +51,5 @@
   onclick={toggle}
 >
   {@render iconGraphic(state === 'hidden' ? 'eye-off' : 'eye')}
-  <span class="visibility-side" aria-hidden="true">{t(lang, 'sides').glyphs[side]}</span>
+  <span class="visibility-side" aria-hidden="true">{sides.glyphs[side]}</span>
 </button>

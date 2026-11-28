@@ -8,7 +8,7 @@ import { cleanup, render } from 'vitest-browser-svelte';
 import '../../styles/index.css';
 import Fixture from './overlay-test-support.svelte';
 
-const WCAG = ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'];
+const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const button = (name: string) => page.getByRole('button', { name, exact: true });
 const el = (name: string) => button(name).element() as HTMLElement;
 const attr = (name: string, attribute: string) => el(name).getAttribute(attribute);

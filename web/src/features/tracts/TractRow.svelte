@@ -1,12 +1,14 @@
 <!--
   One tract: its name, then a lettered key per side (or numbered segment). Each key is a native
-  checkbox named in full ("Arcuate fasciculus · left"); the row is a group named by the tract.
+  checkbox named in full, with the text it shows ("Arcuate fasciculus L, left"); the row is a group
+  named by the tract.
   The count and lengths live in `TractMetrics`, independent of the row's height.
 -->
 <script lang="ts">
   import type { TractBundle as LoadedBundle } from '../../lib/engine/api.ts';
   import { bundleName, isWhole, tractRowName } from '../../lib/core/tracts.ts';
   import type { TractRow } from '../../lib/core/tracts.ts';
+  import { selectionName } from '../../lib/core/workspace.ts';
   import type { Language } from '../../lib/types/index.ts';
 
   let {
@@ -14,7 +16,7 @@
     lang,
     loaded,
     pending,
-    glyphs,
+    sides,
     text,
     hidden,
     current = false,
@@ -27,7 +29,10 @@
     loaded: ReadonlyMap<string, LoadedBundle>;
     /** Keys asked for whose bundle is still downloading: shown as on, the row marked busy. */
     pending: ReadonlySet<string>;
-    glyphs: Readonly<Record<string, string>>;
+    sides: {
+      glyphs: Readonly<Record<string, string>>;
+      words: Readonly<Record<string, string>>;
+    };
     text: { whole: string };
     hidden: boolean;
     /** The key's wish; the owner applies it and the key follows what the engine then holds. */
@@ -41,7 +46,20 @@
   const nameId = $derived(`native-tract-row-${row.key}`);
   const drawn = (id: string) => Boolean(loaded.get(id)?.visible);
   const busy = $derived(row.members.some(({ bundle }) => pending.has(bundle.id)));
-  const keyLabel = (part: string) => (row.sided ? glyphs[part] : isWhole(row) ? text.whole : part);
+  const keyLabel = (part: string) =>
+    row.sided ? sides.glyphs[part] : isWhole(row) ? text.whole : part;
+  // A key's name holds the text it shows (WCAG 2.5.3): a side's glyph, as a side key's name does,
+  // and "whole" for a tract of one bundle whose name has no qualifier.
+  const keyName = (bundle: TractRow['members'][number]['bundle'], part: string) =>
+    row.sided
+      ? selectionName({
+          label: tractRowName(row, lang),
+          side: sides.glyphs[part],
+          sideWord: sides.words[part],
+        })
+      : isWhole(row) && !part
+        ? `${bundleName(bundle, lang)}, ${text.whole.toLocaleLowerCase(lang)}`
+        : bundleName(bundle, lang);
 </script>
 
 <section class="bundle" data-layout={row.members.length > 2 ? 'segments' : 'sides'} {hidden}>
@@ -70,7 +88,7 @@
           <input
             type="checkbox"
             id="native-diffusion-bundle-{bundle.id}"
-            aria-label={bundleName(bundle, lang)}
+            aria-label={keyName(bundle, part)}
             aria-describedby={isDrawn ? `native-diffusion-bundle-${bundle.id}-meta` : undefined}
             data-tooltip={bundleName(bundle, lang)}
             checked={isDrawn || pending.has(bundle.id)}

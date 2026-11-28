@@ -124,7 +124,7 @@ test('pick and inspect on the real model, then find a region by search', async (
   await expect(
     tree.getByRole('row', { name: 'Middle frontal gyrus, left and right', exact: true }),
   ).toHaveAttribute('aria-selected', 'true');
-  const side = tree.getByRole('button', { name: 'Middle frontal gyrus, left', exact: true });
+  const side = tree.getByRole('button', { name: 'Middle frontal gyrus L, left', exact: true });
   await expect(side).toHaveAttribute('aria-pressed', 'true');
 
   await side.focus();

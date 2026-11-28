@@ -292,7 +292,7 @@ describe('SearchCombobox', () => {
         for (const width of [1280, 390]) {
           await page.viewport(width, 800);
           const { violations } = await axe.run(document.body, {
-            runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'],
+            runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'],
           });
           expect(
             violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.html).join(' ')}`),

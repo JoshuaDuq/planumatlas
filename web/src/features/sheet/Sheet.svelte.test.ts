@@ -573,7 +573,6 @@ describe('the selection in the grip', () => {
     const visible = strip().innerText.replace(/\s+/g, ' ').trim();
     expect(visible).toBe('Insula L');
     expect(strip().getAttribute('aria-label')!.startsWith(visible)).toBe(true);
-    // The shared axe run lacks the wcag21a tag this rule carries; the journeys' run has it.
     const { violations } = await axe.run(strip(), { runOnly: ['label-content-name-mismatch'] });
     expect(violations).toEqual([]);
   });

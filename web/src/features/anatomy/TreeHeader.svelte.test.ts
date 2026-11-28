@@ -31,7 +31,7 @@ test('Download table saves the shown atlas’s regions as one CSV file and says 
     saved.push({ name: this.download, href: this.href });
   });
   render(Fixture, { table });
-  await userEvent.click(page.getByRole('button', { name: 'Download table (CSV)' }));
+  await userEvent.click(page.getByRole('button', { name: 'Download table as CSV' }));
   expect(saved.map(({ name }) => name)).toEqual(['planum-regions-cdmd-destrieux-aseg.csv']);
   const lines = (await (await fetch(saved[0]!.href)).text()).split('\r\n');
   expect(lines[1]!.startsWith('destrieux:left:1,destrieux,Frontomarginal gyrus and sulcus,')).toBe(
@@ -43,5 +43,7 @@ test('Download table saves the shown atlas’s regions as one CSV file and says 
 
 test('French names the command in French', () => {
   render(Fixture, { lang: 'fr', table });
-  expect(page.getByRole('button', { name: 'Télécharger le tableau (CSV)' }).element()).toBeTruthy();
+  expect(
+    page.getByRole('button', { name: 'Télécharger le tableau en CSV' }).element(),
+  ).toBeTruthy();
 });

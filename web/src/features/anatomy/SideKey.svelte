@@ -6,6 +6,7 @@
   import type { CatalogRow } from '../../lib/core/catalog/catalog.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { reasonText } from '../../lib/core/panels/navigator.ts';
+  import { selectionName } from '../../lib/core/workspace.ts';
   import type { Language } from '../../lib/types/index.ts';
 
   interface Props {
@@ -18,13 +19,18 @@
   let { lang, row, selected, onpress }: Props = $props();
 
   const side = $derived(row.region.hemisphere);
-  const sideWord = $derived(t(lang, 'sides').words[side]);
+  const sides = $derived(t(lang, 'sides'));
+  // The glyph the key shows leads the side word, so its name holds its visible text (WCAG 2.5.3).
   const label = $derived(
     row.visible
-      ? `${row.label.name}, ${sideWord}`
+      ? selectionName({
+          label: row.label.name,
+          side: sides.glyphs[side],
+          sideWord: sides.words[side],
+        })
       : t(lang, 'navigator').rowHiddenAria(
-          row.label.name,
-          sideWord,
+          `${row.label.name} ${sides.glyphs[side]}`,
+          sides.words[side],
           reasonText(row.reason!, row.region, lang),
         ),
   );
@@ -41,5 +47,5 @@
   data-tooltip={row.visible ? undefined : label}
   onclick={() => onpress(row)}
 >
-  <span aria-hidden="true">{t(lang, 'sides').glyphs[side]}</span>
+  <span aria-hidden="true">{sides.glyphs[side]}</span>
 </button>

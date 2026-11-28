@@ -1336,7 +1336,9 @@ describe('Brain differences in disorders', () => {
     ]);
     expect(text(details)).toContain('Volume, patients minus controls (Cohen’s d)');
     expect(text(details)).toContain('5% false discovery rate');
-    await userEvent.click(page.getByRole('button', { name: 'Paint Schizophrenia on the brain' }));
+    await userEvent.click(
+      page.getByRole('button', { name: 'Paint Schizophrenia, smaller, on the brain' }),
+    );
     expect(calls).toEqual(['disorder:schizophrenia']);
     // The teaching set's hippocampus reads its aseg structure's rows.
     await screen.rerender({ regionId: HIPPOCAMPUS_UNIT });
@@ -1370,13 +1372,13 @@ describe('Brain differences in disorders', () => {
       'https://pubmed.ncbi.nlm.nih.gov/26033243/',
     );
     expect(
-      page.getByRole('button', { name: 'Paint Schizophrenia on the brain' }).element(),
+      page.getByRole('button', { name: 'Paint Schizophrenia, smaller, on the brain' }).element(),
     ).toHaveAttribute('aria-pressed', 'true');
     await userEvent.click(page.getByRole('button', { name: 'Restore previous view' }));
     expect(calls).toEqual(['restore-disorder']);
     await screen.rerender({ explorer: 'functions', disorderPainted: null });
     expect(
-      page.getByRole('button', { name: 'Paint Schizophrenia on the brain' }).query(),
+      page.getByRole('button', { name: 'Paint Schizophrenia, smaller, on the brain' }).query(),
     ).toBeNull();
     // A region no table reports has no section.
     await screen.rerender({ regionId: 'destrieux:left:1', explorer: 'anatomy' });

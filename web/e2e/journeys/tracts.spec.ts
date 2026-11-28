@@ -19,9 +19,9 @@ test('the first check of a bundle downloads and draws it, the lengths CSV downlo
   await expect(key(AF_LEFT)).toBeChecked();
   await expect(key(AF_LEFT)).toHaveAccessibleDescription(/streamlines.*mean .* mm \(range/);
 
-  await key('Cingulum · left').click();
-  await expect(key('Cingulum · left')).toBeChecked({ timeout: 60_000 });
-  await expect(key('Cingulum · left')).toHaveAccessibleDescription(/streamlines/);
+  await key('Cingulum L, left').click();
+  await expect(key('Cingulum L, left')).toBeChecked({ timeout: 60_000 });
+  await expect(key('Cingulum L, left')).toHaveAccessibleDescription(/streamlines/);
 
   await page.getByText('Tract display').click();
   const download = page.waitForEvent('download');

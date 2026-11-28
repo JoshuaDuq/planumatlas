@@ -28,7 +28,6 @@
     type ComparisonManifest,
   } from '../../lib/core/comparison/catalog.ts';
   import { overlapArea, overlapShare } from '../../lib/core/comparison-format.ts';
-  import { withUnit } from '../../lib/core/format.ts';
   import { failureNotice } from '../../lib/core/i18n/errors.ts';
   import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
   import type { Engine } from '../../lib/engine/api.ts';
@@ -270,19 +269,22 @@
       aria-pressed={active === entry.meshId}
       aria-disabled={outlineAvailable ? undefined : 'true'}
       aria-describedby={outlineAvailable ? undefined : `${uid}-view-note`}
-      aria-label={copy.highlight(
-        section ? `${name}, ${section}` : name,
-        withUnit(overlapArea(entry.areaMm2, lang), 'mm²', lang),
-        withUnit(overlapShare(entry.fraction, lang), '%', lang),
-      )}
       onclick={() => toggle(entry.meshId)}
     >
+      <!-- Named by what it shows (WCAG 2.5.3), with hidden words for what the column heads say. A
+           hidden word is read as a block, spaced on both sides, so each is a word of its own. -->
       <span class="comparison-name">
-        <span>{name}</span>
+        <span><span class="visually-hidden">{copy.highlightWith}</span>{name}</span>
         {#if section}<span class="comparison-section">{section}</span>{/if}
       </span>
-      <span class="measure">{overlapArea(entry.areaMm2, lang)}</span>
-      <span class="measure">{overlapShare(entry.fraction, lang)}</span>
+      <span class="measure">
+        {overlapArea(entry.areaMm2, lang)}<span class="visually-hidden">{'mm²,'}</span>
+      </span>
+      <span class="measure">
+        {overlapShare(entry.fraction, lang)}<span class="visually-hidden">
+          {`% ${copy.ofRegion}`}
+        </span>
+      </span>
     </button>
   </li>
 {/snippet}

@@ -34,6 +34,13 @@ const summaryOf = (details: Element) => details.querySelector<HTMLElement>(':sco
 const status = () => root().querySelector<HTMLElement>('[role=status]')!;
 const rows = () => [...root().querySelectorAll<HTMLButtonElement>('button.comparison-row')];
 const text = (element: Element) => element.textContent!.replace(/\s+/g, ' ').trim();
+// What a row shows: its text without the words only its name holds.
+const shown = (element: Element) => {
+  const clone = element.cloneNode(true) as Element;
+  for (const hidden of clone.querySelectorAll('.visually-hidden')) hidden.remove();
+  return text(clone);
+};
+const nameOf = (element: Element) => expect.element(page.elementLocator(element));
 const named = (name: RegExp | string) => page.getByRole('button', { name });
 
 /** Serves the comparison file; every other request goes through. */
@@ -348,15 +355,17 @@ describe('the list', () => {
     await open();
     const first = rows()[0]!;
     expect(first.getAttribute('aria-pressed')).toBe('false');
-    expect(first.getAttribute('aria-label')).toMatch(
-      /^Highlight overlap with .+, 956\.4 mm², 34\.4% of this region$/,
+    // Label in name (WCAG 2.5.3): the name holds what the row shows, in order.
+    await nameOf(first).toHaveAccessibleName(
+      /^Highlight overlap with .+ 956\.4 mm², 34\.4 % of this region$/,
     );
-    // Label in name: each visible part of the region's name is part of the accessible name.
-    for (const part of first.querySelectorAll('.comparison-name > span')) {
-      expect(first.getAttribute('aria-label')).toContain(text(part));
-    }
-    expect(text(first.querySelectorAll('.measure')[0]!)).toBe('956.4');
-    expect(text(first.querySelectorAll('.measure')[1]!)).toBe('34.4');
+    const words = shown(first).split(' ');
+    expect(words.slice(-2)).toEqual(['956.4', '34.4']);
+    const region = words
+      .slice(0, -2)
+      .join(' ')
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    await nameOf(first).toHaveAccessibleName(new RegExp(`with ${region} 956\\.4 mm²`));
   });
 
   test('an HCP-MMP code is captioned with its Glasser section, in its accessible name too', async () => {
@@ -366,8 +375,8 @@ describe('the list', () => {
     const first = rows()[0]!;
     const section = first.querySelector('.comparison-section');
     expect(section).not.toBeNull();
-    expect(text(section!)).toMatch(/cortex/i);
-    expect(first.getAttribute('aria-label')).toContain(`, ${text(section!)},`);
+    expect(shown(section!)).toMatch(/cortex/i);
+    await nameOf(first).toHaveAccessibleName(new RegExp(`\\w ${shown(section!)} \\d`));
   });
 
   test('a Destrieux name needs no caption', async () => {
@@ -381,8 +390,8 @@ describe('the list', () => {
     serve();
     await mount({ lang: 'fr' });
     await open();
-    expect(rows()[0]!.getAttribute('aria-label')).toMatch(
-      /^Tracer le recouvrement avec .+, 956,4 mm², 34,4 % de cette région$/,
+    await nameOf(rows()[0]!).toHaveAccessibleName(
+      /^Tracer le recouvrement avec .+ 956,4 mm², 34,4 % de cette région$/,
     );
   });
 
@@ -392,8 +401,8 @@ describe('the list', () => {
     await open();
     await open(root().querySelectorAll('details')[1]!);
     const last = rows().at(-1)!;
-    expect(text(last.querySelectorAll('.measure')[0]!)).toBe('<0.1');
-    expect(text(last.querySelectorAll('.measure')[1]!)).toBe('<0.1');
+    expect(shown(last.querySelectorAll('.measure')[0]!)).toBe('<0.1');
+    expect(shown(last.querySelectorAll('.measure')[1]!)).toBe('<0.1');
   });
 
   test('the unassigned remainder gives each figure its unit for a screen reader', async () => {
@@ -709,7 +718,7 @@ describe('focus across a repaint', () => {
     row.focus();
     await screen.rerender({ engine, regionId: V1, lang: 'fr' });
     expect(document.activeElement).toBe(row);
-    expect(row.getAttribute('aria-label')).toMatch(/^Tracer le recouvrement avec /);
+    await nameOf(row).toHaveAccessibleName(/^Tracer le recouvrement avec /);
     expect(text(summaryOf(panel()))).toBe('Recouvrement avec Destrieux');
   });
 
@@ -801,7 +810,7 @@ describe('targets, reflow and contrast', () => {
       [...root().querySelectorAll<HTMLElement>(selector)].map(
         (node) =>
           [
-            text(node) || node.getAttribute('aria-label'),
+            shown(node) || node.getAttribute('aria-label'),
             node.getBoundingClientRect().height,
           ] as const,
       );
