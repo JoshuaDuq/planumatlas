@@ -92,12 +92,12 @@ export const FIGURES = [
   {
     name: 'sections', to: 'readme', columns: 3, aspect: 1, sameScale: true,
     panels: [
-      cut('sagittal', '-20', 'right'),
-      cut('coronal', '-20', 'anterior'),
-      cut('axial', '12', 'superior'),
-      mri('sagittal', '-20', 'right', {}, { link: false }),
-      mri('coronal', '-20', 'anterior', {}, { link: false }),
-      mri('axial', '12', 'superior', {}, { link: false }),
+      cut('sagittal', '-12', 'right', nextbrain),
+      cut('coronal', '-4', 'anterior', nextbrain),
+      cut('axial', '22', 'superior', nextbrain),
+      mri('sagittal', '-12', 'right', nextbrain, { link: false }),
+      mri('coronal', '-4', 'anterior', nextbrain, { link: false }),
+      mri('axial', '22', 'superior', nextbrain, { link: false }),
     ],
   },
   {
@@ -140,12 +140,13 @@ export const FIGURES = [
   {
     name: 'sections-and-cuts-1', to: 'docs', columns: 3, aspect: 1.15, sameScale: true,
     panels: [
-      cut('sagittal', '-26', 'right'),
-      cut('coronal', '-20', 'anterior'),
-      cut('axial', '8', 'superior'),
-      stage({ cut: 'oblique' }),
-      cut('coronal', '-20', 'anterior', { detail: 'nextbrain' }),
-      cut('coronal', '-20', 'anterior', { colors: 'territory' }),
+      cut('sagittal', '-12', 'right', nextbrain),
+      cut('coronal', '-4', 'anterior', nextbrain),
+      cut('axial', '22', 'superior', nextbrain),
+      // Along both hippocampi, anterior up as in c. The default azimuth leaves the right temporal pole's tip as an island.
+      stage({ ...nextbrain, cut: 'oblique', az: '90', cam: '-1.3,353.5,-185.6,-1.3,17.9,8.2,0,-0.5,-0.866' }),
+      cut('coronal', '-4', 'anterior'),
+      cut('coronal', '-4', 'anterior', { ...nextbrain, colors: 'territory' }),
     ],
   },
   {
