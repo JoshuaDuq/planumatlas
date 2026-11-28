@@ -439,15 +439,31 @@
         background: var(--surface-hover);
       }
     }
-    /* An atlas's row with its borders toggle at the end of its name's line. */
+    /*
+     * An atlas's row with its borders toggle at the end of its name's line. The choice shares the row's
+     * columns, so its note runs on under the toggle at the full width of the other options.
+     */
     .data-option-row {
-      display: flex;
-      align-items: flex-start;
-      gap: var(--space-1);
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr) auto;
+      align-items: start;
+      column-gap: var(--space-2);
+      padding-inline: var(--space-2);
     }
     .data-option-row > .data-option {
-      flex: 1 1 auto;
-      min-width: 0;
+      grid-column: 1 / -1;
+      grid-row: 1;
+      grid-template-columns: subgrid;
+      width: auto;
+      margin-inline: calc(-1 * var(--space-2));
+    }
+    /* A 24px target centred on the name's line, clear of the note under it. */
+    .data-option-row > .data-option-borders {
+      grid-column: 3;
+      grid-row: 1;
+      min-height: 24px;
+      margin-block-start: calc(var(--space-1) + (var(--lh-ui) - 24px) / 2);
+      margin-inline-end: calc(-1 * var(--space-2));
     }
     .data-option-borders {
       display: inline-flex;
@@ -531,6 +547,15 @@
       .data-option,
       .data-option-borders {
         min-height: 44px;
+      }
+      /* A 44px toggle reaches past the name's line, so the note keeps clear of it. */
+      .data-option-row > .data-option-borders {
+        min-height: 44px;
+        margin-block-start: 0;
+      }
+      .data-option-row .data-option-aside,
+      .data-option-row .data-option-note {
+        grid-column: 2;
       }
     }
   }
