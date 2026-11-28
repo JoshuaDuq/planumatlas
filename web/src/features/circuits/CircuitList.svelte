@@ -1,49 +1,118 @@
 <!--
   The Circuits tab's list (viewer/ui/panels/circuits.js:150-165, 328-335, index.html:309-312): the
-  maps and the guided circuits as rows, each opening a map or a lesson, and the list's scope. A list of buttons;
-  every row is a Tab stop, and ArrowDown and ArrowUp walk the rows.
+  search, maps and guided circuits, and the list's scope. Each row is a Tab stop, and the arrow keys
+  move between the field and the rows.
   - the open circuit is `aria-current="true"`: a row opens a lesson, it does not toggle
     (deviations/x3-current-circuit.md);
   - the labelled list is a real group of `ul` (deviations/x3-list-structure.md);
   - while a run is in flight a row stays focusable and refuses (deviations/x3-busy-keeps-focus.md).
 -->
 <script lang="ts">
+  import { untrack } from 'svelte';
+  import { bridgeText, circuitsMatching, type Elsewhere } from '../../lib/core/elsewhere.ts';
   import { t, templateCopy } from '../../lib/core/i18n/index.ts';
   import { registerCurrentItem } from '../../lib/core/workspace.ts';
+  import type { Explorer } from '../../lib/types/index.ts';
+  import { createDebouncedAnnouncer } from '../../lib/ui/announcer.svelte.ts';
+  import EmptyState from '../../lib/ui/EmptyState.svelte';
+  import { listNav } from '../../lib/ui/list-nav.ts';
+  import SearchBridge from '../../lib/ui/SearchBridge.svelte';
+  import SearchField from '../../lib/ui/SearchField.svelte';
   import type { CircuitExplorer } from './circuits-explorer.svelte.ts';
   import { landmarkTotal } from './circuits-view.ts';
-  import { neighbourKeys } from './neighbour-keys.ts';
   import AboutData from '../info/AboutData.svelte';
 
-  let { model }: { model: CircuitExplorer } = $props();
+  let {
+    model,
+    showShortcut,
+    elsewhere,
+    onElsewhere,
+  }: {
+    model: CircuitExplorer;
+    showShortcut: boolean;
+    elsewhere: (query: string) => Elsewhere[];
+    onElsewhere: (mode: Explorer, query: string) => void | Promise<void>;
+  } = $props();
   const map = $derived(model.map);
   const bodyMap = $derived(model.bodyMap);
   const mapsOffered = $derived(Number(map.available) + Number(bodyMap.available));
 
   const uid = $props.id();
-  const copy = $derived(t(model.lang, 'circuits'));
-  const maps = $derived(t(model.lang, 'visualField'));
-  const body = $derived(t(model.lang, 'bodyMap'));
+  const lang = $derived(model.lang);
+  const copy = $derived(t(lang, 'circuits'));
+  const navigator = $derived(t(lang, 'navigator'));
+  const maps = $derived(t(lang, 'visualField'));
+  const body = $derived(t(lang, 'bodyMap'));
+  let query = $state('');
+  const words = $derived(query.trim());
+  const circuits = $derived(words ? circuitsMatching(model.circuits, words, lang) : model.circuits);
+  const count = $derived(circuits.length);
+  const others = $derived(elsewhere(words));
+  let input = $state<HTMLInputElement | null>(null);
   let listElement = $state<HTMLElement | null>(null);
+  let scroller = $state<HTMLElement | null>(null);
 
   $effect(() => {
-    if (listElement) return model.attachList(listElement);
-  });
-  $effect(() => {
-    if (listElement) return neighbourKeys(listElement);
+    if (!input || !listElement) return;
+    const navigation = listNav(listElement, {
+      field: input,
+      rows: '.circuit-choice, .search-bridge',
+    });
+    return () => navigation.destroy();
   });
   $effect(() =>
     registerCurrentItem(
       () => listElement?.querySelector<HTMLElement>('[aria-current="true"]') ?? null,
     ),
   );
+
+  const announcer = createDebouncedAnnouncer();
+  $effect(() => () => announcer.dispose());
+  $effect(() => {
+    if (!model.exploring || !words) {
+      announcer.reset();
+      return;
+    }
+    const shown = count;
+    announcer.say(
+      untrack(() =>
+        [copy.searchCount(shown), ...others.map((other) => bridgeText(lang, other, words))].join(
+          '. ',
+        ),
+      ),
+    );
+  });
+
+  /** Update the query and start at the top of the results. */
+  export function search(value: string) {
+    query = value;
+    if (scroller) scroller.scrollTop = 0;
+  }
+
+  /** The location bar's search and the `/` key both put the field in focus. */
+  export function focusSearch() {
+    input?.focus();
+    input?.select();
+  }
 </script>
 
-<div class="browser scroll-fade" hidden={!model.exploring}>
-  <h2 class="visually-hidden">{t(model.lang, 'workspace').modes.circuits}</h2>
-  <div role="group" aria-label={copy.heading} bind:this={listElement}>
+<div class="head" hidden={!model.exploring}>
+  <h2 class="visually-hidden">{t(lang, 'workspace').modes.circuits}</h2>
+  <SearchField
+    bind:input
+    {query}
+    label={copy.search}
+    clearLabel={navigator.clearSearch}
+    {showShortcut}
+    controls="{uid}-list"
+    onquery={search}
+  />
+</div>
+
+<div class="browser scroll-fade" hidden={!model.exploring} bind:this={scroller}>
+  <div id="{uid}-list" role="group" aria-label={copy.heading} bind:this={listElement}>
     <!-- The maps come first: below 45 circuits a reader would not find them. -->
-    {#if mapsOffered}
+    {#if !words && mapsOffered}
       <div class="group" role="group" aria-labelledby="{uid}-maps">
         <h3 id="{uid}-maps" class="group-heading">{maps.maps}</h3>
         <ul class="rows" role="list">
@@ -88,49 +157,69 @@
         </ul>
       </div>
     {/if}
-    <div class="group" role="group" aria-labelledby="{uid}-guided">
-      <h3 id="{uid}-guided" class="group-heading group-heading-counts">
-        <span>{maps.guided}</span>
-        <span class="column-head" aria-hidden="true">{copy.landmarks}</span>
-      </h3>
-      <ul class="rows" role="list">
-        {#each model.circuits as circuit (circuit.id)}
-          {@const current = circuit.id === model.lesson.circuit}
-          <li>
-            <button
-              type="button"
-              class="circuit-choice"
-              data-circuit={circuit.id}
-              aria-current={current ? 'true' : undefined}
-              aria-disabled={model.busy ? 'true' : undefined}
-              data-selected={String(current)}
-              onclick={() => model.openCircuit(circuit.id)}
-            >
-              <span class="text guided-text">
-                <span class="row-name">{circuit.name[model.lang]}</span>
-                <span class="route">{circuit.route[model.lang]}</span>
-              </span>
-              <span class="group-count" aria-hidden="true">{circuit.steps.length}</span>
-              <span class="visually-hidden">, {copy.landmarkCount(circuit.steps.length)}</span>
-              <span class="chevron" aria-hidden="true"></span>
-            </button>
-          </li>
-        {/each}
-      </ul>
-    </div>
+    {#if circuits.length}
+      <div class="group" role="group" aria-labelledby="{uid}-guided">
+        <h3 id="{uid}-guided" class="group-heading group-heading-counts">
+          <span>{maps.guided}</span>
+          <span class="column-head" aria-hidden="true">{copy.landmarks}</span>
+        </h3>
+        <ul class="rows" role="list">
+          {#each circuits as circuit (circuit.id)}
+            {@const current = circuit.id === model.lesson.circuit}
+            <li>
+              <button
+                type="button"
+                class="circuit-choice"
+                data-circuit={circuit.id}
+                aria-current={current ? 'true' : undefined}
+                aria-disabled={model.busy ? 'true' : undefined}
+                data-selected={String(current)}
+                onclick={() => model.openCircuit(circuit.id)}
+              >
+                <span class="text guided-text">
+                  <span class="row-name">{circuit.name[lang]}</span>
+                  <span class="route">{circuit.route[lang]}</span>
+                </span>
+                <span class="group-count" aria-hidden="true">{circuit.steps.length}</span>
+                <span class="visually-hidden">, {copy.landmarkCount(circuit.steps.length)}</span>
+                <span class="chevron" aria-hidden="true"></span>
+              </button>
+            </li>
+          {/each}
+        </ul>
+      </div>
+    {:else if words}
+      <EmptyState title={navigator.noMatch(words)} message={copy.noResults} />
+    {/if}
+    {#each others as other (other.mode)}
+      <SearchBridge
+        text={bridgeText(lang, other, words)}
+        onclick={() => onElsewhere(other.mode, words)}
+      />
+    {/each}
   </div>
-  <p class="scope-note">
-    {copy.coverage(model.circuits.length, landmarkTotal(model.circuits))}{mapsOffered
-      ? ` · ${maps.mapCount(mapsOffered)}`
-      : ''}{model.unavailable
-      ? ` · ${templateCopy(model.lang).circuitsElsewhere(model.unavailable)}`
-      : ''}
-  </p>
-  <AboutData place="circuits" lang={model.lang} host="list" />
+  {#if !words}
+    <p class="scope-note">
+      {copy.coverage(model.circuits.length, landmarkTotal(model.circuits))}{mapsOffered
+        ? ` · ${maps.mapCount(mapsOffered)}`
+        : ''}{model.unavailable
+        ? ` · ${templateCopy(lang).circuitsElsewhere(model.unavailable)}`
+        : ''}
+    </p>
+    <AboutData place="circuits" {lang} host="list" />
+  {/if}
 </div>
 
 <style>
   @layer features {
+    .head {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--panel-inset);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-base);
+    }
     .rows {
       margin: 0;
       padding: 0 0 var(--space-2);

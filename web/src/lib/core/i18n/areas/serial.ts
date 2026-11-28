@@ -8,7 +8,7 @@ const feminine = (plane: string) =>
 
 export const en = {
   layout: 'View',
-  layouts: { planes: 'Three planes', series: 'Serial sections' },
+  layouts: { planes: 'Orthogonal views', series: 'Serial sections' },
   spacing: (count: number, spacing: string) => `${count} sections, ${spacing} apart`,
   picture: (plane: Plane, position: string) =>
     `${capital(plane)} section at ${position}. Click to place the crosshair there.`,
@@ -22,7 +22,7 @@ export const en = {
 
 export const fr: typeof en = {
   layout: 'Vue',
-  layouts: { planes: 'Trois plans', series: 'Coupes sériées' },
+  layouts: { planes: 'Vues orthogonales', series: 'Coupes sériées' },
   spacing: (count: number, spacing: string) => `${count} coupes, espacées de ${spacing}`,
   picture: (plane: Plane, position: string) =>
     `Coupe ${feminine(plane)} à ${position}. Cliquez pour y placer le réticule.`,

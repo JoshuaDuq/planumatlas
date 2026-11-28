@@ -121,14 +121,18 @@ describe('other tabs', () => {
     expect((document.activeElement as HTMLInputElement).value).toBe('memory');
   });
 
-  test('Circuits has no search, so its detail has none', async () => {
+  test('the Circuits search icon shows the list and puts focus in its search field', async () => {
     await shell.open();
     const world = shell.app.world!;
     await userEvent.click(page.getByRole('tab', { name: 'Circuits' }));
     await world.excursions.openCircuit(world.circuits.all[0]!.id);
     flushSync();
     await expect.poll(() => detail().hidden).toBe(false);
-    expect(detail().querySelector('.detail-search')).toBeNull();
+    await userEvent.click(searchIcon('Search circuits'));
+    expect(list().hidden).toBe(false);
+    expect(document.activeElement).toBe(
+      page.getByRole('searchbox', { name: 'Search circuits' }).element(),
+    );
   });
 });
 

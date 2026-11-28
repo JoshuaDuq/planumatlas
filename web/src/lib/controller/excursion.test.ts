@@ -421,21 +421,36 @@ describe('an excursion into a function', () => {
 describe('an area opened from a profile', () => {
   test('replaces the profile’s out-of-sight notice: said again for the new view, else cleared', async () => {
     const scene = createScene();
-    const [hidden] = domainAreas(scene.domains, 'language').filter(
+    const [hidden, other] = domainAreas(scene.domains, 'language').filter(
       ({ region }) => scene.engine.model.regions.get(region)!.kind === 'cortex',
     );
     const frameWhole = vi
       .spyOn(scene.engine.camera, 'frameWhole')
-      .mockReturnValue([hidden!.region]);
+      .mockReturnValue([hidden!.region, other!.region]);
     await scene.excursions.openFunction('language');
     expect(scene.session.state.notice?.text).toMatch(/out of sight/i);
     frameWhole.mockRestore();
+    const frameListed = vi
+      .spyOn(scene.engine.camera, 'frameRegions')
+      .mockReturnValueOnce([hidden!.region]);
+    assert.equal(await scene.excursions.openListedRegion(hidden!.region), true);
+    expect(scene.session.state.notice?.text.match(/Out of sight/g)).toHaveLength(1);
+    expect(scene.session.state.notice).toMatchObject({
+      action: 'focus-region',
+      focusRegion: hidden!.region,
+    });
+    const paint = scene.engine.model.settings.paint;
+    scene.excursions.focusListedRegion();
+    expect(scene.engine.model.settings.focused).toBe(true);
+    expect(scene.engine.model.settings.paint).toBe(paint);
+    expect(scene.session.state.selectedFunction).toBe('language');
+    expect(frameListed).toHaveBeenLastCalledWith([hidden!.region]);
     // Framed on its own, the area is in sight: the notice about the whole-brain view goes.
-    vi.spyOn(scene.engine.camera, 'frameRegions').mockReturnValueOnce([]);
+    frameListed.mockReturnValueOnce([]);
     assert.equal(await scene.excursions.openListedRegion(hidden!.region), true);
     expect(scene.session.state.notice).toBeNull();
     // An area no view of it shows is said.
-    vi.spyOn(scene.engine.camera, 'frameRegions').mockReturnValueOnce([hidden!.region]);
+    frameListed.mockReturnValueOnce([hidden!.region]);
     await scene.excursions.openListedRegion(hidden!.region);
     expect(scene.session.state.notice?.text).toMatch(/out of sight/i);
   });

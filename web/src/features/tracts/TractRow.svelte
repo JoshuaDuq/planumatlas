@@ -1,7 +1,7 @@
 <!--
   One tract: its name, then a lettered key per side (or numbered segment). Each key is a native
   checkbox named in full ("Arcuate fasciculus · left"); the row is a group named by the tract.
-  The count and lengths are listed after the rows (`TractMetrics`), so a row never changes height.
+  The count and lengths live in `TractMetrics`, independent of the row's height.
 -->
 <script lang="ts">
   import type { TractBundle as LoadedBundle } from '../../lib/engine/api.ts';

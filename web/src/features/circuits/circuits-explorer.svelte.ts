@@ -62,7 +62,6 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
   let busy = $state(false);
   let failure = $state.raw<{ error: unknown; operation: Operation } | null>(null);
 
-  let list: HTMLElement | null = null;
   let profile: HTMLElement | null = null;
   let stepper: HTMLElement | null = null;
   let status: HTMLElement | null = null;
@@ -223,16 +222,6 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
       return failure ? failureNotice(failure.error, lang, failure.operation).text : '';
     },
 
-    /** The `/` key: the first circuit takes focus. */
-    focusFirst() {
-      list?.querySelector<HTMLElement>('[data-circuit]')?.focus();
-    },
-    attachList(root: HTMLElement) {
-      list = root;
-      return () => {
-        if (list === root) list = null;
-      };
-    },
     attachProfile(root: HTMLElement) {
       profile = root;
       return () => {

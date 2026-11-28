@@ -85,6 +85,7 @@
     lang={live.lang}
     status={live.status}
     surfaceColor={live.surfaceColor}
+    atlas={engine.model.settings.atlas}
     networks={live.networks}
     cabNp={null}
     legend={live.legend}

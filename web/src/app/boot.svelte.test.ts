@@ -143,29 +143,18 @@ afterEach(() => {
 });
 
 describe('the start', () => {
-  test('starts the guided tour on a first visit to a plain page, not on a shared link or a later visit', async () => {
+  test('offers the guided tour on a plain first visit and opens the model directly', async () => {
     const first = await boot('#anatomy=cdmd&lang=en');
-    expect(first.ports.startGuide).toHaveBeenCalledTimes(1);
-    // A first visit gets the short tour (GUIDE-03).
-    expect(first.ports.startGuide).toHaveBeenCalledWith(true);
+    expect(first.ports.startGuide).not.toHaveBeenCalled();
+    expect(first.app.guideOffered).toBe(true);
     expect(first.app.session.state.status).toBe('ready');
 
     const shared = await boot('#region=destrieux:left:29');
-    expect(shared.ports.startGuide).not.toHaveBeenCalled();
+    expect(shared.app.guideOffered).toBe(false);
 
     localStorage.setItem('planum.guide', 'seen');
     const later = await boot('');
-    expect(later.ports.startGuide).not.toHaveBeenCalled();
-  });
-
-  test("a plain first visit's tour starts on a link naming the opening picture", async () => {
-    const ports = portStubs();
-    let seen: string | null = null;
-    ports.startGuide.mockImplementation(() => (seen = location.hash));
-    await boot('', createEngine, ports);
-    // The tour puts the link back when it ends, so it must be written before the tour starts.
-    expect(seen).toContain('atlas=destrieux');
-    expect(seen).not.toContain('colors=');
+    expect(later.app.guideOffered).toBe(false);
   });
 
   test("opens a plain page on Destrieux's regions, and keeps the colour of any link (CAT-03a)", async () => {
@@ -343,8 +332,6 @@ describe('the start', () => {
 
   test('stays on the link’s address bar until a settled camera writes the scene', async () => {
     vi.useFakeTimers();
-    // A first visit writes the opening link at once, for the tour.
-    localStorage.setItem('planum.guide', 'seen');
     const { app } = await boot();
     app.world!.anatomy.setHemisphere('left');
     flushSync();

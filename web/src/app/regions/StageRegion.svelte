@@ -356,6 +356,9 @@
       selectedId={current.selectedRegion?.id ?? null}
       view={current}
       {sources}
+      onGuide={current.status === 'ready' && app.guideOffered && !tractReference
+        ? () => app.ports.startGuide(true)
+        : undefined}
     />
     {#snippet overlayPopover({ close }: { close: () => void })}
       {#await overlayPopoverCode() then { default: OverlayPopover }}
@@ -519,6 +522,7 @@
       surfaceColor={tractReference || visualFieldMapOpen(current) || bodyMapOpen(current)
         ? 'tissue'
         : keyedSurface(current)}
+      atlas={current.atlas}
       networks={(model.manifest.networks as ColoredNetworks | undefined) ?? null}
       cabNp={model.cabNp}
       territories={model.manifest.arterial_territories?.territories ?? null}
@@ -572,7 +576,10 @@
       {directionShown}
       onPaintPick={world.excursions.pickPaint}
       networkMatrix={Boolean(model.manifest.network_matrix)}
-      onPlateAction={(_, event) => openNetworkMatrix(event)}
+      onPlateAction={(action, event) => {
+        if (action === 'remove-borders') void world.commands.chooseAtlasBorders(null);
+        else openNetworkMatrix(event);
+      }}
     />
   {/if}
   {#if fullscreen}

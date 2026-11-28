@@ -190,7 +190,7 @@
           mode,
           colourAside(lang, { atlas: shown.atlas, required: required(mode, shown.atlas) }),
         ),
-        note: line('colour', mode, shown.colour, null),
+        note: line('colour', mode, shown.colour, brief(mode)),
         palette: palette(mode),
         isDefault: mode === DEFAULTS.surfaceColor,
       })),

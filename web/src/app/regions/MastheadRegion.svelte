@@ -168,8 +168,6 @@
   let touring = $state(false);
 
   async function guide(short = false) {
-    // The stops open regions, and with them their groups in the tree: closing folds those back.
-    const expanded = new Set(app.session.state.expanded);
     // The tour and driver.js are a chunk of their own, fetched the first time the tour starts.
     let tour: typeof import('../../features/guide/tour.ts');
     try {
@@ -179,6 +177,10 @@
       app.session.notify(failureNotice(error, lang, 'guide'));
       return;
     }
+    if (!world || touring) return;
+    // Save the live picture and tree before the tour starts changing either of them.
+    currentLink();
+    const expanded = new Set(app.session.state.expanded);
     tour.startGuide(lang, {
       short,
       animate: !app.media.reducedMotion,
@@ -205,11 +207,11 @@
       anchorOf: (region) => world!.engine.model.anchorOf(region),
       sheet: { raise: () => app.ports.revealOnSelect(), lower: () => app.ports.lowerSheet() },
     });
-    // After the start: a tour already running closes inside it, and its close clears the flag.
     touring = true;
+    app.dismissGuideOffer();
   }
 
-  // The key that opens the shortcuts sheet, and the first launch's tour (ports.ts).
+  // The shortcuts key and the stage's tour invitation (ports.ts).
   $effect(() =>
     app.registerPorts({
       startGuide: guide,

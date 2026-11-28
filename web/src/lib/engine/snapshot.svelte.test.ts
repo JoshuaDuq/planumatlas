@@ -19,7 +19,6 @@ const CAPTIONED: SnapshotPlan = {
     [[{ text: 'MGH CDMD sub_013', strong: true }]],
     [[{ text: 'Destrieux' }], [{ text: 'Atlas' }]],
   ],
-  statement: 'Planum · Not clinical anatomy',
   font: 'sans-serif',
   palette: { ink: '#f1f2f4', halo: '#404040', haloCore: '#404040' },
 };

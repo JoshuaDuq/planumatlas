@@ -1,6 +1,6 @@
 <!--
-  The two lines of instruction at the top left of the picture (viewport-chrome.js:56-61, 478-489,
-  600-620; stage.css:67-87). Type on the picture, like its markings: no plate, not interactive, and
+  The instructions at the top left of the picture (viewport-chrome.js:56-61, 478-489,
+  600-620; stage.css:67-87). The gesture instructions are type on the picture, like its markings, and
   repeated in the canvas's own label for assistive technology. The navigation hint retires for good
   once the reader has rotated, zoomed or clicked the model (StageOverlay hears the gestures); the
   keyboard hint shows only while the canvas has focus (stage-vars.css; the canvas's own outline would
@@ -18,9 +18,10 @@
     coarsePointer: boolean;
     /** The tract reference alone is shown: it has no regions to click. */
     tractReference: boolean;
+    onGuide?: () => void;
   }
 
-  let { stage, lang, coarsePointer, tractReference }: Props = $props();
+  let { stage, lang, coarsePointer, tractReference, onGuide }: Props = $props();
 
   const copy = $derived(t(lang, 'viewport'));
   const navigation = $derived(
@@ -61,6 +62,7 @@
 <p
   id="viewport-help"
   class="viewport-help"
+  aria-hidden="true"
   bind:this={navigationNode}
   data-dismissed={stage.hintRetired}
   data-room={navigationFits}
@@ -70,11 +72,22 @@
 <p
   id="viewport-focus-hint"
   class="viewport-help viewport-focus-hint"
+  aria-hidden="true"
   bind:this={focusNode}
   data-room={focusFits}
 >
   {copy.keyboardHint}
 </p>
+{#if onGuide}
+  <button
+    type="button"
+    class="viewport-help viewport-guide"
+    data-below-hint={!stage.hintRetired && navigationFits}
+    onclick={onGuide}
+  >
+    {t(lang, 'header').guideInvitation}
+  </button>
+{/if}
 
 <style>
   @layer features {
@@ -112,6 +125,34 @@
       color: var(--overlay-accent);
       transition: none;
     }
+    .viewport-guide {
+      min-height: var(--control-height);
+      padding: var(--space-1) var(--space-3);
+      border: 1px solid color-mix(in srgb, var(--overlay-accent) 60%, var(--overlay-accent-wash));
+      border-radius: var(--radius-control);
+      background: var(--overlay-accent-wash);
+      color: var(--overlay-ink);
+      font-size: var(--text-stage);
+      font-weight: 600;
+      line-height: var(--lh-ui);
+      text-shadow: none;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: none;
+    }
+    .viewport-guide[data-below-hint='true'],
+    :global(#viewport:has(> canvas:focus-visible)) .viewport-guide {
+      top: calc(var(--vis-top) + var(--stage-gutter) + var(--lh-caption) + var(--space-2));
+    }
+    .viewport-guide:focus-visible {
+      outline-color: var(--overlay-accent);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .viewport-guide:hover {
+        border-color: var(--overlay-accent);
+        background: color-mix(in srgb, var(--overlay-accent-wash), var(--overlay-accent) 12%);
+      }
+    }
     :global(#viewport:has(> canvas:focus-visible)) .viewport-focus-hint {
       opacity: 1;
     }
@@ -122,6 +163,9 @@
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       #viewport-help {
         visibility: hidden;
+      }
+      .viewport-guide {
+        display: none;
       }
       .viewport-focus-hint {
         top: calc(

@@ -107,6 +107,7 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
       text: parts.map(({ text }) => text).join(' '),
       action: offering?.action ?? null,
       ...(offering?.retry && { retry: offering.retry }),
+      ...(offering?.focusRegion && { focusRegion: offering.focusRegion }),
       parts,
     };
   };
@@ -295,6 +296,9 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
       }
       if (notice?.action === 'retry' && !notice.retry) {
         throw new TypeError('A notice offering Retry needs the command to retry.');
+      }
+      if (notice?.action === 'focus-region' && !notice.focusRegion) {
+        throw new TypeError('A notice offering Focus region needs the selected region.');
       }
       if (notice && held) held.push(notice);
       else {

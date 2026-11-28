@@ -124,7 +124,7 @@ describe('from the other lists', () => {
     ]);
   });
 
-  test('the one circuit the words name opens', async () => {
+  test('Circuits receives the bridged search and offers the named circuit', async () => {
     await shell.open({ hash: '#tab=deficits' });
     await type(
       page.getByRole('searchbox', { name: 'Search deficits or cognitive functions' }),
@@ -134,7 +134,27 @@ describe('from the other lists', () => {
       .getByRole('button', { name: 'Circuits: 1 guided circuit matches “basal ganglia”' })
       .click();
     await expect.poll(() => state().explorer).toBe('circuits');
-    await expect.poll(() => state().lesson.circuit).toBe('motor');
+    const search = page.getByRole('searchbox', { name: 'Search circuits' });
+    expect(focused()).toBe(search.element());
+    expect(focused().value).toBe('basal ganglia');
+    await expect
+      .element(page.getByRole('button', { name: /^Basal ganglia motor loops/ }))
+      .toBeVisible();
+    expect(state().lesson.circuit).toBeNull();
+  });
+
+  test('slash returns from a circuit overview to the list and focuses its search', async () => {
+    await shell.open({ hash: '#tab=circuits' });
+    const search = page.getByRole('searchbox', { name: 'Search circuits' });
+    await expect.element(search).toBeVisible();
+    await type(search, 'left dorsal lateral geniculate nucleus');
+    await userEvent.keyboard('{Enter}{Enter}');
+    await expect.element(page.getByRole('button', { name: 'Start route' })).toBeVisible();
+    await userEvent.keyboard('/');
+    expect(focused()).toBe(search.element());
+    expect(focused().value).toBe('left dorsal lateral geniculate nucleus');
+    expect(focused().selectionStart).toBe(0);
+    expect(focused().selectionEnd).toBe(focused().value.length);
   });
 
   test('Functions offers Deficits as before, now with focus in its search', async () => {

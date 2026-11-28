@@ -1,22 +1,19 @@
 <!--
-  The deficit search field (index.html:279-295): a native search input with a visible label
+  A native search input with a visible label
   (WCAG 3.3.2), a `/` hint, and one clear control (the browser's own is hidden).
   Not a combobox: the list under it is plain buttons. Escape with text clears it and keeps
   focus; with none it is left to the page's Escape cascade.
 -->
 <script lang="ts">
-  import type { DeficitsExplorer } from './explorer.svelte.ts';
-
   let {
-    explorer,
     query,
     label,
     clearLabel,
     showShortcut,
     controls,
     onquery,
+    input = $bindable(null),
   }: {
-    explorer: DeficitsExplorer;
     query: string;
     label: string;
     clearLabel: string;
@@ -24,14 +21,10 @@
     /** The id of the list the field filters. */
     controls: string;
     onquery: (value: string) => void;
+    input?: HTMLInputElement | null;
   } = $props();
 
   const uid = $props.id();
-  let input = $state<HTMLInputElement>();
-  $effect(() => {
-    explorer.refs.search = input ?? null;
-    return () => (explorer.refs.search = null);
-  });
 
   function onkeydown(event: KeyboardEvent) {
     if (event.isComposing || event.key !== 'Escape' || query === '') return;

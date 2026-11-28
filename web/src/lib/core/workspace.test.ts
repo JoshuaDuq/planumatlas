@@ -229,3 +229,17 @@ test('a coordinate’s replacement offers Undo only while the replaced lesion is
   assert.equal(offeredNotice(picked, { lesionReplaced: false, pickUndoable: true }), picked);
   assert.equal(offeredNotice(picked, { lesionReplaced: true, pickUndoable: false })!.action, null);
 });
+
+test('the evidence notice can focus only the region it names', () => {
+  const notice = {
+    kind: 'info' as const,
+    text: 'Out of sight from this view.',
+    action: 'focus-region' as const,
+    focusRegion: 'region-a',
+  };
+  const context = { lesionReplaced: false, pickUndoable: false };
+  assert.equal(noticeActionLabel('en', notice.action), 'Focus region');
+  assert.equal(noticeActionLabel('fr', notice.action), 'Cibler la région');
+  assert.equal(offeredNotice(notice, { ...context, selectedRegion: 'region-a' }), notice);
+  assert.equal(offeredNotice(notice, { ...context, selectedRegion: 'region-b' })!.action, null);
+});

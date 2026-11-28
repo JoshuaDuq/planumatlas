@@ -167,6 +167,7 @@ export function createAnatomyCommands(
 
   function selectNow(id: string | null, { frame = false, picked = false }: SelectOptions) {
     const same = id !== null && id === engineState.model.selectedRegion?.id;
+    if (!same && session.state.notice?.focusRegion) session.notify(null);
     // Any other choice ends a stage click's offer for good.
     if (replaced && id !== replaced.by) replaced = null;
     model.select(id);

@@ -1,5 +1,8 @@
 export const en = {
   heading: 'Guided learning',
+  search: 'Search circuits',
+  noResults: 'Try a circuit title or a landmark name.',
+  searchCount: (count: number) => `${count} guided ${count === 1 ? 'circuit' : 'circuits'} found`,
   landmarks: 'Landmarks',
   landmark: 'Landmark',
   visited: 'seen',
@@ -29,7 +32,7 @@ export const en = {
   step: (index: number, total: number) => `Landmark ${index + 1} of ${total}`,
   stepShort: (index: number, total: number) => `${index + 1} of ${total}`,
   inCircuits: 'In guided circuits',
-  route: 'Route',
+  startRoute: 'Start route',
   wholeRoute: 'Whole route',
   routeNote:
     'Each number marks where its landmark lies in this brain, seen through the cortex: an order, not the path the fibres take. Choose a number, here or on the picture, to open it.',
@@ -47,6 +50,10 @@ export const en = {
 
 export const fr: typeof en = {
   heading: 'Apprentissage guidé',
+  search: 'Rechercher des circuits',
+  noResults: 'Essayez le titre d’un circuit ou le nom d’un repère.',
+  searchCount: (count: number) =>
+    `${count} ${count > 1 ? 'circuits guidés trouvés' : 'circuit guidé trouvé'}`,
   landmarks: 'Repères',
   landmark: 'Repère',
   visited: 'vu',
@@ -76,7 +83,7 @@ export const fr: typeof en = {
   step: (index: number, total: number) => `Repère ${index + 1} sur ${total}`,
   stepShort: (index: number, total: number) => `${index + 1} sur ${total}`,
   inCircuits: 'Dans les parcours guidés',
-  route: 'Trajet',
+  startRoute: 'Démarrer le parcours',
   wholeRoute: 'Trajet complet',
   routeNote:
     'Chaque numéro marque l’emplacement de son repère dans ce cerveau, vu à travers le cortex\u202f: un ordre, pas le chemin des fibres. Choisissez un numéro, ici ou sur l’image, pour l’ouvrir.',

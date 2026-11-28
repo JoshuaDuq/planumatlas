@@ -12,7 +12,6 @@
     cabNpName,
     networkBasis,
     networkCss,
-    networkHeadline,
     networkName,
     networksOf,
     striatalNetworksOf,
@@ -52,9 +51,6 @@
   const radius = $derived(
     withUnit(decimal(atlas?.small?.radius_mm ?? 0, 1, lang, { trim: true }), 'mm', lang),
   );
-  // The closed summary's hint: the largest share the region has, else CAB-NP's one network.
-  const headline = $derived(networkHeadline(region, cabNp, lang));
-
   function yeoColour(network: string): string {
     const rgb = colors?.[network];
     if (!rgb) throw new Error(`No colour published for network ${network}.`);
@@ -82,7 +78,7 @@
 
 {#if shares.length || assigned || striatal.length || near.length}
   <div class="evidence-section">
-    <Disclosure variant="section" summary={copy.heading} value={headline} bind:open>
+    <Disclosure variant="section" summary={copy.heading} bind:open>
       {#if shares.length}
         <p class="network-map">{copy.yeo}</p>
         <ul class="network-list">

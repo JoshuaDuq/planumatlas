@@ -35,8 +35,7 @@ export interface UiPorts
   showTracts: LinkHooks['showTracts'];
   /** A stage tool opened from the panel, as its own press would (the Deficits list's Simulate a lesion). */
   openStageTool(tool: 'lesion'): void;
-  /** The guided tour, from the masthead that opens it from the settings menu. */
-  /** `short` for a first visit's own stops; the settings menu's is every stop. */
+  /** The masthead's guided tour, with the short route offered on the opening stage. */
   startGuide(short?: boolean): void;
   /** A phone's sheet back to peek, so the stage has its room (the guided tour's). */
   lowerSheet(): void;

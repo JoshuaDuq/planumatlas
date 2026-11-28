@@ -48,6 +48,12 @@ const summary = (name: string) =>
   [...document.querySelectorAll<HTMLElement>('summary')].find((s) => s.textContent === name)!;
 const returnButton = () =>
   document.querySelector<HTMLButtonElement>('.circuit-return button') ?? null;
+const search = (lang: 'en' | 'fr' = 'en') =>
+  page.getByRole('searchbox', {
+    name: lang === 'en' ? 'Search circuits' : 'Rechercher des circuits',
+  });
+const start = (lang: 'en' | 'fr' = 'en') =>
+  page.getByRole('button', { name: lang === 'en' ? 'Start route' : 'Démarrer le parcours' });
 
 test('every tour is on the default brain, so the list says none is elsewhere', async () => {
   mount();
@@ -121,8 +127,8 @@ describe('the whole route', () => {
     expect(title().textContent).toBe(circuit.name.en);
     expect(title().tagName).toBe('H2');
     expect(document.querySelector('.circuit-route')!.textContent).toBe(circuit.route.en);
-    expect(progress()).toBe('Route');
-    expect(control('previous').hidden).toBe(true);
+    await expect.element(start()).toBeVisible();
+    expect(control('previous')).toBeNull();
     expect(stepRows()).toHaveLength(circuit.steps.length);
     expect(document.querySelectorAll('[aria-current="step"]')).toHaveLength(0);
     // What this atlas shows belongs to one landmark: the route has none.
@@ -130,24 +136,26 @@ describe('the whole route', () => {
     await expectAxeClean();
   });
 
-  test('Next opens the first landmark, whose Previous is the whole route again', async () => {
+  test('Start route opens the first landmark and Previous returns focus to Start route', async () => {
     mount();
     await openRoute('vision');
-    await userEvent.click(control('next'));
+    (start().element() as HTMLElement).focus();
+    await userEvent.keyboard('{Enter}');
     await expect.poll(() => world.lesson.state.route).toBe(false);
     expect(world.lesson.state.step).toBe(0);
+    expect(document.activeElement).toBe(control('next'));
     expect(control('previous').hidden).toBe(false);
     expect(control('previous').getAttribute('aria-label')).toBe('Whole route');
     await userEvent.click(control('previous'));
     await expect.poll(() => world.lesson.state.route).toBe(true);
-    expect(progress()).toBe('Route');
+    expect(document.activeElement).toBe(start().element());
   });
 
   test('is French in French', async () => {
     mount('fr');
     await openRoute('vision');
     expect(title().textContent).toBe(world.circuits.get('vision').name.fr);
-    expect(progress()).toBe('Trajet');
+    await expect.element(start('fr')).toBeVisible();
   });
 });
 
@@ -265,9 +273,9 @@ describe('the list', () => {
     await userEvent.keyboard('{ArrowUp}');
     expect(document.activeElement).toBe(map);
     await userEvent.keyboard('{ArrowUp}');
-    expect(document.activeElement).toBe(map);
+    expect(document.activeElement).toBe(search().element());
     await userEvent.keyboard('{ArrowDown}{ArrowDown}');
-    expect(document.activeElement).toBe(rows()[1]);
+    expect(document.activeElement).toBe(rows()[0]);
     // The last guided circuit is the last row of all.
     rows().at(-1)!.focus();
     await userEvent.keyboard('{ArrowDown}');
@@ -289,10 +297,30 @@ describe('the list', () => {
     expect(event.defaultPrevented).toBe(false);
   });
 
-  test('focusFirst, the / key, puts focus on the first circuit', () => {
+  test('search matches circuit titles, then Enter moves to the first result and Escape clears it', async () => {
     mount();
-    world.explorer.focusFirst();
+    const field = search();
+    await field.fill('basal ganglia');
+    expect(rows().map((row) => row.dataset.circuit)).toEqual(['motor']);
+    expect(document.querySelector('[data-map]')).toBeNull();
+    await expect.poll(() => announcer().textContent).toBe('1 guided circuit found');
+    await userEvent.keyboard('{Enter}');
     expect(document.activeElement).toBe(rows()[0]);
+    await userEvent.keyboard('{ArrowUp}{Escape}');
+    expect(document.activeElement).toBe(field.element());
+    expect(rows()).toHaveLength(45);
+  });
+
+  test('search matches a French landmark without accents and offers a clear action when empty', async () => {
+    mount('fr');
+    const field = search('fr');
+    await field.fill('noyau genicule lateral dorsal gauche');
+    expect(rows().map((row) => row.dataset.circuit)).toEqual(['vision']);
+    await field.fill('unmatched landmark');
+    await expect.element(page.getByText(/Aucun résultat pour/)).toBeVisible();
+    await page.getByRole('button', { name: 'Effacer la recherche' }).click();
+    expect(document.activeElement).toBe(field.element());
+    expect(rows()).toHaveLength(45);
   });
 });
 
@@ -478,12 +506,11 @@ describe('the retained pathway tours', () => {
 describe('the stepper', () => {
   test('is a labelled group of Previous, the place and Next; the ends leave rather than grey out', async () => {
     mount();
-    // The whole route is where the lesson starts.
-    await openRoute('vision');
+    await open('vision');
     const group = document.querySelector('.circuit-stepper')!;
     expect(group.getAttribute('role')).toBe('group');
     expect(group.getAttribute('aria-label')).toBe('Landmarks');
-    expect(control('previous').hidden).toBe(true);
+    expect(control('previous').hidden).toBe(false);
     expect(control('next').hidden).toBe(false);
     expect(control('next').getAttribute('aria-label')).toBe('Next landmark');
     expect(control('next').dataset.tooltip).toBe('Next landmark');

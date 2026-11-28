@@ -21,7 +21,8 @@ import type {
 } from '../api.ts';
 import { belongsToDetail, defaultDetailOf, visibilityOf } from '../../core/catalog/visibility.ts';
 import { labelOf } from '../../core/catalog/labels.ts';
-import { groupsByLobe } from '../../core/catalog/lobes.ts';
+import { groupsByLobe, lobeColor } from '../../core/catalog/lobes.ts';
+import { networkCss } from '../../core/catalog/networks.ts';
 import { sulcExtent } from '../../core/catalog/sulcal-depth.ts';
 import { coded, sameSet } from './support.ts';
 
@@ -265,6 +266,18 @@ export function createFakeModel({
       return Boolean(
         region && region.kind !== 'tissue-region' && layerLoaded(region) && !hidden(region),
       );
+    },
+    surfaceSwatch(id) {
+      const region = regions.get(id);
+      const { surfaceColor, paint } = settings();
+      if (region?.kind !== 'cortex' || paint || !model.isRegionDrawn(id)) return null;
+      const rgb =
+        surfaceColor === 'atlas'
+          ? region.display_color
+          : surfaceColor === 'lobe'
+            ? lobeColor(region)
+            : null;
+      return rgb ? networkCss(rgb) : null;
     },
     centroidOf: centroid,
     // A millimetre off the centroid, so a test can tell which of the two a command used.

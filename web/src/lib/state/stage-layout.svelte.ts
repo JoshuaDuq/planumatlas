@@ -90,7 +90,7 @@ export function createStageLayout({
   );
 
   /**
-   * Whether the section row folds Reverse side and Linked MRI behind its disclosure: always on a phone,
+   * Whether the section row folds Reverse side behind its disclosure: always on a phone,
    * elsewhere only when its one line, `sectionNeed` pixels wide, would not fit between the gutters
    * (stage-tools.js `compactSection`, viewport-chrome.js:169-176).
    */

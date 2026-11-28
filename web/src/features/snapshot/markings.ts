@@ -144,7 +144,7 @@ export function snapshotMarkings(
         };
         // Without the dock the top letter needs no room under a phone's scale bar; a key's band it keeps.
         if (edge === 'top' && !stage.keyInset.top) spot.y = 12 + line / 2;
-        // Hidden over a tall dock; on the image it keeps the line above the statement.
+        // Hidden over a tall dock; on the image it keeps a line clear of the bottom edge.
         if (edge === 'bottom' && stage.dockTall) {
           Object.assign(spot, { x: crop.width / 2, y: crop.height - margin - line * 2 });
         }
@@ -230,15 +230,17 @@ export function snapshotMarkings(
       }
       plate.rows.forEach((row, index) => {
         const item = items[index]!;
-        const swatch = find(item, '.network-swatch');
-        const style = getComputedStyle(swatch);
-        swatches.push({
-          ...local(swatch),
-          color: style.backgroundColor,
-          radius: parseFloat(style.borderTopLeftRadius) || 0,
-          ...(row.ramp && { ramp: row.ramp }),
-          ...(row.line && { casing: style.getPropertyValue('--line-casing').trim() }),
-        });
+        if (row.color !== null) {
+          const swatch = find(item, '.network-swatch');
+          const style = getComputedStyle(swatch);
+          swatches.push({
+            ...local(swatch),
+            color: style.backgroundColor,
+            radius: parseFloat(style.borderTopLeftRadius) || 0,
+            ...(row.ramp && { ramp: row.ramp }),
+            ...(row.line && { casing: style.getPropertyValue('--line-casing').trim() }),
+          });
+        }
         texts.push(words(find(item, '.stage-key-label'), row.label));
       });
     }

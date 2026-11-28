@@ -27,7 +27,7 @@
 ></div>
 <aside aria-label="Panels" data-own-keys>
   <div class="bar"><CircuitStepper {model} /></div>
-  <CircuitList {model} />
+  <CircuitList {model} showShortcut={true} elsewhere={() => []} onElsewhere={() => {}} />
   <div class="detail">
     <CircuitProfile {model} />
     <VisualFieldMap model={model.map} />

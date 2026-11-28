@@ -34,8 +34,8 @@ export type KeyName = 'map' | 'map-2' | 'network' | 'paint' | 'borders' | 'cases
 
 export interface KeyRow {
   id: string;
-  /** A swatch colour: channels, or a CSS colour for the direction key. */
-  color: Rgb | string;
+  /** A swatch colour, or null when the row names a palette rather than one colour. */
+  color: Rgb | string | null;
   label: string;
   pressed: boolean;
   /** Keyed but not drawn in this view. */
@@ -57,8 +57,8 @@ export interface KeyPlate {
   note: string;
   /** Each row is a toggle that shows that row alone. */
   pickable: boolean;
-  /** A command under the rows that opens a figure of the map's own (Yeo's networks: their matrix). */
-  action?: { id: 'network-matrix'; label: string };
+  /** A command under the rows. */
+  action?: { id: 'network-matrix' | 'remove-borders'; label: string };
 }
 
 /** A partition with named colours: Yeo's networks and CAB-NP. */
@@ -71,6 +71,8 @@ export interface KeySources {
   lang: Language;
   status: LoadStatus;
   surfaceColor: SurfaceColor;
+  /** The atlas supplying the region colours beneath another atlas's borders. */
+  atlas?: string;
   networks: ColoredNetworks | null;
   cabNp: ColoredNetworks | null;
   /** The arterial territories' palette, in the atlas's order, when the build publishes them. */
@@ -101,7 +103,13 @@ export interface KeySources {
   }[];
 }
 
-const row = (id: string, color: Rgb | string, label: string, pressed = false, absent = false) => ({
+const row = (
+  id: string,
+  color: KeyRow['color'],
+  label: string,
+  pressed = false,
+  absent = false,
+) => ({
   id,
   color,
   label,
@@ -274,13 +282,25 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
 
   if (ready && sources.borders) {
     const words = t(lang, 'display');
+    const overlay = atlasSwitchLabel(sources.borders, lang);
+    const fill =
+      surfaceColor === 'atlas' && !legend && !sources.maps?.length && sources.atlas
+        ? atlasSwitchLabel(sources.atlas, lang)
+        : null;
     plates.push({
       name: 'borders',
       map: 'borders',
-      title: words.bordersKey(atlasSwitchLabel(sources.borders, lang)),
-      rows: [{ ...row('line', BORDER_INK.core, words.bordersLine), line: true }],
+      title: fill ? words.atlasComparison : words.bordersKey(overlay),
+      rows: [
+        ...(fill ? [row('fill', null, words.bordersFill(fill))] : []),
+        {
+          ...row('line', BORDER_INK.core, fill ? words.bordersOverlay(overlay) : words.bordersLine),
+          line: true,
+        },
+      ],
       note: '',
       pickable: false,
+      action: { id: 'remove-borders', label: words.removeBorders },
     });
   }
 

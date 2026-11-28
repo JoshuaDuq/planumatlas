@@ -5,7 +5,7 @@ import { expect, test } from '../fixtures.ts';
 
 test.use({ viewport: { width: 1280, height: 800 } });
 
-test('open a function and Restore, open a deficit and a mapped region, step a circuit with Next', async ({
+test('open a function and Restore, open a deficit, then search and step a circuit', async ({
   app,
 }) => {
   const { page } = app;
@@ -43,10 +43,11 @@ test('open a function and Restore, open a deficit and a mapped region, step a ci
   );
 
   await page.getByRole('tab', { name: 'Circuits', exact: true }).click();
+  await page.getByRole('searchbox', { name: 'Search circuits' }).fill('visual pathway');
   await page.getByRole('button', { name: /^Visual pathway/ }).click();
   const stepper = page.getByRole('group', { name: 'Landmarks' });
   await expect(page.locator('[data-circuit-title]')).toHaveText('Visual pathway');
-  await page.getByRole('button', { name: 'Next landmark' }).click();
+  await page.getByRole('button', { name: 'Start route' }).click();
   await expect(page.locator('[data-circuit-title]')).toHaveText('Optic chiasm');
   await expect(stepper).toContainText('1 of 4');
   await page.getByRole('button', { name: 'Next landmark' }).click();

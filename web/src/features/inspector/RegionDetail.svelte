@@ -54,6 +54,7 @@
   import { FOCUS_TARGETS, registerFocusTarget } from '../../lib/ui/focus.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import IconButton from '../../lib/ui/IconButton.svelte';
+  import Swatch from '../../lib/ui/Swatch.svelte';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import AgreementSection from './AgreementSection.svelte';
   import BoundarySection from './BoundarySection.svelte';
@@ -84,6 +85,7 @@
     lang: Language;
     /** The selected region, or null for the empty hint. */
     region: Region | null;
+    swatch?: string | null;
     explorer: Explorer;
     cortexVisible: boolean;
     /** The selection is drawn alone in its colour, everything else ghosted. */
@@ -182,6 +184,7 @@
   let {
     lang,
     region,
+    swatch = null,
     explorer,
     cortexVisible,
     focused,
@@ -295,7 +298,10 @@
 >
   {#if region && label && atlasRegion}
     <div class="selection-head">
-      <h2 class="region-name" tabindex="-1" bind:this={title}>{label.name}</h2>
+      <h2 class="region-name" tabindex="-1" bind:this={title}>
+        <span class="region-title-text">{label.name}</span>
+        {#if swatch}<Swatch colour={swatch} />{/if}
+      </h2>
       <IconButton
         class="selection-clear"
         icon="close"

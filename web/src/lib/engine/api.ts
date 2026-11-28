@@ -217,6 +217,8 @@ export interface EngineModel {
   readonly spinalCordLoad: SpinalCordLoad;
   /** A region has a visible mesh on screen (sections.js:259: `visibleMeshes.some(region_id)`). */
   isRegionDrawn(id: string): boolean;
+  /** The CSS colour of a drawn cortical parcel in a uniform atlas or lobe colouring. */
+  surfaceSwatch(id: string): string | null;
   /** The mean of the region's voxel centres in surface RAS millimetres; null for an unknown id or a non-region. */
   centroidOf(id: string | null): Vec3 | null;
   /** The region's own voxel nearest its centroid, where the linked MRI and a cut go to show it. */

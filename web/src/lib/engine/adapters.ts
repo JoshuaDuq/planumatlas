@@ -1,4 +1,5 @@
 import { Vector3 } from 'three';
+import { lobeColor } from '../core/catalog/lobes.ts';
 import type { Manifest } from '../types/index.ts';
 import type {
   EngineModel,
@@ -82,6 +83,14 @@ export function createEngineModel(
       return atlas.spinalCordLoadState;
     },
     isRegionDrawn: (id) => atlas.visibleMeshes.some((mesh) => mesh.userData['region_id'] === id),
+    surfaceSwatch(id) {
+      const region = atlas.regions.get(id);
+      const { surfaceColor, paint } = atlas.settings;
+      if (region?.kind !== 'cortex' || paint) return null;
+      if (surfaceColor !== 'atlas' && !(surfaceColor === 'lobe' && lobeColor(region))) return null;
+      const mesh = atlas.visibleMeshes.find((mesh) => mesh.userData['region_id'] === id);
+      return mesh?.material.color.getStyle() ?? null;
+    },
     centroidOf: (id) => atlas.centroidOf(id),
     anchorOf: (id) => atlas.anchorOf(id),
     canSelect: (region) => atlas.canSelect(region),

@@ -7,7 +7,7 @@
     takes the cut's value back while the reader is on it.
   - Reverse side, Linked MRI (`M`), and Close, which hands focus to the Section tool before the row goes.
     While compact (G1's `sectionCompact`: always on a phone, elsewhere when the first line would not fit),
-    Reverse side and Linked MRI fold behind a disclosure.
+    Linked MRI stays visible and Reverse side folds behind a disclosure.
   - An oblique cut adds tilt and azimuth sliders.
   - Every slider steps in whole units of its own (mm, degrees): arrows one, Page Up and Page Down ten, Home
     and End to the ends; a wheel over it one a notch, ten with Shift. A wheel holds a slider as focus does,
@@ -381,18 +381,18 @@
               />
               <span>{copy.reverseShort}</span>
             </label>
-            <button
-              type="button"
-              class="stage-command cut-mri"
-              aria-pressed={mriOpen}
-              aria-keyshortcuts={ARIA_KEYSHORTCUTS.linkedMri}
-              aria-disabled={controls.opening ? 'true' : undefined}
-              data-tooltip={copy.openMprTitle}
-              onclick={(event) => controls.openLinkedMri({ instant: isKeyboardActivation(event) })}
-            >
-              {copy.openLinkedMpr}
-            </button>
           </div>
+          <button
+            type="button"
+            class="stage-command cut-mri"
+            aria-pressed={mriOpen}
+            aria-keyshortcuts={ARIA_KEYSHORTCUTS.linkedMri}
+            aria-disabled={controls.opening ? 'true' : undefined}
+            data-tooltip={copy.openMprTitle}
+            onclick={(event) => controls.openLinkedMri({ instant: isKeyboardActivation(event) })}
+          >
+            {copy.openLinkedMpr}
+          </button>
           <button
             bind:this={more}
             type="button"
@@ -621,6 +621,9 @@
       line-height: var(--lh-caption);
       color: var(--overlay-danger);
     }
+    .cut-mri {
+      grid-area: mri;
+    }
     .cut-mri[aria-pressed='true'] {
       border: 1px solid var(--overlay-accent);
       background: var(--overlay-accent-wash);
@@ -629,9 +632,6 @@
     .cut-details {
       grid-area: details;
       display: contents;
-    }
-    .cut-details > .stage-command {
-      grid-area: mri;
     }
     .check {
       grid-area: reverse;
@@ -744,13 +744,13 @@
 
     /*
      * Compact (G1's `sectionCompact`, where the first line would not fit): it keeps the plane and the exact
-     * position; Reverse side and Linked MRI open from the disclosure, on a line under the slider.
+     * position and Linked MRI. Reverse side opens from the disclosure beside the slider.
      */
     .section-bar[data-compact='true'][data-pending='false'] .section-bar-row:first-child {
       grid-template-columns: auto auto auto minmax(0, 1fr) auto auto;
       grid-template-areas:
-        'name number unit . more close'
-        'position position position position position position'
+        'name number unit . mri close'
+        'position position position position position more'
         'details details details details details details';
       column-gap: var(--space-2);
     }
@@ -762,6 +762,10 @@
     }
     .section-bar[data-compact='true'] .cut-more {
       display: inline-flex;
+      justify-self: end;
+    }
+    .section-bar[data-compact='true'] .cut-mri {
+      padding-inline: var(--space-2);
     }
     .section-bar[data-compact='true'] .cut-details {
       display: none;
@@ -769,7 +773,6 @@
     .section-bar[data-compact='true'][data-expanded='true'] .cut-details {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: var(--space-3);
       padding: 0 var(--space-2) var(--space-1) 0;
     }
@@ -831,15 +834,18 @@
         font-size: var(--text-title);
       }
     }
-    /*
-     * A landscape phone is short but wide: a line of its own for the slider took half the stage's
-     * height, while one row still leaves it ~200px for the plane's 256 mm.
-     */
+    /* A short landscape stage uses one row when the dock has room for the slider and its ends. */
     @media (max-height: 480px) and (orientation: landscape) {
-      .section-bar[data-compact='true'][data-pending='false'] .section-bar-row:first-child {
-        grid-template-areas:
-          'name number unit position more close'
-          'details details details details details details';
+      .section-bar[data-shown]:not([data-measure]) {
+        container: cut-bar / inline-size;
+      }
+      @container cut-bar (min-width: 28rem) {
+        .section-bar[data-compact='true'][data-pending='false'] .section-bar-row:first-child {
+          grid-template-columns: auto auto auto minmax(6rem, 1fr) auto auto auto;
+          grid-template-areas:
+            'name number unit position mri more close'
+            'details details details details details details details';
+        }
       }
     }
     @media (pointer: coarse) {
@@ -863,6 +869,9 @@
     @media (max-width: 360px) {
       .section-bar[data-compact='true'] .cut-unit {
         display: none;
+      }
+      .section-bar[data-compact='true'][data-pending='false'] .section-bar-row:first-child {
+        column-gap: var(--space-1);
       }
     }
   }

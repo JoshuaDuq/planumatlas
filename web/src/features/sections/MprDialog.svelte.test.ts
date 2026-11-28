@@ -156,6 +156,8 @@ describe('docked beside the stage', () => {
     expect(box(stage).width).toBeGreaterThan(box(dock()!).width);
     const axial = page.getByRole('radio', { name: 'Axial' });
     await expect.element(axial).toBeChecked();
+    await expect.element(page.getByRole('radio', { name: 'Orthogonal views' })).toBeChecked();
+    expect(box(section('axial').querySelector('.plane-name')!).width).toBeGreaterThan(1);
     const slice = box(canvas('axial'));
     expect(section('coronal').hidden).toBe(true);
     await page.getByRole('radio', { name: 'Coronal' }).click();
@@ -326,7 +328,7 @@ describe('the three planes', () => {
     }
     expect(names).toEqual([
       'Close',
-      'Three planes',
+      'Orthogonal views',
       'Sagittal position',
       'Save PNG, sagittal',
       'Coronal position',
@@ -1066,15 +1068,13 @@ describe('on a phone', () => {
     await expect.poll(() => canvas('coronal').width).toBe(SIZE);
   });
 
-  test('the plane still has its heading for a screen reader, though the radio names it', async () => {
+  test('the active plane and its viewing side are visible by the Save action', async () => {
     await opened();
     await expect
       .element(page.getByRole('heading', { name: 'Axial from above · neurological', level: 3 }))
       .toBeInTheDocument();
     const heading = section('axial').querySelector('h3')!;
-    expect(heading.querySelector('.plane-name')!.getBoundingClientRect().width).toBeLessThanOrEqual(
-      1,
-    );
+    expect(heading.querySelector('.plane-name')!.getBoundingClientRect().width).toBeGreaterThan(1);
     // The side the picture is seen from is drawn, on Save's line.
     const seen = heading.querySelector('.seen-from')!.getBoundingClientRect();
     const save = section('axial').querySelector('.save')!.getBoundingClientRect();

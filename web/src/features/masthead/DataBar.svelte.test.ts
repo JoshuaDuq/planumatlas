@@ -191,8 +191,10 @@ describe('DataBar lists', () => {
       'Overview structures grouped from NextBrain and aseg labels, with CerebNet cerebellar lobules where published',
       'Histology-based atlas at 0.4\u202fmm',
     ]);
-    // Colours and subjects are described only when chosen.
-    expect(notes('Colour').filter(Boolean)).toEqual(['Tissue colours, shaded by T1 brightness']);
+    expect(notes('Colour').filter(Boolean)).toEqual([
+      'Tissue colours, shaded by T1 brightness',
+      'One colour per lobe',
+    ]);
     expect(notes('Subject')).toEqual(['One individual’s MRI reconstruction', null]);
     await expect
       .element(list('Atlas').getByRole('button', { name: 'HCP-MMP', exact: true }))
@@ -250,6 +252,7 @@ describe('DataBar lists', () => {
       'CAB-NP networks',
     ]);
     expect(asides('Colour')).toEqual([null, null, null, null, null, 'Atlas becomes HCP-MMP']);
+    expect(option('Colour', 'Lobes').textContent).toContain('One colour per lobe');
     expect(
       [...el(list('Colour')).querySelectorAll('[role=group]')].map(
         (group) => document.getElementById(group.getAttribute('aria-labelledby')!)?.textContent,

@@ -1162,9 +1162,7 @@
         grid-template-columns: minmax(0, 1fr);
       }
     }
-    /* One plane or the serial sections take the whole width, the controls under them. With one plane
-       the radio group names it: the heading keeps the name for assistive technology and shows the
-       side it is seen from beside Save. */
+    /* One plane or the serial sections take the whole width, with the controls under them. */
     .mpr:is([data-single-plane], [data-series]) {
       row-gap: var(--space-2);
     }
@@ -1189,18 +1187,6 @@
     .mpr:is([data-single-plane], [data-series]) .window-controls > :global(.control-field) {
       flex: 1 1 min(7rem, 100%);
       min-width: 0;
-    }
-    .mpr[data-single-plane] .plane-name {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      margin: -1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-      white-space: nowrap;
-    }
-    .mpr[data-single-plane] .seen-from::first-letter {
-      text-transform: uppercase;
     }
     .mpr :global(:is(.mpr-plane-picker, .mpr-layout, .mpr-overlay)) {
       flex-wrap: wrap;

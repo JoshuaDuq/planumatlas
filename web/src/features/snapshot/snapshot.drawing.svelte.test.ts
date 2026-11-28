@@ -1,4 +1,4 @@
-// What the snapshot draws onto the image, recorded call by call on the canvas: the statement, the caption,
+// What the snapshot draws onto the image, recorded call by call on the canvas: the caption,
 // the letters, the route's landmark labels, the colour keys and the scale bar (SNAP-08 to SNAP-14).
 import '../../styles/index.css';
 import { afterEach, describe, expect, test, vi } from 'vitest';
@@ -184,13 +184,10 @@ const measure = (font: string, text: string) => {
 };
 
 describe('what the snapshot draws', () => {
-  test('SNAP-09 the statement is drawn at the bottom left of the image', async () => {
-    const { texts } = await drawFixture();
-    const statement = texts.find((call) => call.text === 'Planum · Not clinical anatomy');
-    expect(statement).toBeDefined();
-    expect(statement!.x).toBe(16);
-    expect(statement!.y).toBe(520 - 24);
-    expect(statement!.font).toContain('12px');
+  test('SNAP-09 the bottom line carries the scale bar alone: nothing is written at its left', async () => {
+    const { plan, texts } = await drawFixture();
+    const bottom = texts.filter((call) => call.y === 520 - 24);
+    expect(bottom.map((call) => call.text)).toEqual([plan.scale!.label]);
   });
 
   test('SNAP-08 the caption runs from the top left, 24 px down and a line of 16 px apart, and stops short of the top letter', async () => {

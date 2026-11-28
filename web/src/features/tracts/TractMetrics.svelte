@@ -1,14 +1,16 @@
 <!--
-  The count and lengths of each drawn bundle, after the list rather than under its row, so turning a
-  bundle on or off never moves the keys below it. Each line is the description its key points to,
-  rendered only while the bundle is drawn (deviations/t1-metrics-only-while-drawn.md); the name is
-  shown for the eye and left out of the description, which the key's own name already gives.
+  A short preview of the drawn bundles, with the full list and measurements in a disclosure.
+  Each bundle's measurements describe its checkbox while the bundle is drawn.
 -->
 <script lang="ts">
+  import { grouped } from '../../lib/core/format.ts';
   import type { TractBundle as LoadedBundle } from '../../lib/engine/api.ts';
   import { bundleName, lengthSummary } from '../../lib/core/tracts.ts';
   import type { TractRow } from '../../lib/core/tracts.ts';
   import type { Language } from '../../lib/types/index.ts';
+  import Disclosure from '../../lib/ui/Disclosure.svelte';
+
+  const PREVIEW_LIMIT = 2;
 
   let {
     rows,
@@ -23,6 +25,7 @@
     loaded: ReadonlyMap<string, LoadedBundle>;
     text: {
       drawnHeading: string;
+      drawnMore: (count: number) => string;
       streamlines: (shown: number, total: number) => string;
       mean: string;
       range: string;
@@ -40,43 +43,75 @@
         return metrics?.visible ? [{ bundle, metrics }] : [];
       }),
   );
+  let open = $state(false);
 </script>
 
 {#if drawn.length}
-  <div class="drawn" role="group" aria-labelledby="native-tract-drawn-heading" {hidden}>
-    <h4 class="drawn-heading" id="native-tract-drawn-heading">{text.drawnHeading}</h4>
-    {#each drawn as { bundle, metrics } (bundle.id)}
-      <p class="meta" id="native-diffusion-bundle-{bundle.id}-meta">
-        <span class="meta-name" aria-hidden="true">{bundleName(bundle, lang)}</span>
-        <span class="values">
-          <span class="count">{text.streamlines(metrics.shown, metrics.total)}</span>
-          <span class="length">
-            <span>{metrics.shown ? lengthSummary(metrics, text, lang) : text.noShown}</span>
+  <div class="drawn" {hidden}>
+    <Disclosure
+      summary={text.drawnHeading}
+      value={grouped(drawn.length)}
+      variant="section"
+      bind:open
+    >
+      {#each drawn as { bundle, metrics } (bundle.id)}
+        <p class="meta">
+          <span class="meta-name">{bundleName(bundle, lang)}</span>
+          <span class="values" id="native-diffusion-bundle-{bundle.id}-meta">
+            <span>{text.streamlines(metrics.shown, metrics.total)}</span>
+            <span class="length">
+              <span>{metrics.shown ? lengthSummary(metrics, text, lang) : text.noShown}</span>
+            </span>
           </span>
-        </span>
-      </p>
-    {/each}
+        </p>
+      {/each}
+    </Disclosure>
+    {#if !open}
+      <ul class="preview" role="list">
+        {#each drawn.slice(0, PREVIEW_LIMIT) as { bundle } (bundle.id)}
+          <li>{bundleName(bundle, lang)}</li>
+        {/each}
+        {#if drawn.length > PREVIEW_LIMIT}
+          <li class="more">{text.drawnMore(drawn.length - PREVIEW_LIMIT)}</li>
+        {/if}
+      </ul>
+    {/if}
   </div>
 {/if}
 
 <style>
   @layer features {
     .drawn {
-      padding-bottom: var(--space-2);
+      margin-inline: var(--panel-inset);
+      border-bottom: 1px solid var(--border-subtle);
     }
-    /* One drawn bundle: its name, then the values on the line below, at the list's inset. */
+    .drawn > :global(.section) {
+      margin-top: 0;
+    }
+    .preview {
+      margin: 0;
+      padding: 0 0 var(--space-2);
+      list-style: none;
+    }
+    .more {
+      color: var(--text-secondary);
+    }
+    .preview,
     .meta {
-      display: grid;
-      padding: var(--space-1) var(--panel-inset);
       font-size: var(--text-caption);
       line-height: var(--lh-caption);
+      overflow-wrap: anywhere;
+    }
+    /* Each drawn bundle has its name above its measurements. */
+    .meta {
+      display: grid;
+      padding-bottom: var(--space-2);
       color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
     }
     .meta-name {
       color: var(--text-primary);
       font-weight: 500;
-      overflow-wrap: anywhere;
     }
     .values {
       display: flex;

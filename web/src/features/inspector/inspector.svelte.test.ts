@@ -451,7 +451,7 @@ describe('commands', () => {
     );
     expect(walked.slice(5)).toEqual([
       'Neuropsychological functions, 1',
-      'Functional networks, Visual 100%',
+      'Functional networks',
       'Typical arterial supply',
       'Functional division',
     ]);
@@ -547,7 +547,7 @@ describe('evidence sections', () => {
       expect.stringMatching(/^Measurements and source, \d\S*\smm²$/),
       'Neuropsychological functions, 32',
       expect.stringMatching(/^Neurosynth terms, \d+$/),
-      'Functional networks, Dorsal attention 93%',
+      'Functional networks',
       'Typical arterial supply',
       'Functional division',
     ]);

@@ -2,8 +2,8 @@
   The lesson's place and its landmark steps, for the location bar's `stepper` slot (viewer/ui/panels/
   circuits.js:74-100, index.html:335). Previous and Next are separate named buttons in a labelled
   group (APG Carousel's pair); at an end the control leaves rather than greying out, and a fixed
-  three-column grid keeps the count still. The whole route comes before the first landmark: Previous
-  from there returns to it. While a run is in flight a control stays focusable and refuses
+  three-column grid keeps the count still. Start route opens the first landmark, whose Previous
+  returns to the whole route. While a run is in flight a control stays focusable and refuses
   (deviations/x3-busy-keeps-focus.md).
 -->
 <script lang="ts">
@@ -16,12 +16,9 @@
 
   const copy = $derived(t(model.lang, 'circuits'));
   const total = $derived(model.circuit?.steps.length ?? 0);
-  const route = $derived(model.lesson.route);
-  const targets = $derived(
-    route ? { previous: null, next: 0 } : stepperTargets(model.lesson.step, total),
-  );
+  const targets = $derived(stepperTargets(model.lesson.step, total));
   // The first landmark's Previous is the whole route.
-  const toRoute = $derived(!route && targets.previous === null);
+  const toRoute = $derived(targets.previous === null);
   let root = $state<HTMLElement | null>(null);
 
   $effect(() => {
@@ -45,18 +42,26 @@
 
 {#if model.exploring && model.circuit}
   <div role="group" aria-label={copy.landmarks} class="circuit-stepper" bind:this={root}>
-    {@render control('previous', toRoute ? copy.wholeRoute : copy.previousLandmark)}
-    <p class="progress">
-      {#if route}
-        {copy.route}
-      {:else}
+    {#if model.lesson.route}
+      <button
+        type="button"
+        class="start-route"
+        data-step-direction="next"
+        aria-disabled={model.busy ? 'true' : undefined}
+        onclick={() => model.openStep(0, 'next')}
+      >
+        {copy.startRoute}
+      </button>
+    {:else}
+      {@render control('previous', toRoute ? copy.wholeRoute : copy.previousLandmark)}
+      <p class="progress">
         <span class="visually-hidden">{copy.landmark}{' '}</span>{copy.stepShort(
           model.lesson.step,
           total,
         )}
-      {/if}
-    </p>
-    {@render control('next', copy.nextLandmark)}
+      </p>
+      {@render control('next', copy.nextLandmark)}
+    {/if}
   </div>
 {/if}
 
@@ -67,6 +72,29 @@
       display: grid;
       grid-template-columns: var(--control-height) auto var(--control-height);
       align-items: center;
+    }
+    .start-route {
+      grid-column: 1 / -1;
+      min-height: var(--control-height);
+      padding: var(--space-1) var(--space-3);
+      border: 1px solid transparent;
+      border-radius: var(--radius-control);
+      background: var(--surface-tonal);
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .start-route[aria-disabled='true'] {
+      color: var(--text-tertiary);
+      cursor: default;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .start-route:hover:not([aria-disabled='true']) {
+        background: var(--surface-tonal-hover);
+      }
+    }
+    .start-route:active:not([aria-disabled='true']) {
+      background: var(--surface-pressed);
     }
     .circuit-stepper :global(.stepper-previous) {
       grid-column: 1;
@@ -98,7 +126,16 @@
     }
   }
   @layer a11y {
+    @media (prefers-contrast: more) {
+      .start-route {
+        border-color: var(--border-control);
+      }
+    }
     @media (forced-colors: active) {
+      .start-route {
+        border-color: ButtonText;
+      }
+      .start-route[aria-disabled='true'],
       .circuit-stepper :global(.icon-button[aria-disabled='true']) {
         color: GrayText;
       }

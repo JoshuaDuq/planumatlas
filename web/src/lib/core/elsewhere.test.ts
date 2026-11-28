@@ -25,6 +25,7 @@ const circuit = (id: string, name: string, route: string, nameFr = name, routeFr
   id,
   name: { en: name, fr: nameFr },
   route: { en: route, fr: routeFr },
+  steps: [],
 });
 const circuits = [
   circuit(
@@ -46,6 +47,16 @@ test('a circuit is found by its name or its route, in the reader’s language, a
   assert.deepEqual(ids('ganglions de la base'), []);
   assert.deepEqual(ids('hippocampal–diencephalic'), ['memory']);
   assert.deepEqual(ids('  '), []);
+});
+
+test('localized landmark names are searchable even when the route omits them', () => {
+  const memory = {
+    ...circuits[1]!,
+    steps: [{ name: { en: 'Left mammillary body', fr: 'Corps mamillaire gauche' } }],
+  };
+  assert.deepEqual(circuitsMatching([memory], 'left mammillary body', 'en'), [memory]);
+  assert.deepEqual(circuitsMatching([memory], 'corps mamillaire gauche', 'fr'), [memory]);
+  assert.deepEqual(circuitsMatching([memory], 'left mammillary body', 'fr'), []);
 });
 
 test('a tract is found by its name in either language, accents folded', () => {

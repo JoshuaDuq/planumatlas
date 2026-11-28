@@ -152,15 +152,19 @@ describe('the ports', () => {
     expect(ports.mprOpen()).toBe(false);
   });
 
-  test('a first visit to the plain page opens the guided tour over a drawn stage, follows a pick on the brain, and its close folds the tree back and hands focus to More settings', async () => {
+  test('the opt-in stage tour follows a pick, then restores the tree and hands focus to More settings', async () => {
     await shell.open({ hash: '#anatomy=cdmd&lang=en', firstVisit: true });
     const expanded = [...shell.app.session.state.expanded];
     const card = () => document.querySelector<HTMLElement>('.driver-popover');
     const title = () => card()?.querySelector('.driver-popover-title')!.textContent;
     const next = () =>
       card()!.querySelector<HTMLButtonElement>('.driver-popover-next-btn')!.click();
-    // The tour's code is fetched as it starts.
+    expect(card()).toBeNull();
+    const invitation = page.getByRole('button', { name: 'Take the tour' });
+    await invitation.click();
     await vi.waitFor(() => expect(title()).toBe('Welcome to Planum'));
+    await expect.element(invitation).not.toBeInTheDocument();
+    expect(location.hash).toContain('atlas=destrieux');
     next();
     next();
     expect(title()).toBe('Open a region');
@@ -205,6 +209,17 @@ describe('the ports', () => {
     flushSync();
     page.getByRole('button', { name: 'Focus', exact: true }).element().focus();
     expect(shell.app.ports.focusInDetail()).toBe(true);
+  });
+
+  test('a selected cortical region shows a swatch for the lobe colouring', async () => {
+    await shell.open({ hash: '#colors=lobe' });
+    shell.engine.emit('pick', { id: 'destrieux:left:30', point: null });
+    flushSync();
+    const swatch = () => document.querySelector('.region-name .network-swatch');
+    expect(swatch()).not.toBeNull();
+    shell.engine.model.setSurfaceColor('tissue');
+    flushSync();
+    expect(swatch()).toBeNull();
   });
 
   test('closing the app withdraws them', async () => {

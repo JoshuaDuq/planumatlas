@@ -203,6 +203,7 @@
     else if (action === 'retry') world!.session.retryNotice();
     else if (action === 'restore') void world!.anatomy.restoreBeforeReveal();
     else if (action === 'undo-pick') world!.anatomy.undoPick();
+    else if (action === 'focus-region') world!.excursions.focusListedRegion();
     else world!.coordinates!.undoReplacement();
   }
 
@@ -329,6 +330,7 @@
         notice={offeredNotice(current.notice, {
           lesionReplaced: world.lesion.replaced !== null,
           pickUndoable: world.anatomy.pickUndoable,
+          selectedRegion: current.selectedRegion?.id ?? null,
         })}
         shell={app.media.phone ? 'sheet' : 'rails'}
         stepper={panels.circuits.exploring && panels.circuits.circuit ? stepper : undefined}

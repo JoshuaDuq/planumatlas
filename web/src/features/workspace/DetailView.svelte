@@ -67,6 +67,11 @@
     commands,
   } = $derived(world);
   const current = $derived(view.current);
+  const regionSwatch = $derived(
+    current.selectedRegion && !world.userMap.drawn
+      ? engine.model.surfaceSwatch(current.selectedRegion.id)
+      : null,
+  );
   // A link can open the body map with no press of its row: its panel's code then loads here.
   const BodyMap = $derived(bodyMapPanel.component);
   $effect(() => {
@@ -261,6 +266,7 @@
       <RegionDetail
         lang={current.lang}
         region={current.selectedRegion}
+        swatch={regionSwatch}
         deficits={current.selectedRegion
           ? deficitsForRegion(deficits, current.selectedRegion.id).map(
               (id) => clinical.get(id).name[current.lang],

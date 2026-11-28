@@ -43,8 +43,6 @@ export const en = {
   // Visually hidden after a stage-key row whose colour is not drawn (WCAG 1.4.1).
   keyAbsent: 'Not shown in this view',
   snapshot: 'Save image (PNG)',
-  // Written onto the exported image, which travels without the page around it.
-  snapshotStatement: 'Planum · Not clinical anatomy',
   fullscreen: 'Full screen',
   exitFullscreen: 'Exit full screen',
   snapshotSaved: (file: string) => `Image saved as ${file}.`,
@@ -106,7 +104,6 @@ export const fr: typeof en = {
   },
   keyAbsent: 'Absent de cette vue',
   snapshot: 'Enregistrer l’image (PNG)',
-  snapshotStatement: 'Planum · Pas une anatomie clinique',
   fullscreen: 'Plein écran',
   exitFullscreen: 'Quitter le plein écran',
   snapshotAt: (scale: number) => `Enregistrer en ${scale}×`,

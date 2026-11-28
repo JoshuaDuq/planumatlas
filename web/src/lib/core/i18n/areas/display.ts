@@ -114,6 +114,10 @@ export const en = {
   // Another atlas's borders drawn over the cortex: the key names the atlas, its row the line.
   bordersKey: (atlas: string) => `${atlas} borders`,
   bordersLine: 'Where each area ends',
+  atlasComparison: 'Atlas comparison',
+  bordersFill: (atlas: string) => `Fill · ${atlas}`,
+  bordersOverlay: (atlas: string) => `Lines · ${atlas}`,
+  removeBorders: 'Remove borders',
   // The pointer's region in each atlas while another's borders are drawn.
   bordersHover: (atlas: string, name: string, other: string, otherName: string) =>
     `${atlas}: ${name} · ${other}: ${otherName}`,
@@ -220,6 +224,10 @@ export const fr: typeof en = {
   networkMatrix: 'Matrice de corrélation',
   bordersKey: (atlas: string) => `Limites de ${atlas}`,
   bordersLine: 'Là où chaque aire s’arrête',
+  atlasComparison: 'Comparaison d’atlas',
+  bordersFill: (atlas: string) => `Couleurs · ${atlas}`,
+  bordersOverlay: (atlas: string) => `Contours · ${atlas}`,
+  removeBorders: 'Retirer les contours',
   bordersHover: (atlas: string, name: string, other: string, otherName: string) =>
     `${atlas}\u202f: ${name} · ${other}\u202f: ${otherName}`,
   thicknessNote:

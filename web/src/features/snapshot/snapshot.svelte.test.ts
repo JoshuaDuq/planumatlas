@@ -162,8 +162,9 @@ describe('the keys in the image', () => {
     await mount({ borders: 'hcp-mmp' });
     const [mark] = markings().keys;
     expect(mark!.texts.map((text) => text.text)).toEqual([
-      'HCP-MMP borders',
-      'Where each area ends',
+      'Atlas comparison',
+      'Fill · Destrieux',
+      'Lines · HCP-MMP',
     ]);
     const [swatch] = mark!.swatches;
     expect([swatch!.color, swatch!.casing]).toEqual(['rgb(242, 242, 242)', '#1b1b1b']);
@@ -237,7 +238,7 @@ describe('the letters and the scale bar', () => {
     expect(scale).toEqual({ pixels: 100, label: '10 mm' });
   });
 
-  test('over a tall dock the bottom letter keeps the line above the statement', async () => {
+  test('over a tall dock the bottom letter keeps a line clear of the bottom edge', async () => {
     await mount();
     stage.setDock({ width: 300, height: 400 });
     flushSync();

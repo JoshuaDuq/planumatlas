@@ -4,6 +4,7 @@
 import { MODES } from '../types/constants.ts';
 import type { Explorer, Language } from '../types/index.ts';
 import { t } from './i18n/index.ts';
+import type { Circuit, Landmark } from './learning/catalog.ts';
 import { foldForSearch } from './tracts.ts';
 
 /** Another tab's matches for the same words. */
@@ -19,21 +20,24 @@ export function elsewhere(from: Explorer, counts: Record<Explorer, () => number>
     .filter(({ count }) => count > 0);
 }
 
-interface Circuit {
-  name: Readonly<Record<Language, string>>;
-  route: Readonly<Record<Language, string>>;
-}
+type SearchableCircuit = Pick<Circuit, 'name' | 'route'> & {
+  steps: readonly Pick<Landmark, 'name'>[];
+};
 
-/** The guided circuits whose name or route holds the words, folded as the tracts' search folds them. */
-export function circuitsMatching<C extends Circuit>(
+/** Guided circuits whose title, route or landmark names hold the localized search words. */
+export function circuitsMatching<C extends SearchableCircuit>(
   circuits: readonly C[],
   query: string,
   lang: Language,
 ): C[] {
   const needle = foldForSearch(query.trim(), lang);
   if (!needle) return [];
-  return circuits.filter((circuit) =>
-    foldForSearch(`${circuit.name[lang]} ${circuit.route[lang]}`, lang).includes(needle),
+  const matches = (text: string) => foldForSearch(text, lang).includes(needle);
+  return circuits.filter(
+    (circuit) =>
+      matches(circuit.name[lang]) ||
+      matches(circuit.route[lang]) ||
+      circuit.steps.some((step) => matches(step.name[lang])),
   );
 }
 

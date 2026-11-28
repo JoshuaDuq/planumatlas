@@ -24,7 +24,6 @@ import type { App } from './application.svelte.ts';
 import { bindAppLifecycle } from './lifecycle.ts';
 import { missingWebgl } from './webgl-check.ts';
 import { composeWorld } from './world.ts';
-import { firstLaunch } from '../features/guide/first-launch.ts';
 
 /** What `mount` is given for `App.svelte`: its status and language follow the app, and every region can read the app from the context. */
 export function shellOptions(app: App) {
@@ -168,13 +167,6 @@ export async function startApp(
     world.links.report(notApplied);
     // The stage took focus while it had no canvas (the skip link, a frame's Load): the keys are the canvas's.
     if (document.activeElement === document.getElementById('viewport')) engine.canvas.focus();
-    if (firstLaunch(arrived)) {
-      // The controls a ready stage shows are drawn before the tour counts which ones it can point at.
-      flushSync();
-      // The tour keeps the opening picture from the link, which the writer has not written yet.
-      world.links.write();
-      app.ports.startGuide(true);
-    }
     // A frame was asked for the brain alone: a cut it did not open is not fetched ahead.
     if (!app.embed) prefetchFirstCut(engine.sections);
     globalThis.addEventListener('hashchange', world.links.onHashChange);

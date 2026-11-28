@@ -17,9 +17,9 @@
   import EmptyState from '../../lib/ui/EmptyState.svelte';
   import { listNav } from '../../lib/ui/list-nav.ts';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
+  import SearchField from '../../lib/ui/SearchField.svelte';
   import ShowAll from '../../lib/ui/ShowAll.svelte';
   import AboutData from '../info/AboutData.svelte';
-  import DeficitSearch from './DeficitSearch.svelte';
   import type { DeficitsExplorer } from './explorer.svelte.ts';
 
   let {
@@ -109,8 +109,12 @@
       () => list?.querySelector<HTMLElement>('.row[aria-current="true"]') ?? null,
     ),
   );
+  let field = $state<HTMLInputElement | null>(null);
   $effect(() => {
-    const field = explorer.refs.search;
+    explorer.refs.search = field;
+    return () => (explorer.refs.search = null);
+  });
+  $effect(() => {
     if (!list || !field) return;
     const nav = listNav(list, { field, rows: '.link-row, .row, .search-bridge, .show-all' });
     return () => nav.destroy();
@@ -119,8 +123,8 @@
 
 <div class="deficit-head">
   <h2 class="visually-hidden">{t(lang, 'workspace').modes.deficits}</h2>
-  <DeficitSearch
-    {explorer}
+  <SearchField
+    bind:input={field}
     query={view.clinicalQuery}
     label={text.searchLabel}
     clearLabel={navigator.clearSearch}

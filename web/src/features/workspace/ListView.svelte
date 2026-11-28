@@ -67,6 +67,7 @@
 
   let tree = $state<AnatomyExplorer>();
   let tracts = $state<TractsExplorer>();
+  let circuitList = $state<CircuitList>();
 
   /** An eye press: the part it hid or showed is said with the count it changes (decision 36, K3). */
   function eye(change: (ids: readonly string[]) => void) {
@@ -95,10 +96,7 @@
     };
   }
 
-  /**
-   * Carries the words to another tab and puts focus in its search. Circuits has no search: the one
-   * circuit they name opens, and several leave its list in front.
-   */
+  /** Carries the words to another tab and puts focus in its search. */
   async function carry(mode: Explorer, query: string) {
     const words = query.trim();
     if (mode === 'functions' || mode === 'deficits') {
@@ -106,26 +104,21 @@
     } else {
       if (mode === 'anatomy') session.setQuery(words);
       if (mode === 'diffusion') tracts!.search(words);
+      if (mode === 'circuits') circuitList!.search(words);
       await excursions.chooseMode(mode);
     }
     // A later tab choice overtook this one.
     if (view.current.explorer !== mode) return;
-    const named =
-      mode === 'circuits' ? circuitsMatching(world.circuits.all, words, current.lang) : [];
-    if (named.length === 1) {
-      await circuits.openCircuit(named[0]!.id);
-      return;
-    }
     // The list was hidden a moment ago: its field is focusable once the page shows it.
     flushSync();
     focusSearch(mode);
   }
 
-  /** The `/` key: the search of the list in front, or its first row where it has none. */
+  /** The `/` key: the search of the list in front. */
   export function focusSearch(mode: Explorer) {
     if (mode === 'functions') functions.focusSearch();
     else if (mode === 'deficits') deficits.focusSearch();
-    else if (mode === 'circuits') circuits.focusFirst();
+    else if (mode === 'circuits') circuitList!.focusSearch();
     else if (mode === 'diffusion') tracts!.focusSearch();
     else tree!.focusSearch();
   }
@@ -222,7 +215,13 @@
 </div>
 
 <div class="mode circuits" hidden={current.explorer !== 'circuits'}>
-  <CircuitList model={circuits} />
+  <CircuitList
+    bind:this={circuitList}
+    model={circuits}
+    showShortcut={app.keyPreference.enabled}
+    elsewhere={othersOf('circuits')}
+    onElsewhere={(mode, query) => carry(mode, query)}
+  />
 </div>
 
 <div class="mode" hidden={current.explorer !== 'diffusion'}>
@@ -273,21 +272,25 @@
     .deficits > :global(.deficit-head) {
       flex: none;
     }
-    .functions > :global(.head) {
+    .functions > :global(.head),
+    .circuits > :global(.head) {
       flex: none;
     }
     /* A head draws the rule under its search once its list has scrolled 8px (elements.css). */
     @supports (animation-timeline: scroll()) {
       .functions,
-      .deficits {
+      .deficits,
+      .circuits {
         timeline-scope: --list-scroll;
       }
       .functions > :global(.browser),
-      .deficits > :global(.deficit-body) {
+      .deficits > :global(.deficit-body),
+      .circuits > :global(.browser) {
         scroll-timeline: --list-scroll block;
       }
       .functions > :global(.head),
-      .deficits > :global(.deficit-head) {
+      .deficits > :global(.deficit-head),
+      .circuits > :global(.head) {
         border-bottom-color: transparent;
         animation: scroll-rule linear both;
         animation-timeline: --list-scroll;

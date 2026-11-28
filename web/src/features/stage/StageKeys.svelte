@@ -43,6 +43,7 @@
     lang: Language;
     status: LoadStatus;
     surfaceColor: SurfaceColor;
+    atlas?: KeySources['atlas'];
     networks: ColoredNetworks | null;
     cabNp: ColoredNetworks | null;
     /** The arterial territories' palette, when the build publishes them. */
@@ -78,6 +79,7 @@
     lang,
     status,
     surfaceColor,
+    atlas,
     networks,
     cabNp,
     territories = null,
@@ -100,6 +102,7 @@
       lang,
       status,
       surfaceColor,
+      atlas,
       networks,
       cabNp,
       territories,
@@ -246,8 +249,10 @@
       style:--line-core={BORDER_INK.core}
       style:--line-casing={BORDER_INK.casing}
     ></span>
-  {:else}
+  {:else if row.color !== null}
     <Swatch colour={row.absent ? 'transparent' : swatchColor(row.color)} />
+  {:else}
+    <span class="stage-key-spacer" aria-hidden="true"></span>
   {/if}
   <span class="stage-key-label">{row.label}</span>
   {#if row.absent}<span class="visually-hidden">. {t(lang, 'viewport').keyAbsent}</span>{/if}
@@ -319,7 +324,7 @@
           <button
             type="button"
             class="stage-key-action"
-            aria-haspopup="dialog"
+            aria-haspopup={action.id === 'network-matrix' ? 'dialog' : undefined}
             onclick={(event) => onPlateAction(action.id, event)}
           >
             {action.label}
@@ -391,6 +396,9 @@
       background: var(--line-core);
       box-shadow: 0 0 0 1px var(--line-casing);
       forced-color-adjust: none;
+    }
+    .stage-key-spacer {
+      flex: 0 0 16px;
     }
     /* A title naming an area wraps rather than run under the chevron (the Complete Name Rule). */
     .stage-key-toggle {

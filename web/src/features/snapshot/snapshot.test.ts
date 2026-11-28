@@ -2,14 +2,7 @@
 import { expect, test } from 'vitest';
 import { SURFACE_COLORS, VIEW_NAMES } from '../../lib/types/constants.ts';
 import type { LabelMark } from './markings.ts';
-import {
-  SEPARATOR,
-  bottomLine,
-  ellipsize,
-  packFacts,
-  settleLabels,
-  snapshotCaption,
-} from './snapshot.ts';
+import { SEPARATOR, ellipsize, packFacts, settleLabels, snapshotCaption } from './snapshot.ts';
 import type { CaptionLine } from './snapshot.ts';
 
 const words = (lines: CaptionLine[]) =>
@@ -99,15 +92,6 @@ test('a line too long for its room keeps its start and ends in an ellipsis', () 
   expect(ellipsize('Destrieux · Tissue', 100, measure)).toBe('Destrieux…');
   expect(measure(ellipsize('Destrieux · Tissue', 100, measure))).toBeLessThanOrEqual(100);
   expect(ellipsize('Destrieux', 5, measure)).toBe('…');
-});
-
-test('statement and scale bar share the bottom line until they would meet', () => {
-  const wide = bottomLine({ width: 1120, height: 824, statementWidth: 190, scaleWidth: 110 });
-  expect(wide.statement).toEqual({ x: 16, y: 800 });
-  expect(wide.scale).toEqual({ x: 994, y: 800 });
-  const narrow = bottomLine({ width: 300, height: 600, statementWidth: 190, scaleWidth: 110 });
-  expect(narrow.scale.y).toBe(576 - 16 - 8);
-  expect(narrow.scale.x + 110).toBe(300 - 16);
 });
 
 test('SNAP-01: a missing atlas and detail leave only the subject and colouring, and an empty subject has no line', () => {
@@ -294,24 +278,6 @@ test('SNAP-07: a shortened run is a trimmed prefix plus an ellipsis that fits, o
   }
 });
 
-test('SNAP-09: the statement and scale never overlap, and the scale shares the line exactly when it fits', () => {
-  const random = seeded(20261026);
-  for (let i = 0; i < 300; i++) {
-    const size = {
-      width: 200 + random(1400),
-      height: 200 + random(800),
-      statementWidth: random(300),
-      scaleWidth: random(200),
-    };
-    const { statement, scale } = bottomLine(size);
-    const shared = scale.y === statement.y;
-    const fits = size.statementWidth + 16 + size.scaleWidth <= size.width - 32;
-    expect(shared, JSON.stringify(size)).toBe(fits);
-    if (shared) expect(statement.x + size.statementWidth).toBeLessThan(scale.x);
-    else expect(scale.y).toBeLessThan(statement.y);
-  }
-});
-
 test('SNAP-06: a fact that fills the room exactly stays on the line', () => {
   expect(packFacts([90, 70], 30, 190)).toEqual([[0, 1]]);
   expect(packFacts([90, 70], 30, 189)).toEqual([[0], [1]]);
@@ -332,7 +298,7 @@ const meets = (a: { x: number; y: number; width: number; height: number }, b: ty
   Math.min(a.x + a.width, b.x + b.width) > Math.max(a.x, b.x) &&
   Math.min(a.y + a.height, b.y + b.height) > Math.max(a.y, b.y);
 
-test('a label clear of the image’s caption, statement and scale bar stays where the stage drew it', () => {
+test('a label clear of the image’s caption and scale bar stays where the stage drew it', () => {
   const clear = label(200, 200);
   const scaleBar = { x: 500, y: 560, width: 120, height: 16 };
   expect(settleLabels([clear], [scaleBar], { x: 0, y: 0, width: 640, height: 600 })).toEqual([

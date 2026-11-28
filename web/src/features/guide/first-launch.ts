@@ -1,4 +1,4 @@
-// What boot asks of the guided tour, kept apart so the tour and driver.js load only when it starts.
+// The invitation and link fields, kept apart so the tour and driver.js load only when it starts.
 import { PREF_KEYS, defaultStorage, readPref } from '../../lib/state/prefs.ts';
 
 /** What the tour keeps of the reader's view: the brain, its atlases and the language. */
@@ -14,10 +14,8 @@ export const parameters = (hash: string) =>
     .map((pair) => pair.split('=') as [string, string]);
 
 /**
- * Whether to start the tour by itself: on a first visit, and only to a page opened plainly, since a
- * link someone shared opens a view the reader came to see. Starting the tour, by hand or not,
- * counts as having seen it. Where site data is blocked that cannot be remembered, so the tour
- * would open on every visit: it waits for the settings menu instead.
+ * Whether the opening view offers the short tour. Shared views and readers who have
+ * already started a tour use the settings menu, as do readers who block site data.
  */
 export function firstLaunch(hash: string, storage: Storage | null = defaultStorage()): boolean {
   if (!storage || readPref(PREF_KEYS.guide, storage) === SEEN) return false;

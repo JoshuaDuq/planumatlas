@@ -63,6 +63,8 @@ type Live = {
   lang: 'en' | 'fr';
   status: 'ready' | 'loading';
   surfaceColor: 'atlas' | 'network' | 'cab-np';
+  atlas?: string;
+  borders?: string | null;
   networks: ColoredNetworks | null;
   cabNp: ColoredNetworks | null;
   legend: Legend | null;
@@ -88,7 +90,7 @@ function mount(
     height?: number;
     sized?: boolean;
     networkMatrix?: boolean;
-    onPlateAction?: (id: 'network-matrix', event: MouseEvent) => void;
+    onPlateAction?: (id: NonNullable<KeyPlate['action']>['id'], event: MouseEvent) => void;
   } = {},
 ) {
   stage = createStageLayout({ media: { phone: false }, onDock, storage: null });
@@ -133,6 +135,23 @@ afterEach(() => {
 });
 
 describe('plates', () => {
+  test('the atlas comparison names fill and lines and can remove its overlay', async () => {
+    const onPlateAction = vi.fn<(id: NonNullable<KeyPlate['action']>['id']) => void>(() => {
+      live.borders = null;
+    });
+    mount({ surfaceColor: 'atlas', atlas: 'destrieux', borders: 'hcp-mmp' }, { onPlateAction });
+    await expect.element(toggle('Atlas comparison')).toBeVisible();
+    const list = page.getByRole('list', { name: 'Atlas comparison' });
+    await expect.element(list).toHaveTextContent('Fill · Destrieux Lines · HCP-MMP');
+    const remove = toggle('Remove borders');
+    expect(remove.element().hasAttribute('aria-haspopup')).toBe(false);
+    remove.element().focus();
+    await userEvent.keyboard('{Enter}');
+    expect(onPlateAction.mock.calls[0]![0]).toBe('remove-borders');
+    await expect.element(toggle('Atlas comparison')).not.toBeInTheDocument();
+    await eventually(() => expect(document.activeElement).toBe(find('#viewport')));
+  });
+
   test('a plate is a named disclosure over a list of its rows, with a swatch for each', async () => {
     mount();
     const button = toggle('Yeo 7 networks');

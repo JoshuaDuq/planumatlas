@@ -27,6 +27,7 @@ import { createEmbed } from '../lib/state/embed.svelte.ts';
 import { createKeyPreference } from '../lib/state/prefs.ts';
 import { createSessionStore } from '../lib/state/session.svelte.ts';
 import { createStageLayout } from '../lib/state/stage-layout.svelte.ts';
+import { firstLaunch } from '../features/guide/first-launch.ts';
 import { createTheme } from '../lib/state/theme.svelte.ts';
 import type { Language } from '../lib/types/index.ts';
 import type { announceView } from '../lib/state/view.svelte.ts';
@@ -102,6 +103,7 @@ export function createApp() {
     lang: language.current,
   });
   let world = $state.raw<World | null>(null);
+  let guideOffered = $state(!arrived.embed && firstLaunch(location.hash));
   let failure = $state.raw<StartFailure | undefined>();
   // The Tracts panel's length filter, which the Linked MRI redraws its tracts by.
   let tractsMinimum = $state<number>(MINIMUM_LENGTH.min);
@@ -130,6 +132,13 @@ export function createApp() {
     stage,
     ports,
     registerPorts: register,
+
+    get guideOffered() {
+      return guideOffered;
+    },
+    dismissGuideOffer() {
+      guideOffered = false;
+    },
 
     /** The settings menu's choice: shown, announced and remembered. */
     chooseLanguage(next: Language) {

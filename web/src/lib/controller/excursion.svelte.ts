@@ -316,11 +316,18 @@ export function createExcursions(
   function sayRevealed(
     before: RevealSettings,
     unseen: string | null = null,
-    { atlasInProfile = false } = {},
+    {
+      atlasInProfile = false,
+      focusRegion,
+    }: { atlasInProfile?: boolean; focusRegion?: string } = {},
   ): boolean {
     const said = revealNotice(lang(), before, revealSettings(), { atlasInProfile });
     if (!said && !unseen) return false;
-    session.notify({ kind: 'info', text: [said, unseen].filter(Boolean).join(' '), action: null });
+    session.notify({
+      kind: 'info',
+      text: [said, unseen].filter(Boolean).join(' '),
+      ...(focusRegion ? { action: 'focus-region', focusRegion } : { action: null }),
+    });
     return true;
   }
 
@@ -494,10 +501,25 @@ export function createExcursions(
     // With the context around it a deficit's regions get, not filling the stage on its own.
     render();
     const unseen = camera.frameRegions(shown);
-    // The profile's notice spoke of its own view: this one is said, or that one goes.
-    if (!sayRevealed(before, unseenNotice(unseen))) session.notify(null);
+    // The whole-map notice described the old framing. Replace its information with the current view.
+    session.notify(null);
+    sayRevealed(before, unseenNotice(unseen), {
+      focusRegion: unseen.includes(shown[0]!) ? shown[0] : undefined,
+    });
     render();
     return true;
+  }
+
+  /** Focus the obscured selection in place, keeping the evidence map and its profile open. */
+  function focusListedRegion() {
+    const notice = session.state.notice;
+    const id = notice?.action === 'focus-region' ? notice.focusRegion : undefined;
+    if (!id || model.state.selectedRegion?.id !== id) return;
+    session.notify(null);
+    model.setFocused(true);
+    render();
+    camera.frameRegions([id]);
+    render();
   }
 
   /** A stage key row: one function, or one finding, alone; null returns to all of them. */
@@ -574,6 +596,7 @@ export function createExcursions(
     openFunctionMri,
     openDeficitMri,
     openListedRegion,
+    focusListedRegion,
     pickPaint,
     offerReload,
 

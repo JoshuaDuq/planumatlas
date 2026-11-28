@@ -32,10 +32,21 @@
     selectedId: string | null;
     view: HoverView;
     sources: HoverSources;
+    onGuide?: () => void;
   }
 
-  let { engine, stage, media, lang, status, tractReference, selectedId, view, sources }: Props =
-    $props();
+  let {
+    engine,
+    stage,
+    media,
+    lang,
+    status,
+    tractReference,
+    selectedId,
+    view,
+    sources,
+    onGuide,
+  }: Props = $props();
 
   const ready = $derived(modelUsable(status));
 
@@ -118,11 +129,11 @@
 </script>
 
 <div class="stage-overlay" bind:this={layer} aria-hidden="true">
-  <StageHints {stage} {lang} coarsePointer={media.coarsePointer} {tractReference} />
   <Orientation {engine} {stage} {lang} {ready} />
   <ScaleBar {engine} {stage} {lang} {ready} />
   <HoverChip {engine} {view} {sources} />
 </div>
+<StageHints {stage} {lang} coarsePointer={media.coarsePointer} {tractReference} {onGuide} />
 
 <style>
   @layer features {

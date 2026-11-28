@@ -774,7 +774,7 @@ describe('the compact row', () => {
     expectFirstLineFitsItsNeed();
   });
 
-  test('where one line would not fit, Reverse side and Linked MRI fold behind More', async () => {
+  test('where one line would not fit, Linked MRI stays visible and Reverse side folds behind More', async () => {
     await mount({}, { width: 400, height: 600 });
     await cutPlane('coronal');
     await vi.waitFor(() => expect(bar().dataset.compact).toBe('true'));
@@ -784,6 +784,7 @@ describe('the compact row', () => {
       false,
     );
     expect(page.getByRole('checkbox', { name: 'Reverse side' }).query()).toBeNull();
+    await expect.element(locate('button', 'Linked MRI')).toBeVisible();
     more.focus();
     await userEvent.keyboard('{Enter}');
     expect(more.getAttribute('aria-expanded')).toBe('true');
@@ -816,6 +817,15 @@ describe('the compact row', () => {
     const dock = document.querySelector<HTMLElement>('.stage-dock')!;
     const gutter = parseFloat(getComputedStyle(dock).getPropertyValue('--stage-gutter'));
     expect(dock.getBoundingClientRect().width).toBeCloseTo(390 - 2 * gutter, 0);
+  });
+
+  test('a narrow landscape stage keeps Linked MRI clear of the cut slider', async () => {
+    await page.viewport(740, 400);
+    await mount({ phone: true }, { width: 345, height: 348 });
+    await cutPlane('coronal');
+    const mri = control('button', 'Linked MRI').getBoundingClientRect();
+    const range = position().getBoundingClientRect();
+    expect(mri.bottom).toBeLessThanOrEqual(range.top);
   });
 
   test('the position slider has a line of its own under the first, a pixel to each 0.5 mm step', async () => {

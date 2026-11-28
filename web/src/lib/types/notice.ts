@@ -2,7 +2,8 @@
  * What a notice offers beside its text (ui/chrome/notice.js:36): a reload, the failed command again,
  * the view before a reveal, the lesion a placed coordinate replaced, or the region a stage click replaced.
  */
-export type NoticeAction = 'reload' | 'retry' | 'restore' | 'restore-lesion' | 'undo-pick';
+export type NoticeAction =
+  'reload' | 'retry' | 'restore' | 'restore-lesion' | 'undo-pick' | 'focus-region';
 
 /**
  * One standing message (state/session.js:139). An error stands until the reader dismisses or
@@ -14,6 +15,8 @@ export interface Notice {
   action?: NoticeAction | null;
   /** The failed command, as it was asked: what `retry` runs. */
   retry?: () => void;
+  /** The selected region the Focus region action belongs to. */
+  focusRegion?: string;
   /** Which failure an error is (`failureKey`, or a masthead control): a later success of the same clears it. */
   key?: string;
 }

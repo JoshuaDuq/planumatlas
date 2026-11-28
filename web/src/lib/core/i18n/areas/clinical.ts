@@ -9,6 +9,7 @@ export const en = {
   checkedMaps: 'Activation maps this evidence checks',
   // Coloured cortical regions the framed view cannot show, each with its sides.
   unseen: (list: string) => `Out of sight from this view: ${list}.`,
+  focusRegion: 'Focus region',
   functionBridge: (count: number, query: string) =>
     `Functions: ${count} activation ${count === 1 ? 'map matches' : 'maps match'} “${query}”`,
   results: (count: number) =>
@@ -84,6 +85,7 @@ export const fr: typeof en = {
     `Données lésionnelles et cliniques · ${count} ${count === 1 ? 'association' : 'associations'}`,
   checkedMaps: 'Cartes d’activation que ces données vérifient',
   unseen: (list: string) => `Hors de vue sous cet angle\u202f: ${list}.`,
+  focusRegion: 'Cibler la région',
   functionBridge: (count: number, query: string) =>
     `Fonctions\u202f: ${count} ${count === 1 ? 'carte d’activation correspond' : 'cartes d’activation correspondent'} à «\u00a0${query}\u00a0»`,
   results: (count: number) =>

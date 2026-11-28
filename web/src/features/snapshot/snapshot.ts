@@ -1,7 +1,7 @@
 // The visible stage as a PNG that documents itself (ui/chrome/snapshot.js; viewport-chrome.js:796-831;
 // app.js:1450-1463): the rendered frame, the orientation letters, the route landmarks' labels, scale bar and
-// colour keys, a caption
-// naming subject, labels, colouring and view or section, and the not-clinical statement.
+// colour keys, and a caption
+// naming subject, labels, colouring and view or section.
 import { tick } from 'svelte';
 import { decimal, withUnit } from '../../lib/core/format.ts';
 import { codeOf } from '../../lib/core/i18n/errors.ts';
@@ -157,28 +157,6 @@ export function ellipsize(text: string, width: number, measure: (text: string) =
   return low ? text.slice(0, low).trimEnd() + ELLIPSIS : ELLIPSIS;
 }
 
-/**
- * Where the bottom line's statement and scale bar go: side by side when both fit between the
- * gutters, otherwise the scale bar one line up. Widths and the result are in CSS pixels.
- */
-export function bottomLine(
-  {
-    width,
-    height,
-    statementWidth,
-    scaleWidth,
-  }: { width: number; height: number; statementWidth: number; scaleWidth: number },
-  layout = SNAPSHOT_LAYOUT,
-) {
-  const { gutter, line, scaleGap } = layout;
-  const baseline = height - gutter - line / 2;
-  const shared = statementWidth + scaleGap * 2 + scaleWidth <= width - 2 * gutter;
-  return {
-    statement: { x: gutter, y: baseline },
-    scale: { x: width - gutter - scaleWidth, y: shared ? baseline : baseline - line - scaleGap },
-  };
-}
-
 interface Palette {
   ink: string;
   halo: string;
@@ -190,7 +168,6 @@ export interface SnapshotPlan extends Markings {
   width: number;
   height: number;
   caption: CaptionLine[];
-  statement: string;
   font: string;
   palette: Palette;
 }
@@ -429,20 +406,8 @@ export function annotateSnapshot(
   canvas: HTMLCanvasElement,
   plan: SnapshotPlan & { ratio: number },
 ): HTMLCanvasElement {
-  const {
-    ratio,
-    width,
-    height,
-    letters,
-    labels,
-    names,
-    caption,
-    statement,
-    scale,
-    keys,
-    font,
-    palette,
-  } = plan;
+  const { ratio, width, height, letters, labels, names, caption, scale, keys, font, palette } =
+    plan;
   const { gutter, line, letterGap } = SNAPSHOT_LAYOUT;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('The snapshot canvas has no 2D context.');
@@ -487,15 +452,13 @@ export function annotateSnapshot(
     }
   });
 
-  ctx.font = fontOf({ size: 12, family: font });
-  const statementWidth = ctx.measureText(statement).width;
+  // The scale bar on the bottom line, at the right.
   ctx.font = fontOf({ size: STAGE_TYPE, family: font });
   const scaleWidth = scale
     ? scale.pixels + SNAPSHOT_LAYOUT.scaleGap + ctx.measureText(scale.label).width
     : 0;
-  const spots = bottomLine({ width, height, statementWidth, scaleWidth });
-  chrome.push(lineBox(spots.statement.x, spots.statement.y, statementWidth));
-  if (scale) chrome.push(lineBox(spots.scale.x, spots.scale.y, scaleWidth));
+  const scaleSpot = { x: width - gutter - scaleWidth, y: height - gutter - line / 2 };
+  if (scale) chrome.push(lineBox(scaleSpot.x, scaleSpot.y, scaleWidth));
 
   ctx.textAlign = 'left';
   for (const label of settleLabels(labels, chrome, { x: 0, y: 0, width, height })) {
@@ -521,9 +484,7 @@ export function annotateSnapshot(
 
   for (const key of keys) drawKey(ctx, key);
 
-  ctx.font = fontOf({ size: 12, family: font });
-  haloText(ctx, statement, spots.statement.x, spots.statement.y, palette, ratio);
-  if (scale) drawScaleBar(ctx, scale, spots.scale.x, spots.scale.y, font, palette, ratio);
+  if (scale) drawScaleBar(ctx, scale, scaleSpot.x, scaleSpot.y, font, palette, ratio);
   ctx.restore();
   return canvas;
 }
@@ -531,7 +492,6 @@ export function annotateSnapshot(
 /** Every face and weight the annotations use, loaded for exactly the words they will draw. */
 export function snapshotFonts(plan: SnapshotPlan) {
   const words = [
-    plan.statement,
     ...plan.letters.map((letter) => letter.text),
     plan.scale?.label ?? '',
     SEPARATOR,
@@ -615,7 +575,6 @@ export function snapshotPlan(
       width: crop.width,
       height: crop.height,
       caption,
-      statement: t(lang, 'viewport').snapshotStatement,
       font: token('--font-ui'),
       palette: {
         ink: token('--overlay-ink'),

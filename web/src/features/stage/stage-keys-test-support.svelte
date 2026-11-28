@@ -18,6 +18,8 @@
       lang: Language;
       status: LoadStatus;
       surfaceColor: SurfaceColor;
+      atlas?: string;
+      borders?: string | null;
       networks: ColoredNetworks | null;
       cabNp: ColoredNetworks | null;
       legend: Legend | null;
@@ -72,6 +74,8 @@
     lang={live.lang}
     status={live.status}
     surfaceColor={live.surfaceColor}
+    atlas={live.atlas}
+    borders={live.borders}
     networks={live.networks}
     cabNp={live.cabNp}
     legend={live.legend}

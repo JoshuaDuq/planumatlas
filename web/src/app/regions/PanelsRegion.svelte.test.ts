@@ -595,9 +595,9 @@ describe('the explorers’ entry points', () => {
     await expect
       .element(page.getByRole('navigation', { name: 'Breadcrumb' }))
       .toHaveTextContent(`Circuits ${circuit.name.en}`);
-    // It opens on the whole route, which selects nothing; Next opens the first landmark.
+    // The whole route selects nothing until the reader opens the first landmark.
     expect(detail().querySelector('.region-detail')).toBeNull();
-    await userEvent.click(page.getByRole('button', { name: 'Next landmark' }));
+    await userEvent.click(page.getByRole('button', { name: 'Start route' }));
     await expect
       .poll(() => detail().querySelector('.region-detail')?.getAttribute('data-landmark-selected'))
       .toBe('true');
@@ -761,10 +761,17 @@ describe('the phone sheet', () => {
     expect(document.activeElement).toBe(
       page.getByRole('combobox', { name: 'Search regions' }).element(),
     );
-    // Circuits has no search, so nothing waits in its grip.
     await userEvent.click(page.getByRole('tab', { name: 'Circuits' }));
+    app.ports.lowerSheet();
     flushSync();
-    expect(atRest()).toBeNull();
+    await expect
+      .element(page.getByRole('button', { name: 'Search circuits', exact: true }))
+      .toBeVisible();
+    await userEvent.click(atRest()!);
+    expect(sheet().dataset.detent).toBe('full');
+    expect(document.activeElement).toBe(
+      page.getByRole('searchbox', { name: 'Search circuits' }).element(),
+    );
   });
 
   test('a held view is reframed where the sheet comes to rest', async () => {

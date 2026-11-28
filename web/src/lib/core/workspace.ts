@@ -24,13 +24,14 @@ export interface DetailState {
 export type WorkspaceView = 'list' | 'detail';
 
 /**
- * The search of the tab in front, by its label: Circuits has none, and Tracts keeps its words in its own
- * list. The detail's location bar and the phone sheet at rest offer it as one control.
+ * The search of the tab in front, by its label. The detail's location bar and the phone sheet at
+ * rest offer it as one control. Tracts keeps its search in its list.
  */
 export function searchLabel(mode: Explorer, lang: Language): string | null {
   if (mode === 'anatomy') return t(lang, 'navigator').searchLabel;
   if (mode === 'functions') return t(lang, 'functions').search;
   if (mode === 'deficits') return t(lang, 'clinical').searchLabel;
+  if (mode === 'circuits') return t(lang, 'circuits').search;
   return null;
 }
 
@@ -165,6 +166,8 @@ export function noticeActionLabel(lang: Language, action: NonNullable<Notice['ac
       return t(lang, 'coordinate').undoReplacement;
     case 'undo-pick':
       return t(lang, 'app').undoPick;
+    case 'focus-region':
+      return t(lang, 'clinical').focusRegion;
     default:
       throw new Error(`Unknown notice action: ${action}`);
   }
@@ -176,11 +179,16 @@ export function noticeActionLabel(lang: Language, action: NonNullable<Notice['ac
  */
 export function offeredNotice(
   notice: Notice | null,
-  { lesionReplaced, pickUndoable }: { lesionReplaced: boolean; pickUndoable: boolean },
+  {
+    lesionReplaced,
+    pickUndoable,
+    selectedRegion,
+  }: { lesionReplaced: boolean; pickUndoable: boolean; selectedRegion?: string | null },
 ): Notice | null {
   const stale =
     (notice?.action === 'restore-lesion' && !lesionReplaced) ||
-    (notice?.action === 'undo-pick' && !pickUndoable);
+    (notice?.action === 'undo-pick' && !pickUndoable) ||
+    (notice?.action === 'focus-region' && notice.focusRegion !== selectedRegion);
   return stale ? { ...notice!, action: null } : notice;
 }
 

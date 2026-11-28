@@ -197,6 +197,15 @@ describe('keyPlates', () => {
   });
 
   test('BORDER-05 drawn borders key their atlas as a line, over any colour and paint, in both languages', () => {
+    const [comparison] = keyPlates(sources({ atlas: 'destrieux', borders: 'hcp-mmp' }));
+    expect(comparison).toMatchObject({
+      title: 'Atlas comparison',
+      rows: [
+        { id: 'fill', label: 'Fill · Destrieux', color: null },
+        { id: 'line', label: 'Lines · HCP-MMP', line: true },
+      ],
+      action: { id: 'remove-borders', label: 'Remove borders' },
+    });
     const plates = keyPlates(
       sources({ surfaceColor: 'thickness', thickness: [1, 4], legend, borders: 'hcp-mmp' }),
     );
