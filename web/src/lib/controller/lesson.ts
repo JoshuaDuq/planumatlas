@@ -146,11 +146,9 @@ export function createLessons({
     checkAnchors(circuit);
     await sections.setMode('off');
     if (!current()) return false;
-    // The internal anatomy that draws most of its deep landmarks, so they show in colour.
-    const structures = circuit.steps
-      .map((step) => step.region)
-      .filter((id) => model.regions.get(id)!.kind === 'structure');
-    if (!(await commands.revealRegions(structures, current))) return false;
+    // The atlas and internal anatomy that draw most of its landmarks, so they show in colour.
+    const landmarks = circuit.steps.map((step) => step.region);
+    if (!(await commands.revealRegions(landmarks, current))) return false;
     const cord = circuit.steps.some((step) => model.regions.get(step.region)?.atlas === 'pam50');
     if (cord && !(await commands.showSpinalCord(true, current))) return false;
     model.select(null);

@@ -87,7 +87,7 @@ A separate test requires each tour's deficit evidence to include a PMID that the
 
 ## Display
 
-A tour opens on its whole route. The panel is headed by the circuit's name, which the location bar truncates, followed by the route sentence and a note on what the numbers mark. Nothing is selected, the cut is off, both hemispheres are shown and the cortex is see-through (opacity 0.15). The internal anatomy holding most of the deep landmarks is revealed, and a teaching-set union of NextBrain labels, such as the midline optic chiasm, is drawn as those labels. The spinal cord is shown if a landmark lies in it, and the view is oblique. A numbered mark sits at each landmark's anchor. The mark shows the number alone, because the landmark list names every landmark. Its tooltip and accessible name carry the landmark's name.
+A tour opens on its whole route. The panel is headed by the circuit's name, which the location bar truncates, followed by the route sentence and a note on what the numbers mark. Nothing is selected, the cut is off, both hemispheres are shown and the cortex is see-through (opacity 0.15). The cortex is drawn on the atlas of the cortical landmarks, and the internal anatomy holding most of the deep landmarks is revealed, so every landmark shows in colour. A teaching-set union of NextBrain labels, such as the midline optic chiasm, is drawn as those labels. The spinal cord is shown if a landmark lies in it, and the view is oblique. A numbered mark sits at each landmark's anchor. The mark shows the number alone, because the landmark list names every landmark. Its tooltip and accessible name carry the landmark's name.
 
 **Next landmark** and **Previous landmark** in the location bar, or a row of the landmark list, open a landmark. At the first landmark the previous control reads **Whole route** and returns to the route. Opening a landmark loads its atlas and layer and selects it. It shows the regions the landmark restores, hides its covering regions and shows only its hemisphere (both for a midline region). Focus is turned on for a structure the opaque picture hides: a deep forebrain structure, or a nucleus, peduncle or white matter inside the brainstem or cerebellum, not their outer parts (Fig. 1b, c). The landmark is then framed (Fig. 1). **Focus** or **Return to landmark** repeats the framing.
 
@@ -118,7 +118,7 @@ On the [Montreal Neurological Institute (MNI) template](mni-template.md) a tour 
 | `stores.svelte.test.ts` | Built from the catalogue, the pontine motor right pons draws `mcp` on CDMD and nothing on a brain without it | passes |
 | `circuits.svelte.test.ts` | **What this atlas shows** gives the generated streamlines line, in English and French, only on a landmark that draws a tract, and the missing-bundle line on a brain without it | passes |
 | `references.test.ts` | Active and archived circuit references name the works their identifiers resolve to | passes |
-| `lesson.test.ts` | Route first; the visual route draws NextBrain with its chiasm; every whole route draws its deep landmarks; deep landmark opens focused; ungeometried landmark refused; Linked MRI opens the prepared plane | passes |
+| `lesson.test.ts` | Route first; the visual route draws NextBrain with its chiasm; every whole route draws all its landmarks; deep landmark opens focused; ungeometried landmark refused; Linked MRI opens the prepared plane | passes |
 
 ## Limitations
 
@@ -132,7 +132,7 @@ Some projections are known from tracing in nonhuman primates, cats, rabbits or r
 
 Each tour's `scope` names what it omits. The visual tour, for example, omits the retina, optic nerves and optic radiations, and the memory tour is one branch, not a complete or necessary Papez circuit.
 
-A route draws one internal anatomy at a time. The pontine motor tour's pontine nuclei are NextBrain's alone, so its whole route is drawn on the NextBrain level, which draws the teaching set's lobule V too ([internal anatomy](internal-anatomy.md)). Its pontine nuclei are not widened to the teaching set's pontine territory, 6.7 times their volume.
+A route draws one cortical atlas and one internal anatomy at a time, so a tour's cortical landmarks share an atlas. The pontine motor tour's pontine nuclei are NextBrain's alone, so its whole route is drawn on the NextBrain level, which draws the teaching set's lobule V too ([internal anatomy](internal-anatomy.md)). Its pontine nuclei are not widened to the teaching set's pontine territory, 6.7 times their volume.
 
 A deficit study supports a region–deficit association, not the pathway's connections. Clinical accuracy has not been validated.
 

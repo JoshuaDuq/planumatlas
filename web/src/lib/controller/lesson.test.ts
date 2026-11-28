@@ -140,7 +140,8 @@ describe('opening a lesson', () => {
     }
   });
 
-  test('every whole route draws all its deep landmarks', async () => {
+  // The cortex carries one atlas at a time, so a tour citing two cannot draw all its landmarks.
+  test('every whole route draws all its landmarks, cortical and deep', async () => {
     const undrawn: string[] = [];
     for (const { id } of createScene().circuits.all) {
       const scene = createScene();
@@ -155,7 +156,7 @@ describe('opening a lesson', () => {
         const drawn =
           model.isRegionDrawn(step.region) ||
           (parts.length > 0 && parts.every((part) => model.isRegionDrawn(part)));
-        if (region.kind === 'structure' && !drawn) undrawn.push(`${id}/${step.id}`);
+        if (!drawn) undrawn.push(`${id}/${step.id}`);
       }
     }
     // The pontine motor tour's pontine nuclei are NextBrain's alone; its lobule V is the teaching
