@@ -1297,6 +1297,7 @@
   "languageSwitch": "Langue",
   "guide": "Utiliser Planum",
   "guideInvitation": "Suivre la visite guidée",
+  "guideDecline": "Ignorer la visite guidée",
   "startOver": "Recommencer",
   "shortcuts": "Raccourcis clavier",
   "theme": "Thème",

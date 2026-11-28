@@ -33,6 +33,7 @@
     view: HoverView;
     sources: HoverSources;
     onGuide?: () => void;
+    onDeclineGuide?: () => void;
   }
 
   let {
@@ -46,6 +47,7 @@
     view,
     sources,
     onGuide,
+    onDeclineGuide,
   }: Props = $props();
 
   const ready = $derived(modelUsable(status));
@@ -133,7 +135,14 @@
   <ScaleBar {engine} {stage} {lang} {ready} />
   <HoverChip {engine} {view} {sources} />
 </div>
-<StageHints {stage} {lang} coarsePointer={media.coarsePointer} {tractReference} {onGuide} />
+<StageHints
+  {stage}
+  {lang}
+  coarsePointer={media.coarsePointer}
+  {tractReference}
+  {onGuide}
+  {onDeclineGuide}
+/>
 
 <style>
   @layer features {

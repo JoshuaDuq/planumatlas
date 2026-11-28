@@ -5,9 +5,13 @@
   once the reader has rotated, zoomed or clicked the model (StageOverlay hears the gestures); the
   keyboard hint shows only while the canvas has focus (stage-vars.css; the canvas's own outline would
   run under the dock). A hint that would not fit one line clear of the top letter or a key is not drawn.
+  The tour invitation's × declines it for good; the settings menu keeps the tour.
 -->
 <script lang="ts">
+  import { tick } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
+  import { FOCUS_TARGETS, rescueFocus } from '../../lib/ui/focus.ts';
+  import IconButton from '../../lib/ui/IconButton.svelte';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
 
@@ -19,9 +23,10 @@
     /** The tract reference alone is shown: it has no regions to click. */
     tractReference: boolean;
     onGuide?: () => void;
+    onDeclineGuide?: () => void;
   }
 
-  let { stage, lang, coarsePointer, tractReference, onGuide }: Props = $props();
+  let { stage, lang, coarsePointer, tractReference, onGuide, onDeclineGuide }: Props = $props();
 
   const copy = $derived(t(lang, 'viewport'));
   const navigation = $derived(
@@ -57,6 +62,12 @@
   const room = $derived(stage.hintRoom);
   const navigationFits = $derived(room === null || navigationWidth <= room);
   const focusFits = $derived(room === null || focusWidth <= room);
+
+  async function decline() {
+    onDeclineGuide!();
+    await tick();
+    rescueFocus(FOCUS_TARGETS.activeTab);
+  }
 </script>
 
 <p
@@ -79,14 +90,19 @@
   {copy.keyboardHint}
 </p>
 {#if onGuide}
-  <button
-    type="button"
-    class="viewport-help viewport-guide"
-    data-below-hint={!stage.hintRetired && navigationFits}
-    onclick={onGuide}
-  >
-    {t(lang, 'header').guideInvitation}
-  </button>
+  {@const header = t(lang, 'header')}
+  <div class="viewport-help viewport-guide" data-below-hint={!stage.hintRetired && navigationFits}>
+    <button type="button" class="viewport-guide-start" onclick={onGuide}>
+      {header.guideInvitation}
+    </button>
+    <IconButton
+      icon="close"
+      class="viewport-guide-decline"
+      label={header.guideDecline}
+      data-tooltip={header.guideDecline}
+      onclick={decline}
+    />
+  </div>
 {/if}
 
 <style>
@@ -126,31 +142,50 @@
       transition: none;
     }
     .viewport-guide {
-      min-height: var(--control-height);
-      padding: var(--space-1) var(--space-3);
+      display: flex;
+      align-items: stretch;
       border: 1px solid color-mix(in srgb, var(--overlay-accent) 60%, var(--overlay-accent-wash));
       border-radius: var(--radius-control);
       background: var(--overlay-accent-wash);
+      text-shadow: none;
+      pointer-events: auto;
+      transition: none;
+    }
+    .viewport-guide-start {
+      min-height: var(--control-height);
+      padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+      border: none;
+      border-radius: inherit;
+      background: none;
       color: var(--overlay-ink);
+      font: inherit;
       font-size: var(--text-stage);
       font-weight: 600;
       line-height: var(--lh-ui);
-      text-shadow: none;
       cursor: pointer;
-      pointer-events: auto;
-      transition: none;
+    }
+    .viewport-guide :global(.viewport-guide-decline) {
+      height: auto;
+      border-left-color: color-mix(in srgb, var(--overlay-accent) 30%, var(--overlay-accent-wash));
+      border-radius: 0 var(--radius-control) var(--radius-control) 0;
+      color: var(--overlay-ink-muted);
     }
     .viewport-guide[data-below-hint='true'],
     :global(#viewport:has(> canvas:focus-visible)) .viewport-guide {
       top: calc(var(--vis-top) + var(--stage-gutter) + var(--lh-caption) + var(--space-2));
     }
-    .viewport-guide:focus-visible {
+    .viewport-guide-start:focus-visible,
+    .viewport-guide :global(.viewport-guide-decline:focus-visible) {
       outline-color: var(--overlay-accent);
     }
     @media (hover: hover) and (pointer: fine) {
-      .viewport-guide:hover {
+      .viewport-guide:has(.viewport-guide-start:hover) {
         border-color: var(--overlay-accent);
         background: color-mix(in srgb, var(--overlay-accent-wash), var(--overlay-accent) 12%);
+      }
+      .viewport-guide :global(.viewport-guide-decline:hover) {
+        background: color-mix(in srgb, var(--overlay-accent-wash), var(--overlay-accent) 12%);
+        color: var(--overlay-ink);
       }
     }
     :global(#viewport:has(> canvas:focus-visible)) .viewport-focus-hint {

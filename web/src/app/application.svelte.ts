@@ -24,10 +24,10 @@ import { VIEW_DIRECTIONS } from '../lib/engine/render/camera-views.ts';
 import { createLanguage } from '../lib/state/language.svelte.ts';
 import { createMedia } from '../lib/state/media.svelte.ts';
 import { createEmbed } from '../lib/state/embed.svelte.ts';
-import { createKeyPreference } from '../lib/state/prefs.ts';
+import { PREF_KEYS, createKeyPreference, writePref } from '../lib/state/prefs.ts';
 import { createSessionStore } from '../lib/state/session.svelte.ts';
 import { createStageLayout } from '../lib/state/stage-layout.svelte.ts';
-import { firstLaunch } from '../features/guide/first-launch.ts';
+import { SEEN, firstLaunch } from '../features/guide/first-launch.ts';
 import { createTheme } from '../lib/state/theme.svelte.ts';
 import type { Language } from '../lib/types/index.ts';
 import type { announceView } from '../lib/state/view.svelte.ts';
@@ -136,7 +136,9 @@ export function createApp() {
     get guideOffered() {
       return guideOffered;
     },
+    /** Started or declined: either way a later visit does not offer it again. */
     dismissGuideOffer() {
+      writePref(PREF_KEYS.guide, SEEN);
       guideOffered = false;
     },
 

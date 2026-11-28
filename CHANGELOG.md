@@ -6,6 +6,11 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
 
+### Changed
+
+- The **Take the tour** invitation on the stage has a **×** that dismisses it for good. **How to use
+  Planum** in the settings menu still starts the tour.
+
 ### Fixed
 
 - A control's spoken name now holds the words it shows, so voice control finds it by what is on screen

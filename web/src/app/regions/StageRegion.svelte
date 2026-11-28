@@ -359,6 +359,7 @@
       onGuide={current.status === 'ready' && app.guideOffered && !tractReference
         ? () => app.ports.startGuide(true)
         : undefined}
+      onDeclineGuide={() => app.dismissGuideOffer()}
     />
     {#snippet overlayPopover({ close }: { close: () => void })}
       {#await overlayPopoverCode() then { default: OverlayPopover }}

@@ -1297,6 +1297,7 @@
   "languageSwitch": "Language",
   "guide": "How to use Planum",
   "guideInvitation": "Take the tour",
+  "guideDecline": "Dismiss the tour",
   "startOver": "Start over",
   "shortcuts": "Keyboard shortcuts",
   "theme": "Theme",

@@ -182,6 +182,19 @@ describe('the ports', () => {
     );
   });
 
+  test('declining the tour invitation hides it for good and hands focus to the tab in front', async () => {
+    await shell.open({ hash: '#anatomy=cdmd&lang=en', firstVisit: true });
+    const invitation = page.getByRole('button', { name: 'Take the tour' });
+    await expect.element(invitation).toBeInTheDocument();
+    const decline = page.getByRole('button', { name: 'Dismiss the tour' });
+    (decline.element() as HTMLButtonElement).focus();
+    await userEvent.keyboard('{Enter}');
+    await expect.element(invitation).not.toBeInTheDocument();
+    expect(document.querySelector('.driver-popover')).toBeNull();
+    expect(localStorage.getItem('planum.guide')).toBe('seen');
+    expect(document.activeElement?.getAttribute('role')).toBe('tab');
+  });
+
   test('kept tracts stay drawn on Functions, and letting them go gives the cortex back', async () => {
     await shell.open();
     const { engine } = shell;
