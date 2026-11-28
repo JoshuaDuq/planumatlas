@@ -8,6 +8,8 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [0.1.3] - 2026-11-27
 
+Archived at [doi:10.5281/zenodo.24616739](https://doi.org/10.5281/zenodo.24616739).
+
 ### Added
 
 - **Circuits** › **Maps** offers a **Body map**: the central strip of both hemispheres coloured by where
