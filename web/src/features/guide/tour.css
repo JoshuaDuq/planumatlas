@@ -49,31 +49,43 @@
     font-size: 20px;
     line-height: 28px;
   }
-  /* The first card's language choice: each name in its own language, the current one pressed. */
+  /* The first card's language choice: each name in its own language, drawn as the segmented control. */
   .guide-card .guide-languages {
     display: flex;
-    gap: var(--space-2);
+    width: fit-content;
+    gap: 2px;
     margin-top: var(--space-4);
+    padding: 2px;
+    border-radius: var(--radius-control);
+    background: var(--surface-tonal);
   }
   .guide-card .guide-languages button {
-    min-height: var(--control-height);
+    min-height: calc(var(--control-height) - 4px);
     padding: 0 var(--space-3);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-control);
-    background: none;
+    border: 0;
+    border-radius: var(--radius-small);
+    background: transparent;
     color: var(--text-secondary);
     font: inherit;
+    font-weight: 500;
     cursor: pointer;
     transition: background-color var(--ui-transition) var(--ease-ui);
   }
   .guide-card .guide-languages button[aria-pressed='true'] {
-    border-color: var(--accent);
+    background: var(--surface-raised);
     color: var(--text-primary);
     font-weight: 600;
+    box-shadow: inset 0 0 0 1px var(--thumb-ring);
+    cursor: default;
   }
   .guide-card .guide-languages button:focus-visible {
     outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline-offset: -2px;
+  }
+  @media (pointer: coarse) {
+    .guide-card .guide-languages button {
+      min-height: 44px;
+    }
   }
   .guide-card .guide-rest {
     display: block;
@@ -163,8 +175,8 @@
       border-color: var(--primary-fill-hover);
       background: var(--primary-fill-hover);
     }
-    .guide-card .guide-languages button:hover {
-      background: var(--surface-hover);
+    .guide-card .guide-languages button:hover:not([aria-pressed='true']) {
+      background: var(--surface-tonal-hover);
       color: var(--text-primary);
     }
     .guide-card .driver-popover-close-btn:hover {
@@ -213,5 +225,20 @@
      them would be cut off: only one edge of the tabs' ring showed, as a stray rule. */
   :root[data-guide-showing] :is(#workspace-panel, #sheet, .workspace-tabs).driver-active-element {
     outline-offset: -2px;
+  }
+}
+
+@layer a11y {
+  /* The segmented control's edges where tones fall away (ChoiceGroup.svelte). */
+  @media (prefers-contrast: more) {
+    .guide-card .guide-languages {
+      box-shadow: inset 0 0 0 1px var(--border-control);
+    }
+  }
+  @media (forced-colors: active) {
+    .guide-card .guide-languages button[aria-pressed='true'] {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
   }
 }
