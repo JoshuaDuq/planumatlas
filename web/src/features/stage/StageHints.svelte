@@ -149,7 +149,8 @@
       background: var(--overlay-accent-wash);
       text-shadow: none;
       pointer-events: auto;
-      transition: none;
+      /* A retiring hint fades first; then the invitation rises into its place, never over it. */
+      transition: top var(--ui-transition) var(--ease-ui) var(--camera-transition);
     }
     .viewport-guide-start {
       min-height: var(--control-height);
@@ -173,6 +174,7 @@
     .viewport-guide[data-below-hint='true'],
     :global(#viewport:has(> canvas:focus-visible)) .viewport-guide {
       top: calc(var(--vis-top) + var(--stage-gutter) + var(--lh-caption) + var(--space-2));
+      transition: none;
     }
     .viewport-guide-start:focus-visible,
     .viewport-guide :global(.viewport-guide-decline:focus-visible) {
@@ -206,6 +208,14 @@
         top: calc(
           var(--vis-top) + var(--key-top) + var(--stage-gutter) + var(--lh-caption) + var(--space-1)
         );
+      }
+    }
+  }
+  @layer a11y {
+    /* Reduced motion: the invitation takes the hint's place once it has faded, without travelling. */
+    @media (prefers-reduced-motion: reduce) {
+      .viewport-guide {
+        transition-duration: 0s;
       }
     }
   }
