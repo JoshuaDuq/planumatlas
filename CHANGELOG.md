@@ -6,6 +6,8 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-11-27
+
 ### Added
 
 - **Circuits** › **Maps** offers a **Body map**: the central strip of both hemispheres coloured by where
@@ -36,6 +38,23 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   mediodorsal–prefrontal landmarks. **What this atlas shows** names the drawn bundle and its dataset, as
   **Tracts** names it. On the MNI template, which has no peduncles, the line says these streamlines are
   on CDMD sub_013 only, and the mediodorsal–prefrontal landmarks draw HCP1065's radiation.
+- Each other cortical atlas in the top bar's **Atlas** list has a **Borders** toggle that draws its area
+  borders as lines over the shown atlas's cortex. The stage key becomes an **Atlas comparison** naming
+  both atlases, with **Remove borders**, and the hover chip names the point in both. Opens with
+  `borders=<atlas>`, on CDMD and the MNI template.
+- The **Overlay** draws a second map over the first, each with its own file, threshold, colour scale and
+  opacity. The second scale is green for positive values and magenta for negative. **Draw on top** swaps
+  them, and the cortex, cut faces, deep surfaces and Linked MRI stack them alike.
+- Search finds HCP-MMP and Julich-Brain areas by their classical names, in English and French: primary
+  visual, motor, somatosensory and auditory cortex, V1, M1, S1, A1, Broca's area and Brodmann areas 1–4,
+  17, 44 and 45. Every HCP-MMP code also answers to "area <code>".
+- **Circuits** has a search over circuit titles, routes and landmark names.
+- Tooltips show a control's keyboard shortcut, and the **Display** popover shows each box's key at the end
+  of its row, while single-key shortcuts are on.
+- A **Contact** button beside the GitHub link gives the maintainer's address; phones find it in the
+  settings panel.
+- A region opened from a function's or deficit's list that other structures hide from view gets a notice
+  with **Focus region**, which focuses it in place and keeps the map and its profile open.
 
 ### Changed
 
@@ -56,6 +75,17 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 - A guided circuit is no longer left out of a brain that lacks one of its landmarks' tracts: that landmark
   draws none, and its notes say which brain has them. The corticospinal landmarks name their streamlines
   in that generated line instead of a written sentence.
+- A first visit no longer starts the guided tour by itself: the stage offers **Take the tour** instead.
+- The **Internal anatomy** list reads **NextBrain (more precise)** and **FreeSurfer aseg (less precise)**.
+- On a cut, the structures the cut face shows are named before the gyri around them: Destrieux at coronal
+  0 mm names 14 structures on the face, up from 4, and NextBrain 13, up from 3.
+- A function, a searched term or the overview painted on Julich-Brain says that its gap maps, a quarter of
+  the cortex, are not areas, so no function scores them.
+- **Tracts**' **Drawn bundles** preview names the first two bundles and counts the rest.
+- The Linked MRI's three-plane layout is named **Orthogonal views**, and a guided circuit's button
+  **Start route**.
+- A saved image no longer carries the "Not clinical anatomy" line.
+- The site counts page views with Cloudflare Web Analytics, one per page load.
 
 ### Fixed
 
@@ -70,6 +100,18 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   together, so the left and right deep structures part as they do at the teaching level.
 - The first exploded view of a level jumped part of the way open: its layout was measured after the
   move had started. It is now measured first.
+- On some Android phones the cortex was not drawn while the deep structures were: its shader used every
+  vertex attribute WebGL 2 guarantees. It now uses 13 of 16.
+- With all CDMD bundles drawn and the Linked MRI open, each step of the cut slider blocked the page for
+  about 330 ms. A step now takes about 22 ms, and the stage draws the slide at its motion resolution.
+- A map below full opacity drew darker on the Linked MRI than on the cut faces and cortex: the Linked MRI
+  now mixes it in linear light, as they do.
+- A name carried onto a cut face while the slider moved could point at another region the face showed
+  there, such as the pallidum's name on white matter. It now fades.
+- Holding a slider in the **Add** popover hid its **Lesion** and **Stroke** tabs.
+- The gizmo's **Reset view** button drew over tooltips.
+- The MNI template's validation stopped at two units lying under aseg's corpus callosum, so its report
+  was not published. Both are declared with their measured overlap and the report is published.
 
 ## [0.1.2] - 2026-11-25
 
@@ -282,7 +324,8 @@ The first numbered release, archived at [doi:10.5281/zenodo.24428326](https://do
 - The Overlay refuses map files over about 528 MiB and stops inflating a `.nii.gz` past the size its
   header states.
 
-[Unreleased]: https://github.com/JoshuaDuq/planumatlas/compare/v0.1.2...main
+[Unreleased]: https://github.com/JoshuaDuq/planumatlas/compare/v0.1.3...main
+[0.1.3]: https://github.com/JoshuaDuq/planumatlas/releases/tag/v0.1.3
 [0.1.2]: https://github.com/JoshuaDuq/planumatlas/releases/tag/v0.1.2
 [0.1.1]: https://github.com/JoshuaDuq/planumatlas/releases/tag/v0.1.1
 [0.1.0]: https://github.com/JoshuaDuq/planumatlas/releases/tag/v0.1.0
