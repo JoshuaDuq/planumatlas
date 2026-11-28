@@ -28,7 +28,8 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   class, and the anterior thalamic radiations, under **Projection tracts**, all tracked by TractSeg in the
   subject's own scan. The MNI template draws the HCP1065 atlas's anterior thalamic radiations. Each passed
   a test of where its streamlines end and run, set before it was tracked; the template's peduncles, and the
-  anterior commissure and fornix on both brains, did not and are not drawn.
+  anterior commissure and fornix on both brains, did not and are not drawn. A lesion report counts them in
+  its **Tracts** section, the middle peduncle, which crosses the midline, for a lesion on either side.
 - Five guided circuits draw these tracts at the landmarks they run through: the middle cerebellar peduncle
   at the pontine motor tour's right pons, the inferior cerebellar peduncle at the vestibular, dorsal
   spinocerebellar and olivocerebellar tours' peduncle, and the left anterior thalamic radiation at both

@@ -19,7 +19,7 @@ The lesion publishes no file. It reads, from `public/models/<anatomy>/` and `pub
 | `white-matter.volume` | FreeSurfer `wmparc` gyral white matter (within 5 mm of cortex) |
 | `neuropsych-domains.json` | Each function's group and its territory: HCP-MMP areas and aseg structures with mean consistency z ≥ 3 (`threshold_z` in `config/neuropsych-domains.yaml`) |
 | `data/neuropsychology.yaml` | Each deficit finding's laterality and cited regions (`mappings`) |
-| `*.trk.gz`, `surface-space.json` | RecoBundles and TractSeg streamlines (35 bundle files on CDMD, 33 counted), or, on the [MNI template](mni-template.md) (Montreal Neurological Institute), the HCP1065 atlas's (23, 22 counted), and the scanner-to-surface transform |
+| `*.trk.gz`, `surface-space.json` | RecoBundles and TractSeg streamlines (35 bundle files on CDMD, 34 counted), or, on the [MNI template](mni-template.md) (Montreal Neurological Institute), the HCP1065 atlas's (23, 22 counted), and the scanner-to-surface transform |
 | Visible cortical meshes | The footprint |
 
 Label grids are described in [sections and cuts](sections-and-cuts.md#data), and bundles in [tracts](tracts.md). CDMD and the MNI template both publish the nine atlases of the first row and `white-matter.volume`.
@@ -52,7 +52,7 @@ A territory's share is of the lesion volume that falls in any territory, not of 
 
 ### Streamlines
 
-Bundles are chosen by side: left when $c_x - r < 0$, right when $c_x + r > 0$, plus the seven callosal segments (bundles `callosum-1` to `callosum-7`, files `callosum_1.trk.gz` to `callosum_7.trk.gz`). The whole-callosum file is skipped, and so is the middle cerebellar peduncle (`mcp`), whose id names no side. The MNI template's atlas has no callosal segments, so there only its 22 lateral bundles are counted and the callosum is not.
+Bundles are chosen by side: left when $c_x - r < 0$, right when $c_x + r > 0$, plus every bundle whose id names no side, which crosses the midline: the seven callosal segments (bundles `callosum-1` to `callosum-7`, files `callosum_1.trk.gz` to `callosum_7.trk.gz`) and the middle cerebellar peduncle (`mcp`). The whole-callosum file (`cc-1`) is skipped. The MNI template's atlas has neither callosal segments nor a middle cerebellar peduncle, so there only its 22 lateral bundles are counted and the callosum is not.
 
 The centre is moved into scanner RAS through `surface-space.json`. A streamline is counted once when any of its points satisfies $\lVert \mathbf{p}-\mathbf{c}\rVert \le r$. A segment passing through the sphere between two outside points is not counted.
 
@@ -68,7 +68,7 @@ Every triangle of the visible cortical meshes whose centroid lies within $r$ is 
 
 **On the brain** paints the lesion alone, the leading functions' whole territories or the cited regions of the leading findings, in six colours by rank (`FINDING_COLORS`), each region taking the colour of the first item that claims it (Fig. 1d,e). **Anatomy measured** lists tissue volumes, cortical regions on each cortical atlas (the one on screen first), deep structures, gyral white matter and arterial territories. Shares of 10% or more are shown to whole percent, and smaller shares to 0.1%.
 
-Streamlines are counted only after **Count *n* bundles** is pressed, where the *n* bundles are those on the sides the sphere reaches. The note under the button reads "Downloads each bundle’s streamlines: tens of megabytes." The lesion is then counted again wherever it is placed, until it is removed, and a link with `lesiontract` counts on restore. Activating a counted bundle draws only its crossing streamlines over a see-through cortex.
+Streamlines are counted only after **Count *n* bundles** is pressed, where the *n* bundles are those on the sides the sphere reaches and those that cross the midline. The note under the button reads "Downloads each bundle’s streamlines: tens of megabytes." The lesion is then counted again wherever it is placed, until it is removed, and a link with `lesiontract` counts on restore. Activating a counted bundle draws only its crossing streamlines over a see-through cortex.
 
 A coordinate from [published coordinates](published-coordinates.md) uses the same sphere; placing either replaces the other. The link carries the lesion as `lesion=<x>,<y>,<z>,<r>`, `lesionmode=lesion|functions|deficits` and `lesiontract=<bundle>` ([sharing and snapshots](sharing-and-snapshots.md)).
 

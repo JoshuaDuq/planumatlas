@@ -115,7 +115,7 @@ test('DIFF-40 at most 64 MiB of decoded points are kept, the least recently used
   const files = lesionBundles(tractCatalog('cdmd').bundles, { centre: [0, 0, 0], radius: 1 }).map(
     (id) => tractCatalog('cdmd').bundles.find((bundle) => bundle.id === id)!.file,
   );
-  assert.equal(files.length, 33);
+  assert.equal(files.length, 34);
   // A sphere every bundle lies inside, so each is near and each is kept in turn.
   const sphere: ScannerSphere = { centre: [0, 0, 0], radius: 300 };
   const bytes: number[] = [];

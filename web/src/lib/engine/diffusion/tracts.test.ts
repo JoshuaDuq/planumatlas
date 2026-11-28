@@ -243,8 +243,8 @@ test('DIFF-40 each count equals the exact count over every decoded point, placed
 test('DIFF-40 a lesion moved 1 mm downloads and decodes nothing again; a bundle the Tracts tab decoded is not downloaded', async () => {
   const { own, read, decode, reads } = await freshCount();
   await own.crossing(LEFT_TPJ, idsOf(LEFT_TPJ));
-  assert.equal(reads().length, 20);
-  assert.equal(decode.mock.calls.length, 20);
+  assert.equal(reads().length, 21);
+  assert.equal(decode.mock.calls.length, 21);
   read.mockClear();
   decode.mockClear();
   const moved: LesionSphere = { centre: [-44, -25, 30], radius: 15 };
@@ -256,9 +256,9 @@ test('DIFF-40 a lesion moved 1 mm downloads and decodes nothing again; a bundle 
   await tab.tracts.loadBundle('af-left');
   tab.read.mockClear();
   assert.deepEqual(await tab.own.crossing(LEFT_TPJ, idsOf(LEFT_TPJ)), await exactCount(LEFT_TPJ));
-  assert.equal(tab.reads().length, 19);
+  assert.equal(tab.reads().length, 20);
   assert.ok(!tab.reads().includes(fileOf('af-left')));
-  assert.equal(tab.decode.mock.calls.length, 19);
+  assert.equal(tab.decode.mock.calls.length, 20);
 }, 120_000);
 
 test('DIFF-41 a bundle the Tracts tab has released is downloaded again by the count, never read from its lines', async () => {
@@ -303,10 +303,10 @@ test('DIFF-39 four bundles at most download at once, each reported as it is coun
     return readInflated(file);
   });
   const ids = idsOf(MIDLINE);
-  assert.equal(ids.length, 33);
+  assert.equal(ids.length, 34);
   const progress: number[] = [];
   const counting = own.crossing(MIDLINE, ids, (counted, total) => {
-    assert.equal(total, 33);
+    assert.equal(total, 34);
     progress.push(counted);
   });
   for (let released = 0; released < ids.length; released++) {

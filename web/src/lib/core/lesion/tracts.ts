@@ -5,11 +5,12 @@ interface Sphere {
 }
 
 const SIDE = /-(left|right)$/;
-const CALLOSAL_SEGMENT = /^callosum-\d+$/;
+const WHOLE_CALLOSUM = 'cc-1';
 
 /**
- * The bundles a lesion's tracts are counted in: each side the sphere extends into, then the callosal
- * segments. The whole-callosum file is left out: the seven segments cover it at half its download.
+ * The bundles a lesion's tracts are counted in: each side the sphere extends into, then the bundles
+ * whose id names no side, which cross the midline (the callosal segments, the middle cerebellar
+ * peduncle). The whole-callosum file is left out: the seven segments cover it at half its download.
  */
 export function lesionBundles(bundles: readonly { id: string }[], sphere: Sphere): string[] {
   const [x] = sphere.centre;
@@ -17,6 +18,6 @@ export function lesionBundles(bundles: readonly { id: string }[], sphere: Sphere
   if (x - sphere.radius < 0) sides.add('left');
   if (x + sphere.radius > 0) sides.add('right');
   const lateral = bundles.filter(({ id }) => sides.has(SIDE.exec(id)?.[1] ?? ''));
-  const callosal = bundles.filter(({ id }) => CALLOSAL_SEGMENT.test(id));
-  return [...lateral, ...callosal].map(({ id }) => id);
+  const midline = bundles.filter(({ id }) => !SIDE.test(id) && id !== WHOLE_CALLOSUM);
+  return [...lateral, ...midline].map(({ id }) => id);
 }

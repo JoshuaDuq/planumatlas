@@ -10,20 +10,23 @@ const bundles = [
   'cc-1',
   'callosum-1',
   'callosum-7',
+  'mcp',
 ].map((id) => ({ id }));
 
-test('takes the bundles of the sides the sphere reaches, and the callosal segments', () => {
+test('takes the bundles of the sides the sphere reaches, and those whose id names no side but the whole callosum', () => {
   assert.deepEqual(lesionBundles(bundles, { centre: [-45, -25, 30], radius: 15 }), [
     'af-left',
     'slf1-left',
     'callosum-1',
     'callosum-7',
+    'mcp',
   ]);
   assert.deepEqual(lesionBundles(bundles, { centre: [40, 0, 0], radius: 10 }), [
     'af-right',
     'slf1-right',
     'callosum-1',
     'callosum-7',
+    'mcp',
   ]);
 });
 
@@ -35,5 +38,6 @@ test('a sphere across the midline reaches both sides', () => {
     'slf1-right',
     'callosum-1',
     'callosum-7',
+    'mcp',
   ]);
 });
