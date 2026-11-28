@@ -307,8 +307,8 @@
     .brand-mark {
       display: flex;
       flex: none;
-      width: 24px;
-      height: 24px;
+      width: max(24px, 1.5rem);
+      height: max(24px, 1.5rem);
       color: var(--text-primary);
     }
     .brand-mark :global(svg) {
@@ -334,6 +334,11 @@
       transition:
         background-color var(--ui-transition) var(--ease-ui),
         color var(--ui-transition) var(--ease-ui);
+    }
+    /* An icon button's glyph, growing with the reader's text as theirs do (IconButton.svelte). */
+    .source-link :global(.control-icon) {
+      width: var(--icon-size);
+      height: var(--icon-size);
     }
     @media (hover: hover) and (pointer: fine) {
       .source-link:hover {

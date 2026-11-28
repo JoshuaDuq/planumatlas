@@ -25,11 +25,14 @@
 
 {#snippet iconGraphic(name: IconName)}
   {@const definition = definitionOf(name)}
+  {@const size = definition.size ?? 16}
+  {@const length = `max(${size}px, ${size / 16}rem)`}
   <svg
     class="control-icon"
     viewBox="0 0 24 24"
-    width={definition.size ?? 16}
-    height={definition.size ?? 16}
+    width={size}
+    height={size}
+    style:--icon-size={length}
     fill={definition.filled ? 'currentColor' : 'none'}
     stroke={definition.filled ? undefined : 'currentColor'}
     stroke-width={definition.filled ? undefined : (definition.strokeWidth ?? 1.5)}
@@ -75,8 +78,14 @@
     .icon-button:active:not(:disabled, [aria-disabled='true'], :focus-visible) {
       transform: scale(var(--press-scale));
     }
+    /*
+     * The glyph grows with the reader's text size inside the square, which grows with it already; beside
+     * text it keeps its size, so a label still fits its row at 200 % text.
+     */
     .icon-button :global(.control-icon) {
       flex: none;
+      width: var(--icon-size);
+      height: var(--icon-size);
     }
     .icon-button[aria-expanded='true'],
     .icon-button[aria-pressed='true'] {
