@@ -235,11 +235,11 @@ test('PROV-05 each domain lists how much of every lesion-mapped parcel its areas
   const text = (label: string) => domainItems.find((item) => item.text === label)!.note;
   assert.equal(
     text('Executive functions: “executive function”'),
-    'Lesion check: Executive dysfunction (Gläscher et al. 2012): G_front_middle (L) 0% coloured, G_front_middle (R) 18% coloured, G_and_S_cingul-Ant (L) 0% coloured, G_and_S_cingul-Ant (R) 8% coloured.',
+    'Lesion check: Executive dysfunction (Gläscher et al. 2012, Vuong and Martin 2011, Nakajima et al. 2021, Cipolotti et al. 2025, Godefroy et al. 2024): G_front_middle (L) 0% coloured.',
   );
   assert.equal(
     text('Pain: “pain”'),
-    'Lesion check: Central post-stroke pain (Sprenger et al. 2012, Karoam et al. 2025): caudal_division_of_ventral_posterior_lateral_nucleus (L), not measured, caudal_division_of_ventral_posterior_lateral_nucleus (R), not measured, anterior_nucleus_of_pulvinar (L), not measured, anterior_nucleus_of_pulvinar (R), not measured.',
+    'Lesion check: Central post-stroke pain (Kim et al. 2022, Sprenger et al. 2012, Karoam et al. 2025, Montes et al. 2005): caudal_division_of_ventral_posterior_lateral_nucleus (L), not measured, caudal_division_of_ventral_posterior_lateral_nucleus (R), not measured, anterior_nucleus_of_pulvinar (L), not measured, anterior_nucleus_of_pulvinar (R), not measured.',
   );
   assert.equal(
     text('Working memory: “working memory”'),
@@ -248,9 +248,10 @@ test('PROV-05 each domain lists how much of every lesion-mapped parcel its areas
   const unchecked = domainItems.filter((item) => item.note?.startsWith('No lesion study'));
   assert.equal(unchecked.length, 26);
   const [executive] = domains.lesion_checks.executive as Parameters<typeof checkedParcels>[0][];
+  const [operculum] = domains.lesion_checks.touch as Parameters<typeof checkedParcels>[0][];
   assert.equal(
-    checkedParcels(executive, 'fr', (mapping) => mapping.source_name),
-    'G_front_middle (G), part colorée 0\u202f%, G_front_middle (D), part colorée 18\u202f%, G_and_S_cingul-Ant (G), part colorée 0\u202f%, G_and_S_cingul-Ant (D), part colorée 8\u202f%',
+    checkedParcels(operculum, 'fr', (mapping) => mapping.source_name),
+    'Lat_Fis-post (G), part colorée 51\u202f%, Lat_Fis-post (D), part colorée 96\u202f%, G_and_S_subcentral (G), part colorée 100\u202f%, G_and_S_subcentral (D), part colorée 93\u202f%',
   );
   const midline = {
     ...executive,

@@ -3147,14 +3147,14 @@
   },
   "deficits": {
    "scope": "Données lésionnelles<NNBSP>: là où une lésion est liée à un déficit.",
-   "shows": "149 déficits acquis de l’adulte, chacun rapporté sur les régions d’atlas que des études de patients publiées y associent. Un profil réunit une à six observations, chacune peinte dans sa propre couleur. Chaque observation cite des études qui l’appuient ou la nuancent, et indique sa limite et la façon dont l’anatomie de l’étude est devenue des parcelles d’atlas.",
-   "source": "Une sélection choisie de 472 études indexées dans PubMed<NNBSP>: cartographies lésionnelles, séries de cas, études de cas et méta-analyses. 214 d’entre elles ont été extraites du seul résumé. Les parcelles sont des étiquettes d’atlas sur un cerveau de référence, et non des volumes lésionnels.",
+   "shows": "177 déficits acquis de l’adulte, chacun rapporté sur les régions d’atlas que des études de patients publiées y associent. Un profil réunit une à six observations, chacune peinte dans sa propre couleur. Chaque observation cite des études qui l’appuient ou la nuancent, et indique sa limite et la façon dont l’anatomie de l’étude est devenue des parcelles d’atlas.",
+   "source": "Une sélection choisie de 1<NNBSP>281 études indexées dans PubMed<NNBSP>: cartographies lésionnelles, séries de cas, études de cas et méta-analyses. 214 d’entre elles ont été extraites du seul résumé. Les parcelles sont des étiquettes d’atlas sur un cerveau de référence, et non des volumes lésionnels.",
    "caution": "La littérature est sélectionnée, sans revue systématique, et le catalogue n’est ni diagnostique ni pronostique. Des associations de groupe tracées sur un seul cerveau de référence ne prédisent pas le déficit d’un patient individuel. Une parcelle peut être tracée entière là où une étude n’en impliquait qu’une partie<NNBSP>; la substance blanche reste sans couleur."
   },
   "circuits": {
    "scope": "Des parcours de voies décrites dans la littérature.",
-   "shows": "45 parcours de voies anatomiques et de branches de boucles, 124 repères en tout, dans les systèmes sensoriels, moteurs, cérébelleux, hippocampiques, limbiques, d’association et commissuraux. Chaque repère est une région étiquetée des atlas de ce cerveau, cadrée avec 12<NBSP>mm d’anatomie environnante.",
-   "source": "Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 262 références sont 252 articles PubMed, 9 chapitres de Purves et al., Neuroscience, et un chapitre de StatPearls. Un repère sur un faisceau que l’onglet Faisceaux publie pour ce cerveau le trace, et ses notes nomment le faisceau et sa source.",
+   "shows": "43 parcours de voies anatomiques et de branches de boucles, 121 repères en tout, dans les systèmes sensoriels, moteurs, cérébelleux, hippocampiques, limbiques, d’association et commissuraux. Chaque repère est une région étiquetée des atlas de ce cerveau, cadrée avec 12<NBSP>mm d’anatomie environnante.",
+   "source": "Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 312 références sont 298 articles PubMed et 14 chapitres d’ouvrages, dont 10 de Purves et al., Neuroscience. Un repère sur un faisceau que l’onglet Faisceaux publie pour ce cerveau le trace, et ses notes nomment le faisceau et sa source.",
    "caution": "Hormis les trajectoires tracées, les parcours enseignent des connexions décrites dans la littérature et ne mesurent rien dans ce cerveau. Les étiquettes d’atlas approchent les structures, et certaines projections ne sont connues que par traçage chez le singe, le chat, le lapin ou les rongeurs. Une étude de déficit appuie une association région–déficit, et non les connexions de la voie."
   },
   "tracts": {

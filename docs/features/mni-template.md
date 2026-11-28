@@ -87,7 +87,7 @@ The same reconstruction's NextBrain volume is the reference that [registration l
 
 **Subject**, in the data popover under the masthead, lists both brains. Choosing one reloads the viewer on it (`anatomy=mni152`). The template's note reads "An average of 152 young adults at mean adult size, with an averaged atlas's tracts and no spinal cord". The template's files, tract catalog and wording load only when it is opened, so CDMD's first visit downloads none of them. **About this data** and **Provenance** say that the brain is an average, that its tracts come from other people and that its own space is placed without registration.
 
-On the template, **Deficits** lists all 149 profiles, coma among them. **Circuits** leaves out 4 of 45 tours, each with a landmark in the spinal cord, which the template lacks: corticospinal descent, the spinothalamic pathway, ventral spinocerebellar input and rubrospinal descent. Its coverage line says how many are on CDMD sub_013 only.
+On the template, **Deficits** lists all 177 profiles. **Circuits** leaves out 4 of 43 tours, each with a landmark in the spinal cord, which the template lacks: corticospinal descent, the spinothalamic pathway, ventral spinocerebellar input and rubrospinal descent. Its coverage line says how many are on CDMD sub_013 only.
 
 On this brain **Coordinate** and **Overlay** offer MNI152NLin2009cAsym, SPM12 (TPM), and MNI with no template stated, which is read as MNI152NLin2009cAsym. Nothing is downloaded to place the template's own space; SPM12's field is downloaded when first used. The coordinate report adds that the landing is a location on an average brain.
 
@@ -105,7 +105,7 @@ On this brain **Coordinate** and **Overlay** offer MNI152NLin2009cAsym, SPM12 (T
 | `spaces.test.ts` | A coordinate in the template's own space is placed by its scale alone, downloading nothing | passes |
 | `inverse-field.test.ts` | The inverse reads a point back in template millimetres over its brain only | passes |
 | `carry.test.ts` | A map in its own space lands where the scale puts it | passes |
-| `catalog.test.ts`, `data.test.ts` | Exactly the 4 tours above are left out, each for a cord level the template lacks, and the rest resolve; asked to resolve every tour, the template is refused; every profile resolves, and a copy of the template without its arousal nuclei leaves out coma alone | passes |
+| `catalog.test.ts`, `data.test.ts` | Exactly the 4 tours above are left out, each for a cord level the template lacks, and the rest resolve; asked to resolve every tour, the template is refused; every profile resolves, and a copy of the template without its subthalamic nuclei leaves out hemichorea alone | passes |
 | `DataBar.svelte.test.ts`, `AnatomyExplorer.svelte.test.ts`, `provenance.test.ts` (PROV-26) | The subject note, the anatomy sheet and Provenance call the brain an average in both languages; its own space is not listed as a registered map | passes |
 | `scripts/prepare_diffusion_mni152.py` | Share of the published streamline length in the template's white matter ≥ 0.90 | 0.934 |
 | `validate_segmentation.cerebellar_agreement`: CerebNet lobules vs aseg cerebellar cortex (8, 47), 1 mm | Dice ≥ 0.85 | 0.929 |

@@ -51,8 +51,7 @@ const ACTIVE = [
   ['stria-terminalis', 3, 'emotion-recognition'],
   ['motion-mt-mst', 3, 'akinetopsia'],
   ['colour', 3, 'achromatopsia'],
-  ['transcallosal-sma', 3, 'callosal-apraxia'],
-  ['piriform-orbitofrontal', 2, 'olfactory-recognition'],
+  ['transcallosal-sma', 3, 'sma-syndrome'],
   ['schaffer-collaterals', 2, 'amnesia'],
   ['navigation', 3, 'topographical-disorientation'],
   ['slf3-opercular', 2, 'apraxia'],
@@ -63,8 +62,6 @@ const ACTIVE = [
   ['frontal-aslant-opercular', 2, 'speech-apraxia'],
   ['motor-hyperdirect', 2, 'hemichorea'],
   ['anterior-commissure-temporal', 4, 'cognitive-estimation'],
-  ['thalamocingulate-posterior', 2, 'amnesia'],
-  ['vertical-occipital-v3a-v4', 2, 'alexia'],
   ['slf2-dorsal-frontoparietal', 2, 'neglect'],
   ['inferior-pulvinar-mt', 2, 'akinetopsia'],
   ['rubrospinal-crossed', 2, 'holmes-tremor'],
@@ -74,25 +71,26 @@ const ACTIVE = [
   ['septohippocampal-ca1-oriens', 2, 'amnesia'],
   ['valuation', 4, 'decision-making'],
   ['associative-frontocaudate', 2, 'working-memory'],
-  ['dorsal-cingulum-anterior-posterior', 2, 'akinetic-mutism'],
-  ['olivocerebellar-flocculus', 2, 'room-tilt-illusion'],
-  ['basal-amygdala-area25', 2, 'decision-making'],
+  ['olivocerebellar-flocculus', 2, 'gaze-evoked-nystagmus'],
+  ['basal-amygdala-area25', 2, 'emotion-recognition'],
   ['dentate-thalamo-putamen', 3, 'dystonia'],
   ['ca1-subiculum', 3, 'amnesia'],
   ['dorsal-geniculate-mt', 2, 'akinetopsia'],
   ['subthalamic-crus-ii', 2, 'cerebellar-cognitive'],
+  ['posterior-ilf-reading', 2, 'alexia'],
+  ['transcallosal-auditory-core', 3, 'word-deafness'],
 ];
 
 test('withdrawn tours remain source-checkable in the archive and cannot be opened as active circuits', () => {
   const activeIds = new Set(data.circuits.map((circuit) => circuit.id));
-  assert.equal(archived.circuits.length, 28);
+  assert.equal(archived.circuits.length, 32);
   assert.deepEqual(archived.withheld_pending_rework, ['hearing']);
   assert.equal(
     [...data.circuits, ...archived.circuits].reduce(
       (sum, circuit) => sum + circuit.steps.length,
       0,
     ),
-    210,
+    215,
   );
   for (const manifest of published) {
     const catalog = create(data, manifest);
@@ -104,7 +102,7 @@ test('withdrawn tours remain source-checkable in the archive and cannot be opene
   }
 });
 
-test('the 45 active pathway tours resolve exact source landmarks on the default anatomy', () => {
+test('the 43 active pathway tours resolve exact source landmarks on the default anatomy', () => {
   for (const manifest of published.filter(complete)) {
     const catalog = create(data, manifest);
     assert.deepEqual(
@@ -113,7 +111,7 @@ test('the 45 active pathway tours resolve exact source landmarks on the default 
     );
     assert.equal(
       catalog.all.reduce((count, circuit) => count + circuit.steps.length, 0),
-      124,
+      121,
     );
     assert.equal(catalog.contextMarginMm, 12);
     assert.equal(catalog.get('vision').steps.at(-1)!.region, 'hcp-mmp:left:1');
@@ -203,6 +201,7 @@ test('a landmark’s tract is one of the anatomy’s own bundles, drawn at the l
       'mediodorsal-prefrontal.dorsal-prefrontal atr-left',
       'dorsal-spinocerebellar.inferior-peduncle icp-right',
       'olivocerebellar-flocculus.inferior-peduncle icp-left',
+      'posterior-ilf-reading.lateral-occipitotemporal-sulcus ilf-left',
     ],
   );
 });
@@ -377,22 +376,22 @@ const rejections: [string, (d: Copy) => void, string, ErrorConstructor?][] = [
   [
     'a repeated reference',
     (d) => d.references.push(d.references[0]),
-    'Duplicate reference: visual-pathways',
+    'Duplicate reference: visual-retinal-central-projections',
   ],
   [
     'a blank reference title',
     (d) => (d.references[0].title = ''),
-    'Missing text: visual-pathways.title',
+    'Missing text: visual-retinal-central-projections.title',
   ],
   [
     'a missing reference citation',
     (d) => delete d.references[0].citation,
-    'Missing text: visual-pathways.citation',
+    'Missing text: visual-retinal-central-projections.citation',
   ],
   [
     'a reference URL that is not https',
     (d) => (d.references[0].url = 'http://example.org/'),
-    'Invalid reference URL: visual-pathways',
+    'Invalid reference URL: visual-retinal-central-projections',
   ],
   [
     'a reference URL that does not parse',
@@ -403,12 +402,12 @@ const rejections: [string, (d: Copy) => void, string, ErrorConstructor?][] = [
   [
     'a reference with neither PMID nor NBK accession',
     (d) => delete d.references[0].nbk,
-    'Missing PMID or NBK accession: visual-pathways',
+    'Missing PMID or NBK accession: visual-retinal-central-projections',
   ],
   ...['NBK', 'nbk123', 'NBK12x'].map((nbk): [string, (d: Copy) => void, string] => [
     `an NBK accession written ${nbk}`,
     (d) => (d.references[0].nbk = nbk),
-    'Missing PMID or NBK accession: visual-pathways',
+    'Missing PMID or NBK accession: visual-retinal-central-projections',
   ]),
   ...['5608081', 'PMC', 'pmc1'].map((pmcid): [string, (d: Copy) => void, string] => [
     `a PMCID written ${pmcid}`,
@@ -625,11 +624,11 @@ describe('CAT-52 · a landmark resolves to one form and uncovers what others cov
   });
 });
 
-test('CAT-53 · the published pathways: revision, margin, 262 references, 45 tours with their deficits and landmark counts', () => {
+test('CAT-53 · the published pathways: revision, margin, 312 references, 43 tours with their deficits and landmark counts', () => {
   const catalog = create(data);
-  assert.equal(catalog.revised, '2026-11-26');
+  assert.equal(catalog.revised, '2026-11-28');
   assert.equal(catalog.contextMarginMm, 12);
-  assert.equal(data.references.length, 262);
+  assert.equal(data.references.length, 312);
   for (const reference of data.references) {
     assert.ok(catalog.reference(reference.id).url.startsWith('https://'), reference.id);
   }
@@ -638,6 +637,22 @@ test('CAT-53 · the published pathways: revision, margin, 262 references, 45 tou
     ACTIVE,
   );
 });
+
+// Archived landmarks whose patient evidence the clinical text describes but no finding paints: the
+// Crus I results were exploratory, the intraparietal one an uncorrected Bayesian analysis, and the
+// planum temporale one a pooled cohort with uncertain ages at onset.
+const DESCRIBED_ONLY = [
+  'cerebellar-cognition/left-crus-i',
+  'cerebellar-cognition/right-crus-i',
+  'extinction/intraparietal',
+  'voices/planum-temporale',
+];
+const paintsDeficitRegion = (deficit: string, region: string) =>
+  clinical.associations.some(
+    (association) =>
+      association.deficit === deficit &&
+      association.mappings.some((mapping) => mapping.region === region),
+  );
 
 test('archived clinical landmarks trace to cited patient evidence; the occipital face landmark has a separate stimulation source', () => {
   const references = new Map(clinical.references.map((reference) => [reference.id, reference]));
@@ -661,6 +676,13 @@ test('archived clinical landmarks trace to cited patient evidence; the occipital
         assert.ok(stimulation && circuit.references.includes(stimulation.id));
         assert.ok(!circuit.clinical_references.includes(stimulation.id));
         assert.equal(step.region, 'destrieux:right:2');
+        continue;
+      }
+      if (DESCRIBED_ONLY.includes(`${id}/${step.id}`)) {
+        assert.ok(
+          !paintsDeficitRegion(circuit.deficit, step.region),
+          `${id}/${step.id} is painted`,
+        );
         continue;
       }
       assert.ok(
@@ -722,6 +744,13 @@ test('every landmark in the five archived lesion tours has cited full-text patie
         .map((reference) => reference.pmid),
     );
     for (const step of circuit.steps) {
+      if (DESCRIBED_ONLY.includes(`${id}/${step.id}`)) {
+        assert.ok(
+          !paintsDeficitRegion(circuit.deficit, step.region),
+          `${id}/${step.id} is painted`,
+        );
+        continue;
+      }
       assert.ok(
         clinical.associations.some(
           (association) =>
@@ -865,6 +894,7 @@ test('on the template, a tour naming a cord or deficit it lacks is left out; a l
       ['mediodorsal-prefrontal.dorsal-prefrontal', 'atr-left', null],
       ['dorsal-spinocerebellar.inferior-peduncle', null, 'icp-right'],
       ['olivocerebellar-flocculus.inferior-peduncle', null, 'icp-left'],
+      ['posterior-ilf-reading.lateral-occipitotemporal-sulcus', 'ilf-left', null],
     ],
   );
   // Complete, as the default anatomy must be, the template is refused rather than trimmed.

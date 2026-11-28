@@ -642,7 +642,7 @@ describe('the published cdmd functions and deficits', () => {
       explorer: 'deficits',
       atlas: 'destrieux',
       selectedFunction: null,
-      selectedDeficit: 'dystonia',
+      selectedDeficit: 'somatoparaphrenia',
       selectedFinding: null,
       paintLifted: false,
       paintFrom: null,
@@ -652,17 +652,18 @@ describe('the published cdmd functions and deficits', () => {
       lesson: { circuit: null },
     };
     const paint = paintFor(state, both)!;
-    for (const structure of catalog.mappedRegions('dystonia')) {
+    for (const structure of catalog.mappedRegions('somatoparaphrenia')) {
       for (const id of catalog.standIns(structure)) {
         assert.deepEqual(paint.colors.get(id), paint.colors.get(structure), id);
       }
     }
-    assert.ok(paint.colors.has('learning:left:pallidum-internal'));
+    assert.ok(paint.colors.has('learning:right:pallidum-internal'));
     const teachingOnly = (id: string) => id.startsWith('learning:');
     const legend = legendFor({ ...state, paint }, { ...both, drawn: teachingOnly })!;
+    // Only the finding with no overlay is greyed.
     assert.deepEqual(
       legend.rows.map((row) => row.absent),
-      legend.rows.map(() => false),
+      [false, true],
     );
   });
 
@@ -682,7 +683,7 @@ describe('the published cdmd functions and deficits', () => {
         assert.equal(legend.rows.length, 3, id);
       }
     }
-    assert.equal(data.deficits.length, 149);
+    assert.equal(data.deficits.length, 177);
     for (const deficit of data.deficits) {
       const state: KeyState = {
         surfaceColor: 'tissue',

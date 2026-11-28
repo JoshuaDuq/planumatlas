@@ -604,9 +604,9 @@ describe('the explorers’ entry points', () => {
   });
 
   test('a deficit’s profile sits above the selected region, which reads as a second subject', async () => {
-    const world = await boot();
-    const deficit = world.clinical.grouped('', 'en')[0]!.deficits[0]!;
-    await app.ports.openDeficit(deficit.id);
+    await boot();
+    // Mapped on cortex as well, so the cortical region stays selectable.
+    await app.ports.openDeficit('anosognosia');
     engine.emit('pick', { id: REGION, point: null });
     flushSync();
     const profile = detail().querySelector('.clinical-profile')!;
@@ -698,7 +698,7 @@ describe('the location bar and the notice', () => {
 
   test('a deficit painting deep structures keeps its cortex opaque, and its profile hides it to show them', async () => {
     const world = await boot();
-    await world.excursions.openDeficit('neglect');
+    await world.excursions.openDeficit('anosognosia');
     flushSync();
     expect(engine.model.settings.cortexOpacity).toBe(1);
     const { count } = world.excursions.beneath!;

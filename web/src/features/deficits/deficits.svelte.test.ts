@@ -50,9 +50,9 @@ describe('the list', () => {
       const label = document.getElementById(group.getAttribute('aria-labelledby')!)!;
       expect(label.tagName).toBe('H3');
     }
-    expect(rows()).toHaveLength(149);
+    expect(rows()).toHaveLength(177);
     expect(document.querySelector('.scope-note')!.textContent).toContain(
-      '149 profiles · adult acquired deficits',
+      '177 profiles · adult acquired deficits',
     );
     expect(document.querySelector('[role="group"][aria-label="Deficits"]')).not.toBeNull();
     await expect.element(page.getByRole('searchbox', { name: /search deficits/i })).toBeVisible();
@@ -76,7 +76,7 @@ describe('the list', () => {
     expect(field().value).toBe('');
     expect(document.activeElement).toBe(field());
     expect(calls.at(-1)).toBe('query:');
-    await expect.poll(announced, { timeout: 2000 }).toBe('149 deficits');
+    await expect.poll(announced, { timeout: 2000 }).toBe('177 deficits');
   });
 
   test('an equal sentence for a different query is said again', async () => {
@@ -159,7 +159,7 @@ describe('the list', () => {
       expect(items.length).toBeGreaterThan(0);
       expect(group.querySelectorAll('ul > li > button.row')).toHaveLength(items.length);
     }
-    expect(document.querySelectorAll('ul > li > button.row')).toHaveLength(149);
+    expect(document.querySelectorAll('ul > li > button.row')).toHaveLength(177);
   });
 
   test('one clear control: the custom button, with the native cancel hidden (D9)', async () => {
@@ -230,31 +230,31 @@ describe('the list', () => {
 
 test('the default brain places every profile, so the list says none is elsewhere', async () => {
   await mount();
-  expect(document.querySelector('[data-deficit="coma"]')).not.toBeNull();
+  expect(document.querySelector('[data-deficit="hemichorea"]')).not.toBeNull();
   expect(document.querySelector('.scope-note')!.textContent!.trim()).toBe(
-    '149 profiles · adult acquired deficits',
+    '177 profiles · adult acquired deficits',
   );
 });
 
-test('on a brain without arousal nuclei, the list leaves coma out and says one profile is on CDMD only', async () => {
+test('on a brain without the subthalamic nucleus, the list leaves hemichorea out and says one profile is on CDMD only', async () => {
   const note = () => document.querySelector('.scope-note');
   await loadTemplateCopy();
   let fixture: Fixture | undefined;
   const full = manifest as unknown as Manifest;
   render(Harness, {
-    manifest: { ...full, regions: full.regions.filter(({ atlas }) => atlas !== 'aan') },
+    manifest: { ...full, regions: full.regions.filter(({ id }) => !id.endsWith(':subthalamic')) },
     complete: false,
     onready: (ready: Fixture) => (fixture = ready),
   } as never);
   await expect.poll(() => fixture).toBeDefined();
   expect(note()!.textContent!.trim()).toBe(
-    '148 profiles · adult acquired deficits · 1 more profile maps structures this template does not have, and is on CDMD sub_013 only.',
+    '176 profiles · adult acquired deficits · 1 more profile maps structures this template does not have, and is on CDMD sub_013 only.',
   );
-  expect(document.querySelector('[data-deficit="coma"]')).toBeNull();
+  expect(document.querySelector('[data-deficit="hemichorea"]')).toBeNull();
 });
 
 describe('opening a deficit', () => {
-  test('a finding without parcel-level evidence shows its publication and no region buttons beside a mapped one', async () => {
+  test('a finding without parcel-level evidence shows its publications and no region buttons beside a mapped one', async () => {
     const { view } = await mount();
     await row('motor-neglect').click();
     await expect.poll(() => heading().textContent!.trim()).toBe('Motor neglect');
@@ -267,7 +267,7 @@ describe('opening a deficit', () => {
     );
     expect(finding('motor-neglect-putamen').querySelectorAll('button.region')).toHaveLength(1);
     unmapped.querySelector<HTMLElement>('summary')!.click();
-    expect(unmapped.querySelectorAll('article.publication')).toHaveLength(1);
+    expect(unmapped.querySelectorAll('article.publication')).toHaveLength(3);
     view.lang = 'fr';
     await expect.poll(() => heading().textContent!.trim()).toBe('Négligence motrice');
     expect(unmapped.querySelector('.regions')!.textContent!.trim()).toBe(
@@ -307,11 +307,11 @@ describe('opening a deficit', () => {
     await row('aphasia').click();
     await expect.poll(() => meta().textContent).toBe('Opening anatomy…');
     release(true);
-    await expect.poll(() => meta().textContent).toBe('Left hemisphere · 7 regions visible');
+    await expect.poll(() => meta().textContent).toBe('Left hemisphere · 6 regions visible');
     expect(meta().getAttribute('role')).toBe('status');
     // The same mounted region is updated in place: it is the one the first text went into.
     view.hemisphere = 'right';
-    await expect.poll(() => meta().textContent).toBe('Left hemisphere · 0 of 7 regions visible');
+    await expect.poll(() => meta().textContent).toBe('Left hemisphere · 0 of 6 regions visible');
     view.hemisphere = 'left';
   });
 
@@ -356,7 +356,7 @@ describe('opening a deficit', () => {
 
   test('associations: a title with its swatch, the full side to a screen reader, region buttons named with their side', async () => {
     await mount();
-    await row('neglect').click();
+    await row('visual-extinction').click();
     const articles = document.querySelectorAll('article.association');
     expect(articles.length).toBeGreaterThan(1);
     const title = articles[0].querySelector('h4')!;
@@ -553,7 +553,7 @@ describe('the meta line', () => {
     await row('aphasia').click();
     const node = meta();
     await expect.poll(() => node.textContent).toMatch(/^Left hemisphere/);
-    await row('amnesia').click();
+    await row('akinetopsia').click();
     await expect.poll(() => node.textContent).toMatch(/^Bilateral landmarks/);
     view.lang = 'fr';
     await expect.poll(() => node.textContent).toMatch(/^Repères bilatéraux/);
@@ -638,7 +638,7 @@ describe('the selected region’s deficits', () => {
 
   test('DEF-34 · a first group lists the deficits involving the region, in the list’s own order', async () => {
     const { view, explorer, calls } = await mount();
-    // The left short insular gyri: aphasia and ten more.
+    // The left short insular gyri: aphasia and eleven more.
     view.selectedRegion = region('destrieux:left:18');
     await expect.poll(group).not.toBeNull();
     const first = document.querySelector('[data-testid="list"] [role="group"][aria-labelledby]')!;
@@ -647,7 +647,7 @@ describe('the selected region’s deficits', () => {
       'Involving this region',
     );
     showAll()!.click();
-    await expect.poll(() => ids(group()!).length).toBe(11);
+    await expect.poll(() => ids(group()!).length).toBe(12);
     const involving = new Set(
       [...explorer.involved('destrieux:left:18')].flatMap((id) =>
         explorer.deps.clinical.forRegion(id).map((association) => association.deficit),
@@ -656,8 +656,8 @@ describe('the selected region’s deficits', () => {
     expect(ids(group()!)).toContain('aphasia');
     await expectAxeClean();
     // Each keeps its place: the full list's rows, filtered.
-    const listed = ids(document.querySelector('[data-testid="list"]')!).slice(11);
-    expect(listed).toHaveLength(149);
+    const listed = ids(document.querySelector('[data-testid="list"]')!).slice(12);
+    expect(listed).toHaveLength(177);
     expect(ids(group()!)).toEqual(listed.filter((id) => involving.has(id!)));
     group()!.querySelector<HTMLElement>('[data-deficit="aphasia"] .row')!.click();
     expect(calls.at(-1)).toBe('deficit:aphasia');
@@ -666,7 +666,7 @@ describe('the selected region’s deficits', () => {
   test('DEF-35 · nothing selected, a region with no deficit, or a search: no group', async () => {
     const { view } = await mount();
     expect(group()).toBeNull();
-    expect(rows()).toHaveLength(149);
+    expect(rows()).toHaveLength(177);
     view.selectedRegion = region('destrieux:left:-1');
     await settled();
     expect(group()).toBeNull();
@@ -678,13 +678,13 @@ describe('the selected region’s deficits', () => {
 
   test('DEF-36 · more than eight show eight and “Show all N”, which shows the rest and moves focus to the first of them', async () => {
     const { view } = await mount();
-    // The left opercular inferior frontal gyrus: 10 deficits.
+    // The left opercular inferior frontal gyrus: 9 deficits.
     view.selectedRegion = region('destrieux:left:12');
     await expect.poll(() => ids(group()!).length).toBe(8);
-    expect(showAll()!.textContent!.trim()).toBe('Show all 10');
+    expect(showAll()!.textContent!.trim()).toBe('Show all 9');
     showAll()!.focus();
     await userEvent.keyboard('{Enter}');
-    await expect.poll(() => ids(group()!).length).toBe(10);
+    await expect.poll(() => ids(group()!).length).toBe(9);
     expect(showAll()).toBeNull();
     expect(document.activeElement).toBe(group()!.querySelectorAll('.row')[8]);
     // Exactly eight: all shown, no command. Another region starts folded again.
@@ -694,7 +694,7 @@ describe('the selected region’s deficits', () => {
     view.selectedRegion = region('destrieux:left:12');
     await expect.poll(() => showAll()).not.toBeNull();
     view.lang = 'fr';
-    await expect.poll(() => showAll()!.textContent!.trim()).toBe('Afficher les 10');
+    await expect.poll(() => showAll()!.textContent!.trim()).toBe('Afficher les 9');
     expect(group()!.querySelector('h3')!.textContent).toBe('Touchant cette région');
   });
 });

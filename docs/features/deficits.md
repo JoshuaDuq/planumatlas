@@ -1,6 +1,6 @@
 # Deficits
 
-The **Deficits** tab maps 149 acquired adult deficits onto the atlas regions that published patient studies associate with them. Each profile holds one to six findings. Each finding cites its supporting studies and any qualifying ones, states its limitation and how the study's anatomy became atlas parcels, and is painted in its own colour. The catalogue is a curated selection of 472 PubMed-indexed studies, not a systematic review, and its parcels are atlas labels on one reference brain, not lesion volumes.
+The **Deficits** tab maps 177 acquired adult deficits onto the atlas regions that published patient studies associate with them. Each profile holds one to six findings. Each finding cites its supporting studies and any qualifying ones, states its limitation and how the study's anatomy became atlas parcels, and is painted in its own colour. The catalogue is a curated selection of 1,281 PubMed-indexed studies, not a systematic review, and its parcels are atlas labels on one reference brain, not lesion volumes.
 
 ```{figure} figures/deficits-1-light.webp
 :alt: Three panels. a, a brain seen from the right with an opaque beige cortex and gyri painted blue, magenta, green and amber, above a key of five findings. b, the same view with the cortex hidden, in which the caudate and putamen are painted violet among unpainted deep structures. c, the side panel showing the finding "Neglect after basal ganglia and thalamic lesions" with its regions, reported finding, interpretation, mapping note and the first of two publications.
@@ -13,14 +13,14 @@ The **Deficits** tab maps 149 acquired adult deficits onto the atlas regions tha
 
 | Input | Content |
 | :--- | :--- |
-| [`data/neuropsychology.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/neuropsychology.yaml), revision 2026-11-19 | 6 groups, 149 deficits, 271 findings (`associations`), 472 references |
-| [`data/reference-records.json`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/reference-records.json), fetched 2026-11-16, with later additions | 788 identity records (758 PubMed articles, 10 Bookshelf chapters, 20 works recorded by digital object identifier (DOI) alone: 19 datasets and 1 article) for every work cited in the repository and the published manifests |
+| [`data/neuropsychology.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/neuropsychology.yaml), revision 2026-11-28 | 6 groups, 177 deficits, 476 findings (`associations`), 1,281 references |
+| [`data/reference-records.json`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/reference-records.json), fetched 2026-11-16, with later additions | 1,623 identity records (1,589 PubMed articles, 14 Bookshelf chapters, 20 works recorded by digital object identifier (DOI) alone: 19 datasets and 1 article) for every work cited in the repository and the published manifests |
 | `public/models/<anatomy>/manifest.json` | The region ids and source labels that mappings must resolve to |
 | `public/models/<anatomy>/neuropsych-domains.json` | Teaching-set stand-ins for FreeSurfer structures (`units`); Functions maps that cite a finding (`lesion_checks`) |
 
-The 472 references span 1978–2026: 176 case series, 175 lesion-mapping studies, 111 case reports and 10 meta-analyses. Extraction scope is `abstract` for 214 and `full-text` for 258. Six references carry a recorded published correction. The 271 findings hold 600 evidence entries (368 supporting, 232 qualifying), and 168 findings carry at least one qualifying entry. By laterality, 124 findings are bilateral, 77 left and 70 right.
+The 1,281 references span 1970–2026: 460 case series, 445 case reports, 357 lesion-mapping studies and 19 meta-analyses. Extraction scope is `abstract` for 214 and `full-text` for 1,067. Fourteen references carry a recorded published correction. The 476 findings hold 1,609 evidence entries (801 supporting, 808 qualifying), and 432 findings carry at least one qualifying entry. By laterality, 251 findings are bilateral, 119 left and 106 right.
 
-Findings per profile: one (69 profiles), two (58), three (9), four (8), five (3: hemispatial neglect, working memory, sign language aphasia) and six (2: aphasia, limb apraxia). Profiles per group: sensorimotor 45, perception and visuospatial abilities 31, attention and executive functions 22, language, reading and number 20, social and emotional functions 19, memory 12. The 498 mappings point to 172 distinct regions: Destrieux parcels (289 mappings), FreeSurfer `aseg` structures (87), teaching-set structures (`learning:`, 79), NextBrain nuclei (34) and Harvard arousal nuclei (`aan:`, 9). Fifty-one findings have no mapping.
+Findings per profile: one (23 profiles), two (65), three (53), four (23), five (6: visual verticality, smooth pursuit, post-stroke urinary retention, ocular tilt reaction, pure sensory stroke, palilalia) and six (7: aphasia, amnesia, hemispatial neglect, limb apraxia, working memory, verbal fluency, sign language aphasia). Profiles per group: sensorimotor 59, perception and visuospatial abilities 42, attention and executive functions 23, language, reading and number 22, social and emotional functions 19, memory 12. The 618 mappings point to 166 distinct regions: Destrieux parcels (341 mappings), FreeSurfer `aseg` structures (128), NextBrain nuclei (82) and teaching-set structures (`learning:`, 67). No finding maps a Harvard arousal nucleus. 151 findings have no mapping.
 
 | Record | Fields |
 | :--- | :--- |
@@ -71,16 +71,16 @@ Each finding lists its regions as buttons, and its **Evidence** disclosure shows
 
 A region's inspector lists the deficits mapped on it under **Linked deficits**. The [lesion report](lesion-report.md#method) ranks deficits by the share of cited regions a placed sphere reaches, and each [circuit](circuits.md) links to its deficit. URL state is `tab=deficits&deficit=<id>`. The chosen finding is not part of the link.
 
-On the Montreal Neurological Institute (MNI) [template](mni-template.md) a profile is listed only if every finding's regions exist there, and the list's coverage line counts those that are not. Every profile is listed there, coma's brainstem arousal nuclei included.
+On the Montreal Neurological Institute (MNI) [template](mni-template.md) a profile is listed only if every finding's regions exist there, and the list's coverage line counts those that are not. Every profile is listed there.
 
 ## Validation
 
 | Test | Criterion | Result |
 | :--- | :--- | :--- |
-| `data.test.ts` CAT-50 | Revision 2026-11-19: 6 groups, 149 deficits, 472 references, 271 findings | passes |
+| `data.test.ts` CAT-50 | Revision 2026-11-28: 6 groups, 177 deficits, 1,281 references, 476 findings | passes |
 | `data.test.ts` | On CDMD sub_013 every published deficit resolves its regions, source labels and evidence; every profile has a colour per finding | passes |
-| `data.test.ts` | On the MNI template every profile resolves; a copy of the template without its arousal nuclei leaves out coma alone and, built as complete, is refused | passes |
-| `data.test.ts`, `catalog.test.ts` CAT-49 | The six colours; a seventh finding throws; aphasia has the most findings (6) and paints 7 regions | passes |
+| `data.test.ts` | On the MNI template every profile resolves; a copy of the template without its subthalamic nuclei leaves out hemichorea alone and, built as complete, is refused | passes |
+| `data.test.ts`, `catalog.test.ts` CAT-49 | The six colours; a seventh finding throws; no profile has more than six findings, and aphasia's six paint 6 regions | passes |
 | `catalog.test.ts` | Each finding takes the next colour, a shared region the first, and one finding can be shown alone | passes |
 | `data.test.ts` | Named mapping limits hold (motor neglect, amusia, Holmes tremor, alien hand, coma) | passes |
 | `validate.test.ts` CAT-44 | Each refusal under Record validation, and acceptance of boundary values | passes |
@@ -88,11 +88,11 @@ On the Montreal Neurological Institute (MNI) [template](mni-template.md) a profi
 | `references.test.ts` | Each cited work matches its fetched record; no retraction or expression of concern; the records file holds exactly the cited works | passes |
 | `tests/test_neuropsych_domains.py` | A Functions lesion check must name an existing finding; deficit groups equal the Functions groups in order and wording | passes |
 
-Among the mapping limits that `data.test.ts` fixes by name, the parietal motor-neglect, amusia-network and Holmes-tremor-network findings paint no region. Alien hand paints the anterior callosal segments (`aseg:midline:254`, `255`) and not the posterior (`251`). The dorsolateral-pons coma finding paints only `learning:left:pons`.
+Among the mapping limits that `data.test.ts` fixes by name, the parietal motor-neglect, amusia-network and Holmes-tremor-network findings paint no region. Alien hand paints the mid-posterior callosal segment (`aseg:midline:252`) and the right thalamus, not the anterior or posterior callosum (`255`, `254`, `251`). The dorsolateral-pons coma finding paints only `learning:left:pons`.
 
 ## Limitations
 
-The literature is selected, not systematically reviewed. Clinical accuracy has not been validated, and the catalogue is not diagnostic or prognostic. Of the 472 references, 214 were extracted from the abstract only. A single case does not show that the same lesion is required in everyone. Consortium, cohort and registry studies can share participants.
+The literature is selected, not systematically reviewed. Clinical accuracy has not been validated, and the catalogue is not diagnostic or prognostic. Of the 1,281 references, 214 were extracted from the abstract only. A single case does not show that the same lesion is required in everyone. Consortium, cohort and registry studies can share participants.
 
 Group associations drawn on one reference brain do not predict an individual patient's deficit.
 

@@ -27,15 +27,15 @@ test('an anatomy that cannot place a finding leaves its deficit out, and refuses
   const template = manifests.find(([id]) => id === 'mni152')![1];
   const lacking = {
     ...template,
-    regions: template.regions.filter(({ id }) => !id.startsWith('aan:')),
+    regions: template.regions.filter(({ id }) => !id.endsWith(':subthalamic')),
   };
   const catalog = createClinicalCatalog(data, lacking, {}, false);
   assert.deepEqual(
     catalog.unavailable.map(({ id }) => id),
-    ['coma'],
+    ['hemichorea'],
   );
   assert.equal(catalog.search('', 'en').length, data.deficits.length - 1);
-  assert.throws(() => catalog.get('coma'), /Unknown deficit: coma/);
+  assert.throws(() => catalog.get('hemichorea'), /Unknown deficit: hemichorea/);
   assert.throws(() => createClinicalCatalog(data, lacking, {}), /unknown region/);
 });
 
@@ -50,9 +50,15 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'acalculia',
       'achromatopsia',
       'acquired-anxiety',
+      'acquired-hypergraphia',
       'acquired-mania',
       'acquired-mirror-writing',
       'acquired-ocd',
+      'acquired-parosmia',
+      'acquired-pathological-startle',
+      'acquired-pendular-nystagmus',
+      'acquired-phantosmia',
+      'acquired-synaesthesia',
       'action-naming',
       'agnosia',
       'agrammatism',
@@ -65,6 +71,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'amnesia',
       'amusia',
       'anosognosia',
+      'anterior-opercular-syndrome',
       'aphantasia',
       'aphasia',
       'apraxia',
@@ -74,17 +81,23 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'ataxia',
       'ataxic-hemiparesis',
       'auditory-agnosia',
+      'auditory-extinction',
       'auditory-motion',
       'auditory-short-term-memory',
+      'autotopagnosia',
       'biological-motion',
       'buccofacial-apraxia',
       'callosal-apraxia',
+      'central-hypoventilation',
       'central-pain',
+      'central-positional-nystagmus',
       'cerebellar-cognitive',
       'cerebellar-vertigo',
+      'cerebral-polyopia',
       'cognitive-estimation',
       'coma',
       'confabulation',
+      'conscious-hemiasomatognosia',
       'constructional-apraxia',
       'cortical-deafness',
       'crossed-sensory-loss',
@@ -105,9 +118,11 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'focal-retrograde-autobiographical-amnesia',
       'foreign-accent',
       'fregoli-syndrome',
+      'gait-apraxia',
       'gaze-evoked-nystagmus',
       'gesture-recognition',
       'hand-paresis',
+      'heautoscopy',
       'hemianopia',
       'hemichorea',
       'hemifield-dysmetropsia',
@@ -115,6 +130,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'holmes-tremor',
       'horizontal-gaze-palsy',
       'hypersomnia',
+      'impaired-affective-touch',
       'insular-cardiac-dysfunction',
       'interval-timing',
       'kluver-bucy',
@@ -132,10 +148,17 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'motor-neglect',
       'multitasking',
       'musical-alexia',
+      'musical-hallucinations',
       'neglect',
       'object-colour-knowledge',
+      'ocular-bobbing',
+      'ocular-flutter',
+      'ocular-lateropulsion',
+      'ocular-tilt-reaction',
+      'oculomotor-apraxia',
       'olfactory-detection-loss',
       'olfactory-recognition',
+      'optic-aphasia',
       'optic-ataxia',
       'pain-asymbolia',
       'palilalia',
@@ -144,6 +167,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'parkinsonism',
       'pathological-grasping',
       'pathological-laughter-crying',
+      'peduncular-hallucinosis',
       'personal-neglect',
       'phonagnosia',
       'phonological-alexia',
@@ -151,6 +175,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'post-stroke-depressive-symptoms',
       'post-stroke-hiccups',
       'post-stroke-restless-legs',
+      'post-stroke-sensory-hypersensitivity',
       'post-stroke-urinary-retention',
       'prosopometamorphopsia',
       'prospective-memory',
@@ -177,8 +202,10 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'speech-apraxia',
       'stereopsis-impairment',
       'stuttering',
+      'supernumerary-phantom-limb',
       'surface-alexia',
       'sustained-attention',
+      'symptomatic-palatal-tremor',
       'tactile-agnosia',
       'tactile-extinction',
       'taste-impairment',
@@ -193,6 +220,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'visual-anosognosia',
       'visual-extinction',
       'visual-verticality',
+      'volitional-facial-paresis',
       'word-deafness',
       'working-memory',
     ],
@@ -203,7 +231,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
   assert.equal(catalog.forRegion('destrieux:left:38')[0].deficit, 'aphasia');
   assert.equal(catalog.forRegion('destrieux:right:21')[0].deficit, 'agnosia');
   for (const id of ['aseg:left:17', 'aseg:right:53']) {
-    assert.equal(catalog.forRegion(id)[0].deficit, 'amnesia');
+    assert.equal(catalog.forRegion(id)[0].deficit, 'material-specific-memory');
   }
   assert.deepEqual(catalog.forRegion('destrieux:left:1'), []);
   // Two meta-analyses carve neglect and aphasia differently from the single
@@ -212,7 +240,9 @@ function checkAnatomy(catalog: ClinicalCatalog) {
     catalog.forRegion('destrieux:right:38').map((a) => a.id),
     [
       'neglect-allocentric',
+      'emotion-facial-frontotemporal',
       'akinetopsia-lateral',
+      'extinction-temporoparietal',
       'spatial-relations-metric',
       'acquired-anxiety-temporal-limbic',
       'sign-aphasia-right-atypical',
@@ -224,13 +254,12 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       .map((a) => a.id)
       .sort(),
     [
-      'aprosodia-frontal-parietal',
       'extinction-temporoparietal',
       'line-orientation-right-hemisphere',
       'musical-alexia-right-inferior-parietal',
       'neglect-egocentric',
       'neglect-perceptual',
-      'personal-neglect-parietal',
+      'optic-ataxia-left-field-misreaching',
       'reduplicative-right-mca-case',
       'sign-aphasia-right-atypical',
       'sound-localization-right-network',
@@ -267,13 +296,12 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'action-naming-left-frontal',
       'agrammatism-inferior-frontal',
       'agraphia-orthographic-long-term',
+      'anterior-opercular-syndrome-bilateral-opercula',
       'apraxia-pantomime-frontal',
       'dysphagia-insula',
-      'emotional-empathy-inferior-frontal',
       'fluency-letter',
       'gesture-recognition-correctness',
       'speech-apraxia-frontal',
-      'stuttering-cortico-striatal',
     ],
   );
   // Deep landmarks reach into aseg and the learning-anatomy solids.
@@ -285,11 +313,18 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       .forRegion('nextbrain:left:458')
       .map((a) => a.deficit)
       .sort(),
-    ['central-pain', 'central-pain', 'lateropulsion', 'pathological-laughter-crying'],
+    ['central-pain', 'central-pain', 'pathological-laughter-crying'],
   );
   assert.deepEqual(
     catalog.forDeficit('amnesia').map((a) => a.id),
-    ['hippocampal-amnesia', 'amnesia-fornix', 'amnesia-diencephalic', 'amnesia-basal-forebrain'],
+    [
+      'hippocampal-amnesia',
+      'amnesia-fornix',
+      'amnesia-diencephalic',
+      'amnesia-thalamic-free-recall',
+      'amnesia-basal-forebrain',
+      'amnesia-right-nonverbal-memory',
+    ],
   );
   assert.ok(catalog.forDeficit('hemichorea')[0].evidence.some((e) => e.role === 'qualifying'));
   assert.deepEqual(
@@ -300,6 +335,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'aphasia',
       'aphasia',
       'akinetopsia',
+      'aphantasia',
       'gesture-recognition',
       'surface-alexia',
       'agrammatism',
@@ -307,19 +343,16 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'palinacousis',
     ],
   );
-  // Lobule VI carries motor, speech and cognitive claims side by side; the anterior lobe no cognitive one.
+  // Lobules V and VI carry motor and speech claims; the cognitive claim sits on Crus II alone.
   const cited = (region: string) =>
     catalog
       .forRegion(region)
       .map((a) => a.deficit)
       .sort();
-  assert.deepEqual(cited('learning:lobule-vi-right'), [
-    'ataxia',
-    'cerebellar-cognitive',
-    'dysarthria',
-    'motor-adaptation',
-  ]);
-  assert.deepEqual(cited('learning:lobule-v-right'), ['ataxia', 'dysarthria', 'motor-adaptation']);
+  for (const lobule of ['learning:lobule-vi-right', 'learning:lobule-v-right']) {
+    assert.deepEqual(cited(lobule), ['ataxia', 'dysarthria', 'motor-adaptation']);
+  }
+  assert.deepEqual(cited('learning:crus-ii-right'), ['cerebellar-cognitive']);
   assert.deepEqual(
     catalog.search('champ visuel', 'fr').map((deficit) => deficit.id),
     ['visual-allesthesia', 'hemifield-dysmetropsia', 'hemianopia'],
@@ -354,12 +387,12 @@ describe('published clinical content: fixed values', () => {
   const [, manifest] = manifests[0];
   const catalog = createClinicalCatalog(data, manifest, {});
 
-  test('CAT-50 · the published records are the revision of 2026-11-19: 6 groups, 149 deficits, 472 references, 271 associations', () => {
-    assert.equal(catalog.revised, '2026-11-19');
+  test('CAT-50 · the published records are the revision of 2026-11-28: 6 groups, 177 deficits, 1281 references, 476 associations', () => {
+    assert.equal(catalog.revised, '2026-11-28');
     assert.equal(data.groups.length, 6);
-    assert.equal(data.deficits.length, 149);
-    assert.equal(data.references.length, 472);
-    assert.equal(data.associations.length, 271);
+    assert.equal(data.deficits.length, 177);
+    assert.equal(data.references.length, 1281);
+    assert.equal(data.associations.length, 476);
   });
 
   test('reviewed motor-neglect and aprosodia findings preserve their mapping limits', () => {
@@ -367,13 +400,19 @@ describe('published clinical content: fixed values', () => {
     assert.deepEqual(catalog.mappedRegions('motor-neglect'), ['aseg:right:51']);
     assert.deepEqual(
       catalog.forDeficit('aprosodia').map((a) => a.id),
-      ['aprosodia-frontal-parietal', 'aprosodia-medial-frontal'],
+      [
+        'aprosodia-frontal-parietal',
+        'aprosodia-medial-frontal',
+        'aprosodia-chronic-frontoinsular-striatal',
+      ],
     );
   });
 
-  test('the callosal alien-hand finding highlights anterior subdivisions and leaves posterior callosum uncoloured', () => {
-    assert.deepEqual(catalog.mappedRegions('alien-hand'), ['aseg:midline:254', 'aseg:midline:255']);
-    assert.ok(!catalog.paint('alien-hand').paint.colors.has('aseg:midline:251'));
+  test('the callosal alien-hand finding highlights the mid-posterior body and leaves the anterior and posterior callosum uncoloured', () => {
+    assert.deepEqual(catalog.mappedRegions('alien-hand'), ['aseg:midline:252', 'aseg:right:49']);
+    for (const id of ['aseg:midline:251', 'aseg:midline:254', 'aseg:midline:255']) {
+      assert.ok(!catalog.paint('alien-hand').paint.colors.has(id), id);
+    }
   });
 
   test('the focal coma finding colours its brainstem landmark without colouring connected cortical nodes', () => {
@@ -390,8 +429,13 @@ describe('published clinical content: fixed values', () => {
 
   test('new findings keep normative connectivity and unresolved clinical locations out of the direct-lesion paint', () => {
     assert.equal(catalog.paint('holmes-tremor', 'holmes-tremor-network').paint.colors.size, 0);
-    assert.deepEqual(catalog.mappedRegions('holmes-tremor'), ['aseg:right:49']);
-    assert.deepEqual(catalog.mappedRegions('asterixis'), ['aseg:left:10']);
+    assert.deepEqual(catalog.mappedRegions('holmes-tremor'), [
+      'aseg:left:10',
+      'aseg:right:49',
+      'nextbrain:right:10385',
+      'nextbrain:left:385',
+    ]);
+    assert.deepEqual(catalog.mappedRegions('asterixis'), ['aseg:left:10', 'nextbrain:left:384']);
   });
 
   test('new profiles retain their distinct tasks and bilingual search terms', () => {
@@ -399,7 +443,7 @@ describe('published clinical content: fixed values', () => {
     assert.equal(catalog.search('mouvement biologique', 'fr')[0].id, 'biological-motion');
     assert.equal(catalog.search('backward span', 'en')[0].id, 'working-memory');
     assert.deepEqual(catalog.mappedRegions('biological-motion'), [
-      'destrieux:left:74',
+      'destrieux:right:34',
       'destrieux:right:74',
     ]);
     assert.deepEqual(
@@ -410,17 +454,25 @@ describe('published clinical content: fixed values', () => {
         'working-memory-frontal-manipulation',
         'working-memory-distractor-filtering',
         'working-memory-load-sensitive-retention',
+        'working-memory-updating',
       ],
     );
   });
 
   test('the further additions keep auditory overlap and proposed disconnections out of their parcel mappings', () => {
-    assert.deepEqual(catalog.mappedRegions('astasia'), ['aseg:right:49']);
+    assert.deepEqual(catalog.mappedRegions('astasia'), ['aseg:left:10', 'aseg:right:49']);
     assert.equal(
       catalog.paint('sustained-attention', 'sustained-attention-vigilance').paint.colors.size,
       0,
     );
-    assert.deepEqual(catalog.mappedRegions('sustained-attention'), ['destrieux:right:57']);
+    assert.equal(
+      catalog.paint('sustained-attention', 'sustained-attention-spatial').paint.colors.size,
+      0,
+    );
+    assert.deepEqual(catalog.mappedRegions('sustained-attention'), [
+      'destrieux:left:13',
+      'destrieux:left:14',
+    ]);
     assert.equal(catalog.search('vigilance decrement', 'en')[0].id, 'sustained-attention');
     assert.equal(catalog.search('estimation des durées', 'fr')[0].id, 'interval-timing');
   });
@@ -430,6 +482,8 @@ describe('published clinical content: fixed values', () => {
       'destrieux:left:12',
       'destrieux:left:14',
       'destrieux:left:38',
+      'destrieux:left:25',
+      'destrieux:left:26',
     ]);
     assert.deepEqual(
       [...catalog.paint('interval-timing', 'interval-timing-inferior-frontal').paint.colors.keys()],
@@ -439,8 +493,11 @@ describe('published clinical content: fixed values', () => {
       [...catalog.paint('interval-timing', 'interval-timing-middle-frontal').paint.colors.keys()],
       ['destrieux:right:15'],
     );
+    assert.deepEqual(
+      catalog.forDeficit('gesture-recognition').map((finding) => finding.evidence.length),
+      [3, 4, 3],
+    );
     for (const finding of catalog.forDeficit('gesture-recognition')) {
-      assert.equal(finding.evidence.length, 2);
       assert.ok(finding.evidence.some((source) => source.role === 'qualifying'));
     }
   });
@@ -454,7 +511,7 @@ describe('published clinical content: fixed values', () => {
       catalog.paint('source-memory', 'source-memory-context-stability').paint.colors.size,
       0,
     );
-    // The review added the thalamic series as supporting-only evidence; every other finding is qualified.
+    // Every finding is qualified, the thalamic series by the adult observation the review added.
     assert.deepEqual(
       ['visual-verticality', 'source-memory'].flatMap((deficit) =>
         catalog
@@ -462,7 +519,7 @@ describe('published clinical content: fixed values', () => {
           .filter((finding) => !finding.evidence.some((source) => source.role === 'qualifying'))
           .map((finding) => finding.id),
       ),
-      ['visual-verticality-thalamic'],
+      [],
     );
   });
 
@@ -484,17 +541,22 @@ describe('published clinical content: fixed values', () => {
   });
 
   test('additional sleep and motor findings retain only their reviewed landmarks', () => {
-    assert.deepEqual(catalog.mappedRegions('micrographia'), ['aseg:left:13']);
+    assert.deepEqual(catalog.mappedRegions('micrographia'), [
+      'aseg:left:13',
+      'nextbrain:left:79',
+      'nextbrain:right:10384',
+    ]);
     assert.deepEqual(catalog.mappedRegions('hypersomnia'), ['aseg:left:10', 'aseg:right:49']);
     assert.deepEqual(catalog.mappedRegions('saccadic-dysmetria'), [
       'learning:left:fastigial',
       'learning:right:fastigial',
-      'nextbrain:left:715',
-      'nextbrain:right:10715',
+      'learning:vermis-viii',
+      'learning:vermis-ix',
     ]);
     assert.deepEqual(catalog.mappedRegions('smooth-pursuit'), [
       'learning:vermis-ix',
       'learning:vermis-viii',
+      'learning:lobule-x-right',
     ]);
     assert.equal(catalog.paint('smooth-pursuit', 'smooth-pursuit-cerebral').paint.colors.size, 0);
     assert.ok(
@@ -515,7 +577,10 @@ describe('published clinical content: fixed values', () => {
   });
 
   test('reading and mood findings distinguish direct lesions from failed or indirect localizations', () => {
-    assert.deepEqual(catalog.mappedRegions('phonological-alexia'), ['destrieux:left:29']);
+    assert.deepEqual(catalog.mappedRegions('phonological-alexia'), [
+      'destrieux:left:29',
+      'destrieux:left:26',
+    ]);
     assert.equal(
       catalog.paint('phonological-alexia', 'phonological-alexia-general-reading').paint.colors.size,
       0,
@@ -523,6 +588,7 @@ describe('published clinical content: fixed values', () => {
     assert.deepEqual(catalog.mappedRegions('post-stroke-depressive-symptoms'), [
       'aseg:right:54',
       'aseg:right:52',
+      'aseg:right:51',
     ]);
     assert.equal(
       catalog.paint('post-stroke-depressive-symptoms', 'post-stroke-depressive-symptoms-network')
@@ -544,11 +610,11 @@ describe('published clinical content: fixed values', () => {
   });
 
   test('body attention and motion findings retain their localization limits', () => {
-    assert.deepEqual(catalog.mappedRegions('surface-alexia'), ['destrieux:left:38']);
-    assert.deepEqual(catalog.mappedRegions('personal-neglect'), [
-      'destrieux:right:26',
-      'destrieux:right:28',
+    assert.deepEqual(catalog.mappedRegions('surface-alexia'), [
+      'destrieux:left:38',
+      'destrieux:left:44',
     ]);
+    assert.deepEqual(catalog.mappedRegions('personal-neglect'), ['destrieux:right:28']);
     assert.equal(catalog.paint('personal-neglect', 'personal-neglect-medial').paint.colors.size, 0);
     assert.deepEqual(catalog.mappedRegions('auditory-motion'), ['destrieux:right:34']);
   });
@@ -574,8 +640,11 @@ describe('published clinical content: fixed values', () => {
       0,
     );
     assert.deepEqual(catalog.mappedRegions('gaze-evoked-nystagmus'), [
-      'learning:left:pons',
-      'learning:right:pons',
+      'nextbrain:left:580',
+      'nextbrain:right:10580',
+      'nextbrain:left:662',
+      'nextbrain:right:10662',
+      'learning:lobule-x-right',
     ]);
   });
 
@@ -613,7 +682,10 @@ describe('published clinical content: fixed values', () => {
   });
 
   test('facial and bladder findings keep their broad landmarks and localization limits', () => {
-    assert.deepEqual(catalog.mappedRegions('emotional-facial-paresis'), ['learning:right:pons']);
+    assert.deepEqual(catalog.mappedRegions('emotional-facial-paresis'), [
+      'nextbrain:right:10580',
+      'aseg:left:10',
+    ]);
     assert.deepEqual(catalog.mappedRegions('post-stroke-urinary-retention'), [
       'learning:left:medulla',
       'learning:right:medulla',
@@ -642,7 +714,12 @@ describe('published clinical content: fixed values', () => {
   });
 
   test('memory, fluency, fear and moral findings colour only their reviewed landmarks', () => {
-    assert.deepEqual(catalog.mappedRegions('material-specific-memory'), ['aseg:right:53']);
+    assert.deepEqual(catalog.mappedRegions('material-specific-memory'), [
+      'aseg:right:53',
+      'aseg:left:17',
+      'destrieux:left:37',
+      'destrieux:left:21',
+    ]);
     assert.deepEqual(
       [
         ...catalog
@@ -664,6 +741,8 @@ describe('published clinical content: fixed values', () => {
     assert.deepEqual(catalog.mappedRegions('moral-judgement'), [
       'destrieux:left:31',
       'destrieux:right:31',
+      'aseg:left:17',
+      'aseg:right:53',
     ]);
   });
 
@@ -721,7 +800,8 @@ describe('published clinical content: fixed values', () => {
     ]);
     assert.ok(
       catalog
-        .forDeficit('smoking-addiction-disruption')[0]
+        .forDeficit('smoking-addiction-disruption')
+        .find((a) => a.id === 'smoking-insula')!
         .evidence.some((e) => e.reference === 'bienkowski-2010' && e.role === 'qualifying'),
     );
     assert.ok(
@@ -780,10 +860,7 @@ describe('published clinical content: fixed values', () => {
       catalog.paint('sign-language-aphasia', 'sign-aphasia-right-spatial').paint.colors.size,
       0,
     );
-    assert.deepEqual(catalog.mappedRegions('post-stroke-cognitive-impairment'), [
-      'aseg:left:10',
-      'destrieux:left:25',
-    ]);
+    assert.deepEqual(catalog.mappedRegions('post-stroke-cognitive-impairment'), ['aseg:left:10']);
     assert.deepEqual(catalog.mappedRegions('post-stroke-restless-legs'), [
       'learning:left:pons',
       'learning:right:pons',
@@ -820,7 +897,10 @@ describe('published clinical content: fixed values', () => {
   test('transient amnesia, pure sensory and ataxic hemiparesis profiles have distinct bilingual search terms', () => {
     assert.equal(catalog.search('ictus amnésique', 'fr')[0].id, 'transient-global-amnesia');
     assert.equal(catalog.search('cheiro-oral syndrome', 'en')[0].id, 'pure-sensory-stroke');
-    assert.equal(catalog.search('dysarthrie-main malhabile', 'fr')[0].id, 'ataxic-hemiparesis');
+    assert.equal(catalog.search('parésie crurale', 'fr')[0].id, 'ataxic-hemiparesis');
+    assert.ok(
+      !catalog.search('dysarthrie-main malhabile', 'fr').some((d) => d.id === 'ataxic-hemiparesis'),
+    );
   });
 
   test('motor-area, recognition-memory and action-naming findings colour only their reviewed landmarks', () => {
@@ -844,7 +924,7 @@ describe('published clinical content: fixed values', () => {
   test('motor-area, recognition-memory and action-naming profiles have distinct bilingual search terms', () => {
     assert.equal(catalog.search('postoperative mutism', 'en')[0].id, 'sma-syndrome');
     assert.equal(catalog.search('souvenir-savoir', 'fr')[0].id, 'recollection-familiarity');
-    assert.equal(catalog.search('noun-verb dissociation', 'en')[0].id, 'action-naming');
+    assert.equal(catalog.search('verb retrieval', 'en')[0].id, 'action-naming');
   });
 
   test('praxis findings colour only their reviewed landmarks and keep deep lesions uncoloured', () => {
@@ -862,6 +942,7 @@ describe('published clinical content: fixed values', () => {
       'aseg:midline:255',
       'aseg:midline:254',
       'aseg:midline:253',
+      'aseg:midline:252',
     ]);
     const qualifying = (finding: string) =>
       catalog
@@ -881,7 +962,7 @@ describe('published clinical content: fixed values', () => {
     ]);
     assert.deepEqual(qualifying('apraxia-tool-use'), ['stoll-2022']);
     assert.deepEqual(qualifying('apraxia-deep'), ['schmidt-2023']);
-    assert.deepEqual(qualifying('callosal-apraxia-anterior'), ['watson-1986']);
+    assert.deepEqual(qualifying('callosal-apraxia-anterior'), ['watson-1986', 'tanaka-1996']);
   });
 
   test('limb and callosal apraxia have distinct bilingual search terms', () => {
@@ -970,8 +1051,10 @@ describe('published clinical content: fixed values', () => {
     assert.deepEqual(keys('cognitive-estimation', 'estimation-frontal'), []);
     assert.deepEqual(keys('fregoli-syndrome', 'fregoli-right-insula'), ['destrieux:right:18']);
     assert.deepEqual(keys('fregoli-syndrome', 'fregoli-connectivity'), []);
-    for (const id of ['acquired-ocd', 'kluver-bucy', 'cognitive-estimation', 'fregoli-syndrome'])
+    assert.deepEqual(keys('kluver-bucy', 'kluver-bucy-bilateral-temporal'), []);
+    for (const id of ['acquired-ocd', 'cognitive-estimation', 'fregoli-syndrome'])
       assert.equal(catalog.forDeficit(id).length, 2);
+    assert.equal(catalog.forDeficit('kluver-bucy').length, 3);
   });
 
   test('further Hart profiles have bilingual searches without replacing related profiles', () => {
@@ -1022,15 +1105,15 @@ describe('published clinical content: fixed values', () => {
       'aseg:left:12',
     ]);
     assert.deepEqual(keys('working-memory', 'working-memory-load-sensitive-retention'), [
-      'aseg:right:50',
+      'nextbrain:right:10048',
       'nextbrain:right:12035',
     ]);
     assert.deepEqual(keys('amnesia', 'amnesia-basal-forebrain'), ['nextbrain:right:10111']);
     assert.deepEqual(keys('semantic-memory', 'semantic-controlled-retrieval'), []);
-    assert.equal(catalog.forDeficit('working-memory').length, 5);
-    assert.equal(catalog.forDeficit('amnesia').length, 4);
-    assert.equal(catalog.forDeficit('semantic-memory').length, 2);
-    assert.equal(catalog.forDeficit('reduplicative-paramnesia').length, 3);
+    assert.equal(catalog.forDeficit('working-memory').length, 6);
+    assert.equal(catalog.forDeficit('amnesia').length, 6);
+    assert.equal(catalog.forDeficit('semantic-memory').length, 3);
+    assert.equal(catalog.forDeficit('reduplicative-paramnesia').length, 4);
     assert.ok(
       catalog
         .forDeficit('working-memory')
@@ -1062,11 +1145,11 @@ describe('published clinical content: fixed values', () => {
 
   test('memory, anxiety and spatial-delusion references record the text actually read', () => {
     const scope = (id: string) => data.references.find((r) => r.id === id)!.scope;
-    // Liebermann's full text was unobtainable; Koenigs and Mugikura now support full-text claims.
+    // Liebermann's full text was unobtainable; Koenigs, Mugikura and Alves 2021 now support full-text claims.
     assert.equal(scope('liebermann-2013'), 'abstract');
     assert.equal(scope('koenigs-2009'), 'full-text');
     assert.equal(scope('mugikura-2014'), 'full-text');
-    assert.equal(scope('alves-2021'), 'abstract');
+    assert.equal(scope('alves-2021'), 'full-text');
   });
 
   test('CAT-45 · a published search ignores case and accents and ranks the named deficit first', () => {
@@ -1075,6 +1158,7 @@ describe('published clinical content: fixed values', () => {
     assert.deepEqual(ids('amnesia', 'en'), [
       'amnesia',
       'focal-retrograde-autobiographical-amnesia',
+      'fear-conditioning',
       'reduplicative-paramnesia',
       'source-memory',
       'transient-global-amnesia',
@@ -1083,12 +1167,15 @@ describe('published clinical content: fixed values', () => {
       'aphasia',
       'speech-apraxia',
       'language-self-awareness',
+      'optic-aphasia',
       'semantic-memory',
       'sign-language-aphasia',
+      'sustained-attention',
     ]);
     assert.deepEqual(ids('AMNÉSIA', 'en'), [
       'amnesia',
       'focal-retrograde-autobiographical-amnesia',
+      'fear-conditioning',
       'reduplicative-paramnesia',
       'source-memory',
       'transient-global-amnesia',
@@ -1108,7 +1195,7 @@ describe('published clinical content: fixed values', () => {
       'transient-global-amnesia',
       'working-memory',
     ]);
-    assert.equal(ids('', 'fr').length, 149);
+    assert.equal(ids('', 'fr').length, 177);
     assert.deepEqual(ids('unlisted', 'en'), []);
   });
 
@@ -1118,11 +1205,11 @@ describe('published clinical content: fixed values', () => {
     assert.equal(catalog.nearest('abc', 'en'), null);
   });
 
-  test('CAT-49 · aphasia has the most findings, six, and its paint colours 7 regions', () => {
+  test('CAT-49 · no deficit has more than six findings, aphasia has six, and its paint colours 6 regions', () => {
     const counts = data.deficits.map((d) => catalog.forDeficit(d.id).length);
     assert.equal(Math.max(...counts), 6);
     assert.equal(catalog.forDeficit('aphasia').length, 6);
-    assert.equal(catalog.paint('aphasia').paint.colors.size, 7);
+    assert.equal(catalog.paint('aphasia').paint.colors.size, 6);
     assert.equal(catalog.paint('aphasia').paint.id, 'deficit:aphasia');
   });
 });

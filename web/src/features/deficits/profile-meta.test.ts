@@ -40,7 +40,8 @@ const clinical = createClinicalCatalog(
 );
 
 test('counts what is drawn now of the regions a deficit maps, and says whether they are painted', () => {
-  const ids = clinical.mappedRegions('neglect');
+  // Its NextBrain nucleus is not drawn at FreeSurfer's detail; its other regions are.
+  const ids = clinical.mappedRegions('pure-sensory-stroke');
   assert.deepEqual(stageCounts(ids, drawnAs, settings, false), {
     shown: ids.length - 1,
     total: ids.length,

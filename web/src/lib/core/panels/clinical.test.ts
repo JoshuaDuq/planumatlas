@@ -207,21 +207,30 @@ test('PANEL-13 the Functions tab brings its own busy and failure text', () => {
   );
 });
 
-test('PANEL-15 the six published corrections are listed with their DOI, link and summary', () => {
+test('PANEL-15 the fourteen published corrections are listed with their DOI, link and summary', () => {
   const data = readRepoYaml<ClinicalData>('data/neuropsychology.yaml');
   const corrected = data.references.filter((reference) => reference.corrections);
   assert.deepEqual(
     corrected.map((reference) => reference.id),
     [
+      'aron-2003-stop-signal',
       'karnath-2000',
+      'karnath-2005-thalamic-pushing',
+      'choi-2022',
       'bouvier-2006',
+      'kawakami-2024',
+      'saygin-2003-environmental-sounds',
       'woolgar-2010',
+      'morrison-2013-met-revised',
+      'ding-2020-connected-speech',
       'weaver-2021',
+      'dede-2013-memory-recognition',
       'barojas-alvarez-2021',
       'kim-lee-2002',
     ],
   );
-  assert.deepEqual(publishedCorrections(corrected[0], 'en'), [
+  const reference = (id: string) => corrected.find((r) => r.id === id)!;
+  assert.deepEqual(publishedCorrections(reference('karnath-2000'), 'en'), [
     {
       doi: 'doi:10.1073/pnas.98.2.777-e',
       href: 'https://doi.org/10.1073/pnas.98.2.777-e',
@@ -229,7 +238,7 @@ test('PANEL-15 the six published corrections are listed with their DOI, link and
         'Corrects the spelling “centrolateralis” in the discussion and a missing colon in the Table 2 legend. No finding is affected.',
     },
   ]);
-  assert.deepEqual(publishedCorrections(corrected[0], 'fr'), [
+  assert.deepEqual(publishedCorrections(reference('karnath-2000'), 'fr'), [
     {
       doi: 'doi:10.1073/pnas.98.2.777-e',
       href: 'https://doi.org/10.1073/pnas.98.2.777-e',
@@ -237,21 +246,31 @@ test('PANEL-15 the six published corrections are listed with their DOI, link and
         'Corrige l’orthographe « centrolateralis » dans la discussion et un deux-points manquant dans la légende du tableau 2. Aucun résultat n’est modifié.',
     },
   ]);
-  assert.equal(publishedCorrections(corrected[1], 'en')[0].doi, 'doi:10.1093/cercor/bhl065');
-  assert.match(publishedCorrections(corrected[1], 'fr')[0].summary, /^Corrige une phrase/);
-  assert.equal(publishedCorrections(corrected[2], 'en')[0].doi, 'doi:10.1073/pnas.1513862112');
+  assert.equal(
+    publishedCorrections(reference('bouvier-2006'), 'en')[0].doi,
+    'doi:10.1093/cercor/bhl065',
+  );
   assert.match(
-    publishedCorrections(corrected[2], 'fr')[0].summary,
+    publishedCorrections(reference('bouvier-2006'), 'fr')[0].summary,
+    /^Corrige une phrase/,
+  );
+  assert.equal(
+    publishedCorrections(reference('woolgar-2010'), 'en')[0].doi,
+    'doi:10.1073/pnas.1513862112',
+  );
+  assert.match(
+    publishedCorrections(reference('woolgar-2010'), 'fr')[0].summary,
     /^Corrige le résultat du groupe frontal/,
   );
   assert.equal(
-    publishedCorrections(corrected[3], 'en')[0].doi,
+    publishedCorrections(reference('weaver-2021'), 'en')[0].doi,
     'doi:10.1016/s1474-4422(24)00094-2',
   );
+  const consent = reference('barojas-alvarez-2021');
   assert.equal(
-    publishedCorrections(corrected[4], 'en')[0].href,
+    publishedCorrections(consent, 'en')[0].href,
     'https://doi.org/10.1016/j.cccb.2022.100130',
   );
-  assert.match(publishedCorrections(corrected[4], 'en')[0].summary, /consent/);
-  assert.match(publishedCorrections(corrected[4], 'fr')[0].summary, /consentement/);
+  assert.match(publishedCorrections(consent, 'en')[0].summary, /consent/);
+  assert.match(publishedCorrections(consent, 'fr')[0].summary, /consentement/);
 });

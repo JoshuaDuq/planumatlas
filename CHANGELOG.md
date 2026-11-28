@@ -6,10 +6,39 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
 
+### Added
+
+- **Circuits** has two new tours: the posterior inferior longitudinal fasciculus's input to left
+  occipitotemporal reading cortex, whose second landmark draws the left inferior longitudinal fasciculus,
+  and the projection between the primary auditory cortices across the corpus callosum.
+- **Deficits** has 177 profiles, 476 findings and 1,281 references, up from 149, 271 and 472, among them
+  optic aphasia, heautoscopy, autotopagnosia, symptomatic palatal tremor, ocular bobbing, Foix–Chavany–Marie
+  syndrome and acquired central hypoventilation.
+
 ### Changed
 
+- Every tour, archived tour, profile and finding was re-checked against its sources. 111 references are
+  now read from the full text rather than the abstract, and many findings state their cohorts, tasks
+  and participant reuse more exactly.
+- Three tours link to the deficit with the closest patient evidence at their landmarks: the olivocerebellar
+  input to the flocculus to gaze-evoked nystagmus, the basal amygdalar projection to area 25 to impaired
+  emotion recognition, and the callosal pathway between supplementary motor areas to supplementary motor
+  area syndrome.
+- Several findings colour fewer or narrower regions where the study did not support the whole parcel:
+  hippocampal amnesia marks CA1's pyramidal layer rather than the whole hippocampus, abulia the caudate
+  heads, and nine findings whose results were exploratory, in white matter or unplaced no longer colour
+  a region. Coma marks the injured pontine and midbrain levels rather than individual arousal nuclei.
+- The **Functions** lesion checks follow the revised findings. Findings now drawn on NextBrain's nuclei,
+  such as CA1 for amnesia and the caudate heads for abulia, are listed without a measured coverage.
 - The **Take the tour** invitation on the stage has a **×** that dismisses it for good. **How to use
   Planum** in the settings menu still starts the tour.
+
+### Removed
+
+- Four tours move to the archive because one animal tracing series sets their exact route, or the patient
+  studies cannot place the stops they show: the anteroventral thalamic projection to the posterior
+  cingulate cortex, the dorsal cingulum projection, V3A to ventral V4 and the piriform–orbitofrontal
+  olfactory pathway. **Circuits** has 43 tours and 121 landmarks, down from 45 and 124.
 
 ### Fixed
 

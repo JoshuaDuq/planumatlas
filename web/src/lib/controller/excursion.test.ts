@@ -466,19 +466,19 @@ describe('a deficit’s FreeSurfer structures', () => {
       const scene = createScene();
       const { model } = scene.engine;
       await model.setDetail(detail);
-      await scene.excursions.openDeficit('dystonia');
+      await scene.excursions.openDeficit('somatoparaphrenia');
       assert.equal(model.settings.detail, drawnOn);
       const framed = scene.engine.calls.findLast((call) => call.method === 'frameRegions')!;
       const regions = framed.args[0] as string[];
       assert.ok(regions.every((id) => id.startsWith(`${drawnOn}:`) && model.isRegionDrawn(id)));
-      assert.equal(regions.includes('learning:left:pallidum-internal'), drawnOn === 'learning');
+      assert.equal(regions.includes('learning:right:pallidum-internal'), drawnOn === 'learning');
     });
   }
 
   test('a structure with no teaching-set stand-in is still drawn on FreeSurfer’s segmentation', async () => {
     const scene = createScene();
     await scene.engine.model.setDetail('learning');
-    await scene.excursions.openDeficit('alien-hand');
+    await scene.excursions.openDeficit('callosal-apraxia');
     assert.equal(scene.engine.model.settings.detail, 'aseg');
   });
 

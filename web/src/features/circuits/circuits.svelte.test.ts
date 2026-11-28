@@ -57,7 +57,7 @@ const start = (lang: 'en' | 'fr' = 'en') =>
 
 test('every tour is on the default brain, so the list says none is elsewhere', async () => {
   mount();
-  await expect.poll(() => rows().length).toBe(45);
+  await expect.poll(() => rows().length).toBe(43);
   expect(document.querySelector('.scope-note')!.textContent).not.toContain('CDMD sub_013 only');
 });
 
@@ -67,7 +67,7 @@ test('a brain without a cord leaves the cord tours out and says how many are on 
   mount('en', true, ['pam50']);
   const left = world.circuits.unavailable.map(({ id }) => id);
   expect(left).toContain('spinothalamic');
-  await expect.poll(() => rows().length).toBe(45 - left.length);
+  await expect.poll(() => rows().length).toBe(43 - left.length);
   expect(rowOf('spinothalamic')).toBeNull();
   expect(note()!.textContent).toContain(
     ` · ${left.length} more circuits need structures this template does not have, and are on CDMD sub_013 only.`,
@@ -160,7 +160,7 @@ describe('the whole route', () => {
 });
 
 describe('the list', () => {
-  test('offers the 45 active pathway tours and no archived landmark or deferred circuit tours', () => {
+  test('offers the 43 active pathway tours and no archived landmark or deferred circuit tours', () => {
     mount();
     expect(rows().map((row) => row.dataset.circuit)).toEqual([
       'vision',
@@ -179,7 +179,6 @@ describe('the list', () => {
       'motion-mt-mst',
       'colour',
       'transcallosal-sma',
-      'piriform-orbitofrontal',
       'schaffer-collaterals',
       'navigation',
       'slf3-opercular',
@@ -190,8 +189,6 @@ describe('the list', () => {
       'frontal-aslant-opercular',
       'motor-hyperdirect',
       'anterior-commissure-temporal',
-      'thalamocingulate-posterior',
-      'vertical-occipital-v3a-v4',
       'slf2-dorsal-frontoparietal',
       'inferior-pulvinar-mt',
       'rubrospinal-crossed',
@@ -201,13 +198,14 @@ describe('the list', () => {
       'septohippocampal-ca1-oriens',
       'valuation',
       'associative-frontocaudate',
-      'dorsal-cingulum-anterior-posterior',
       'olivocerebellar-flocculus',
       'basal-amygdala-area25',
       'dentate-thalamo-putamen',
       'ca1-subiculum',
       'dorsal-geniculate-mt',
       'subthalamic-crus-ii',
+      'posterior-ilf-reading',
+      'transcallosal-auditory-core',
     ]);
   });
 
@@ -308,7 +306,7 @@ describe('the list', () => {
     expect(document.activeElement).toBe(rows()[0]);
     await userEvent.keyboard('{ArrowUp}{Escape}');
     expect(document.activeElement).toBe(field.element());
-    expect(rows()).toHaveLength(45);
+    expect(rows()).toHaveLength(43);
   });
 
   test('search matches a French landmark without accents and offers a clear action when empty', async () => {
@@ -320,7 +318,7 @@ describe('the list', () => {
     await expect.element(page.getByText(/Aucun résultat pour/)).toBeVisible();
     await page.getByRole('button', { name: 'Effacer la recherche' }).click();
     expect(document.activeElement).toBe(field.element());
-    expect(rows()).toHaveLength(45);
+    expect(rows()).toHaveLength(43);
   });
 });
 
