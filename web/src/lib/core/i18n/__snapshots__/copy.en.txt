@@ -212,6 +212,10 @@
   ],
   "atRegion": "Involving this region",
   "simulateLesion": "Simulate a lesion",
+  "activeMap": "On the brain",
+  "resume": "Resume",
+  "backToResults": "Back to results",
+  "backToFinding": "Back to finding",
   "associations": "Associations",
   "findings": "Evidence",
   "studyFinding": "Reported finding",
@@ -475,7 +479,9 @@
    "[\"grey\"] → \"The regions this finding cites; grey regions are not cited.\""
   ],
   "keyAbsent": "An outlined finding has no region coloured in this view.",
-  "keyPicked": "Only this finding’s regions. Choose it again for every finding."
+  "keyPicked": "Only this finding’s regions are coloured.",
+  "allFindings": "All findings",
+  "shared": "Shared regions"
  },
  "diffusion": {
   "bundlesDrawn": [

@@ -21,6 +21,8 @@
     crumbs: readonly Crumb[];
     onBack: () => void;
     onGroup: () => void;
+    backLabel?: string;
+    backBusy?: boolean;
     back?: HTMLButtonElement | null;
     stepper?: Snippet;
     trailing?: Snippet;
@@ -33,6 +35,8 @@
     crumbs,
     onBack,
     onGroup,
+    backLabel,
+    backBusy,
     back = $bindable(null),
     stepper,
     trailing,
@@ -51,12 +55,13 @@
         <button
           type="button"
           class="detail-back"
-          aria-label={copy.back(list.label)}
+          aria-label={backLabel ?? copy.back(list.label)}
+          aria-disabled={backBusy || undefined}
           bind:this={back}
           onclick={onBack}
         >
           <span class="chevron back-chevron" aria-hidden="true"></span>
-          <span class="detail-back-label">{list.label}</span>
+          <span class="detail-back-label">{backLabel ?? list.label}</span>
         </button>
       </li>
       {#if group}
@@ -194,6 +199,10 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .detail-back[aria-disabled='true'] {
+      color: var(--text-tertiary);
+      cursor: default;
+    }
     .detail-stepper {
       display: contents;
     }
@@ -227,7 +236,7 @@
       text-wrap: balance;
     }
     @media (hover: hover) and (pointer: fine) {
-      .detail-back:hover,
+      .detail-back:hover:not([aria-disabled='true']),
       .detail-crumb:hover {
         background: none;
         color: var(--accent);

@@ -70,10 +70,14 @@
       clinical,
       anatomy: regions,
       session,
+      view,
       excursions,
       openFunction: (id) => functions.openFunction(id),
       clinicalLinks: {
-        simulateLesion() {
+        async simulateLesion() {
+          // Back may have brought the list forward while a deficit's profile was still selected.
+          if (view.current.selectedDeficit) await excursions.closeDeficit();
+          if (view.current.explorer !== 'deficits' || view.current.selectedDeficit) return;
           sheet?.uncover();
           flushSync();
           app!.ports.openStageTool('lesion');
@@ -334,6 +338,13 @@
         })}
         shell={app.media.phone ? 'sheet' : 'rails'}
         stepper={panels.circuits.exploring && panels.circuits.circuit ? stepper : undefined}
+        detailBack={panels.deficits.canReturnToFinding
+          ? {
+              label: t(lang, 'clinical').backToFinding,
+              busy: panels.deficits.opening,
+              onclick: panels.deficits.returnToFinding,
+            }
+          : undefined}
         trailing={(world.excursions.restorable &&
           ((current.explorer === 'functions' && current.selectedFunction) ||
             (current.explorer === 'deficits' && current.selectedDeficit))) ||

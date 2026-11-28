@@ -469,6 +469,26 @@ describe('paint rows', () => {
     await expect.element(page.getByRole('button', { name: /Absent de cette vue/ })).toBeVisible();
   });
 
+  test('shared regions keep part of their finding’s swatch and a separate status in both languages', async () => {
+    mount({
+      legend: {
+        ...DEFICIT,
+        rows: [DEFICIT.rows[0]!, DEFICIT.rows[1]!, { ...DEFICIT.rows[2]!, shared: true }],
+      },
+    });
+    const shared = swatch('Arcuate');
+    expect(getComputedStyle(shared).backgroundImage).toContain('rgb(153, 120, 200) 50%');
+    expect(shared.closest('li')!.hasAttribute('data-absent')).toBe(false);
+    await expect
+      .element(page.getByRole('button', { name: /Arcuate.*Shared regions/ }))
+      .toBeVisible();
+    await expect.element(page.getByRole('button', { name: /Wernicke.*Not shown/ })).toBeVisible();
+    live.lang = 'fr';
+    await expect
+      .element(page.getByRole('button', { name: /Arcuate.*Régions partagées/ }))
+      .toBeVisible();
+  });
+
   test('the picked key mutes the rows it stepped back from, and bolds the one in front', async () => {
     mount({ legend: picked(DEFICIT, 'f1') });
     const rows = rowButtons();

@@ -2,8 +2,10 @@ import { tick } from 'svelte';
 import { createLatestRunner } from '../../lib/core/async/latest.ts';
 import type { createCatalog } from '../../lib/core/catalog/catalog.ts';
 import type { ClinicalCatalog } from '../../lib/core/clinical/catalog.ts';
+import type { ReaderState } from '../../lib/core/state/reader-state.ts';
 import type { Excursions } from '../../lib/controller/excursion.svelte.ts';
 import type { SessionStore } from '../../lib/state/session.svelte.ts';
+import type { ViewStore } from '../../lib/state/view.svelte.ts';
 import { FOCUS_TARGETS, focusHeading, requestFocus } from '../../lib/ui/focus.ts';
 import { scrollToTop } from '../../lib/ui/scroll.ts';
 
@@ -13,12 +15,17 @@ export interface DeficitsDeps {
   anatomy: Pick<ReturnType<typeof createCatalog>, 'get'>;
   /** The language and the open deficit key a failure to the profile it happened in. */
   session: Pick<SessionStore, 'state' | 'setClinicalQuery'>;
+  view: Pick<ViewStore, 'current'>;
   /** The S3 controller's members the tab calls (`createExcursions`). */
   excursions: Pick<
     Excursions,
     | 'openDeficit'
     | 'openDeficitMri'
+    | 'pickPaint'
     | 'openListedRegion'
+    | 'captureDeficitView'
+    | 'restoreDeficitView'
+    | 'resumeDeficit'
     | 'restoreBeforeExcursion'
     | 'restorable'
     | 'offerReload'
@@ -50,14 +57,28 @@ export function createDeficitsExplorer(deps: DeficitsDeps) {
   /** The elements the controller moves focus to; the components bind them. */
   const refs: {
     heading: HTMLElement | null;
+    scroller: HTMLElement | null;
     search: HTMLInputElement | null;
     list: HTMLElement | null;
-  } = { heading: null, search: null, list: null };
+  } = { heading: null, scroller: null, search: null, list: null };
 
   let opening = $state(false);
   let busy = $state<Busy>('loading');
   let failure = $state<Failure | null>(null);
   let operation = $state<Operation>('deficit');
+  let regionReturn = $state.raw<{
+    deficit: string;
+    region: string;
+    trigger: HTMLButtonElement;
+    scene: ReaderState;
+    scrollTop: number;
+  } | null>(null);
+  const canReturnToFinding = $derived(
+    regionReturn !== null &&
+      deps.view.current.explorer === 'deficits' &&
+      deps.view.current.selectedDeficit === regionReturn.deficit &&
+      deps.view.current.selectedRegion?.id === regionReturn.region,
+  );
   // A failure belongs to the profile it happened in: another deficit or language clears it (clinical.js:521-525).
   let lastFailure = $state.raw<{ profile: string; error: unknown } | null>(null);
   const profileKey = () => `${deps.session.state.lang}|${deps.session.state.selectedDeficit}`;
@@ -98,6 +119,7 @@ export function createDeficitsExplorer(deps: DeficitsDeps) {
    * its top and its heading takes focus (deviation x2-focus-after-render).
    */
   async function openDeficit(id: string): Promise<void> {
+    regionReturn = null;
     const running = run(() => deps.excursions.openDeficit(id));
     await tick();
     const { heading } = refs;
@@ -108,12 +130,44 @@ export function createDeficitsExplorer(deps: DeficitsDeps) {
     await running;
   }
 
-  /** A region opened from a profile is detailed below it: brought into view, its name takes focus. */
-  async function openRegion(id: string): Promise<void> {
+  /** Open a mapped region at the top of the inspector and hold the profile's reading position. */
+  async function openRegion(id: string, trigger: HTMLButtonElement): Promise<void> {
     if (opening) return;
+    const deficit = deps.session.state.selectedDeficit;
+    const scene = canReturnToFinding ? regionReturn!.scene : deps.excursions.captureDeficitView();
+    const scrollTop = refs.scroller?.scrollTop ?? 0;
     if (!(await run(() => deps.excursions.openListedRegion(id), { failed: 'region' }))) return;
-    if (requestFocus(FOCUS_TARGETS.regionTitle, { preventScroll: true })) {
+    const { selectedRegion, selectedDeficit, explorer } = deps.view.current;
+    if (deficit && selectedRegion && selectedDeficit === deficit && explorer === 'deficits') {
+      regionReturn = { deficit, region: selectedRegion.id, trigger, scene, scrollTop };
+    }
+    await tick();
+    const focused = requestFocus(FOCUS_TARGETS.regionTitle, { preventScroll: true });
+    if (canReturnToFinding && refs.scroller) {
+      refs.scroller.scrollTop = 0;
+    } else if (focused) {
       document.activeElement!.scrollIntoView({ block: 'start' });
+    }
+  }
+
+  /** Restore the map behind the inspector, then focus the matching link in its original finding. */
+  async function returnToFinding(): Promise<void> {
+    if (!canReturnToFinding || opening) return;
+    const { trigger, scene, scrollTop } = regionReturn!;
+    if (
+      !(await run(() => deps.excursions.restoreDeficitView(scene), {
+        busyText: 'restoring',
+        failureText: 'restoreFailed',
+      }))
+    ) {
+      return;
+    }
+    regionReturn = null;
+    await tick();
+    if (trigger.isConnected) {
+      if (refs.scroller) refs.scroller.scrollTop = scrollTop;
+      trigger.focus({ preventScroll: true });
+      trigger.scrollIntoView({ block: 'nearest' });
     }
   }
 
@@ -169,6 +223,14 @@ export function createDeficitsExplorer(deps: DeficitsDeps) {
     clinicalLinks: deps.clinicalLinks ?? null,
     openDeficit,
     openRegion,
+    resumeDeficit: deps.excursions.resumeDeficit,
+    get canReturnToFinding() {
+      return canReturnToFinding;
+    },
+    discardOldRegion() {
+      if (regionReturn && !canReturnToFinding) regionReturn = null;
+    },
+    returnToFinding,
     /** The Linked MRI at the open deficit's first cited region, its paint over the scan; `instant` for a key press. */
     openMri(options: { instant: boolean }) {
       const { selectedDeficit, selectedFinding } = deps.session.state;

@@ -29,13 +29,14 @@
   import CoordinateReport from '../lesion/CoordinateReport.svelte';
   import LesionReport from '../lesion/LesionReport.svelte';
   import { clinicalLayers } from '../../lib/core/state/clinical-navigation.ts';
-  import { deficitsForRegion } from '../../lib/core/panels/clinical.ts';
+  import { deficitsForRegion, stageMessage } from '../../lib/core/panels/clinical.ts';
   import type { FunctionExplorer } from '../functions/functions-explorer.svelte.ts';
   import AtlasComparison from '../inspector/AtlasComparison.svelte';
   import TractProfile from '../tracts/TractProfile.svelte';
   import { tractEnds } from '../../lib/core/diffusion/ends.ts';
   import { tractRows } from '../../lib/core/tracts.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
+  import StatusLine from '../../lib/ui/StatusLine.svelte';
   import RegionDetail from '../inspector/RegionDetail.svelte';
   import HighlightStrip from '../highlights/HighlightStrip.svelte';
   import { announce } from '../../lib/ui/announcer.svelte.ts';
@@ -67,6 +68,8 @@
     commands,
   } = $derived(world);
   const current = $derived(view.current);
+  $effect(() => deficits.discardOldRegion());
+  const inspectingFinding = $derived(deficits.canReturnToFinding);
   const regionSwatch = $derived(
     current.selectedRegion && !world.userMap.drawn
       ? engine.model.surfaceSwatch(current.selectedRegion.id)
@@ -118,7 +121,7 @@
   // A function's or deficit's profile above makes the region a smaller second subject (clinical.css:172-173, 299-300).
   const underProfile = $derived(
     (current.explorer === 'functions' && current.selectedFunction !== null) ||
-      (current.explorer === 'deficits' && current.selectedDeficit !== null),
+      (current.explorer === 'deficits' && current.selectedDeficit !== null && !inspectingFinding),
   );
   // A placed lesion is Anatomy's detail once no region is selected, and Deficits' while no deficit is
   // open, so one simulated from there stays there (2026-11-20 review); a coordinate's is Anatomy's.
@@ -208,7 +211,7 @@
   settings={current}
 />
 
-<div class="detail-body scroll-fade">
+<div class="detail-body scroll-fade" bind:this={deficits.refs.scroller}>
   <div class="tab-group">
     <CircuitProfile model={circuits} />
     {#if circuits.map.available}
@@ -219,7 +222,21 @@
     {/if}
     <CircuitStatus model={circuits} />
     <FunctionProfile model={functions} />
-    <DeficitProfile explorer={deficits} view={current} />
+    <DeficitProfile explorer={deficits} view={current} hidden={inspectingFinding} />
+    {#if inspectingFinding}
+      <StatusLine
+        class={deficits.actionError ? 'finding-return-status error' : 'finding-return-status'}
+        text={stageMessage(t(current.lang, 'clinical'), {
+          opening: deficits.opening,
+          busy: deficits.busy,
+          error: deficits.actionError,
+          failure: deficits.failure,
+          operation: deficits.operation,
+          lang: current.lang,
+          status: '',
+        })}
+      />
+    {/if}
     {#if tract}
       <TractProfile
         bind:this={tractProfile}
@@ -250,6 +267,7 @@
       <LesionReport
         {lesion}
         lang={current.lang}
+        deficitsFirst={current.explorer === 'deficits'}
         atlases={lesionAtlases}
         label={(id) => catalog.label(id).name}
         bundleName={(id) => bundles.find((bundle) => bundle.id === id)!.name[current.lang]}
@@ -315,7 +333,7 @@
           full: world.highlights.full,
         }}
         onhighlight={() => toggleHighlight(current.selectedRegion!)}
-        onclear={() => void anatomy.clearSelection()}
+        onclear={inspectingFinding ? null : () => void anatomy.clearSelection()}
         onregion={(id) => void anatomy.openConstituent(id)}
         parts={current.explorer === 'anatomy' && current.selectedRegion
           ? partsSystem(current.selectedRegion, engine.model.regions)
@@ -374,6 +392,15 @@
     .tab-group {
       padding-bottom: var(--space-4);
       background: var(--surface-base);
+    }
+    .tab-group :global(.finding-return-status:not(:empty)) {
+      margin: var(--space-3) var(--panel-inset) 0;
+      color: var(--text-secondary);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+    }
+    .tab-group :global(.finding-return-status.error) {
+      color: var(--danger);
     }
     /* The phone sheet: H6's #inspector carries the home-indicator padding, so there is one rule (phone.css:226-231). */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {

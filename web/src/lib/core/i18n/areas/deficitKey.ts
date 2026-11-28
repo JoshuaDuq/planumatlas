@@ -18,7 +18,9 @@ export const en = {
   keyOne: (ground: KeyGround) =>
     `The regions this finding cites; ${EN_REGIONS[ground]} are not cited.`,
   keyAbsent: 'An outlined finding has no region coloured in this view.',
-  keyPicked: 'Only this finding’s regions. Choose it again for every finding.',
+  keyPicked: 'Only this finding’s regions are coloured.',
+  allFindings: 'All findings',
+  shared: 'Shared regions',
 };
 
 export const fr: typeof en = {
@@ -27,6 +29,7 @@ export const fr: typeof en = {
   keyOne: (ground: KeyGround) =>
     `Les régions que cite ce constat\u202f; ${FR_REGIONS[ground]} ne sont pas citées.`,
   keyAbsent: 'Un constat cerné n’a aucune région colorée dans cette vue.',
-  keyPicked:
-    'Seulement les régions de ce constat. Choisissez-le de nouveau pour tous les constats.',
+  keyPicked: 'Seules les régions de ce constat sont colorées.',
+  allFindings: 'Tous les constats',
+  shared: 'Régions partagées',
 };

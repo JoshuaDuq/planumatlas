@@ -23,8 +23,27 @@ deficits:
       en: Acquired language impairment can affect understanding, expression, naming, repetition, reading or writing in different combinations. Difficulties using language can occur alongside a separate disorder of speech-motor planning or control.
       fr: Un trouble acquis du langage peut toucher la compréhension, l’expression, la dénomination, la répétition, la lecture ou l’écriture selon différentes combinaisons. Les difficultés de langage peuvent s’accompagner d’un trouble distinct de la planification ou du contrôle moteur de la parole.
     aliases:
-      en: [language comprehension, understanding speech, word comprehension, sentence comprehension, Broca’s aphasia]
-      fr: [compréhension du langage, compréhension orale, compréhension des mots, compréhension des phrases, aphasie de Broca]
+      en:
+        - language comprehension
+        - understanding speech
+        - word comprehension
+        - sentence comprehension
+        - Broca’s aphasia
+        - word finding
+        - word finding difficulty
+        - word-finding difficulty
+        - difficulty finding words
+        - trouble finding words
+      fr:
+        - compréhension du langage
+        - compréhension orale
+        - compréhension des mots
+        - compréhension des phrases
+        - aphasie de Broca
+        - manque du mot
+        - difficulté à trouver ses mots
+        - difficulté à trouver les mots
+        - difficulté à trouver des mots
 
   - id: amnesia
     name: {en: Amnesia, fr: Amnésie}

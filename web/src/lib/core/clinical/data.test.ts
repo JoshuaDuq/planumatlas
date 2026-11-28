@@ -1208,6 +1208,42 @@ describe('published clinical content: fixed values', () => {
     assert.equal(catalog.nearest('abc', 'en'), null);
   });
 
+  test('everyday wording for naming difficulty finds Aphasia in its group and language', () => {
+    for (const [query, lang] of [
+      ['word finding', 'en'],
+      ['word finding difficulty', 'en'],
+      ['word-finding difficulty', 'en'],
+      ['difficulty finding words', 'en'],
+      ['trouble finding words', 'en'],
+      ['DIFFICULTE A TROUVER SES MOTS', 'fr'],
+      ['difficulté à trouver les mots', 'fr'],
+      ['difficulté à trouver des mots', 'fr'],
+      ['manque du mot', 'fr'],
+    ] as const) {
+      const groups = catalog
+        .grouped(query, lang)
+        .map(({ group, deficits }) => [group.id, deficits.map(({ id }) => id)]);
+      assert.deepEqual(groups, [['language-number', ['aphasia']]], query);
+    }
+    assert.deepEqual(catalog.search('word finding', 'fr'), []);
+    assert.deepEqual(catalog.search('manque du mot', 'en'), []);
+  });
+
+  test('a typo in everyday naming wording offers a searchable suggestion in the same language', () => {
+    for (const [query, lang, expected] of [
+      ['word fnding', 'en', 'word finding'],
+      ['manque du mto', 'fr', 'manque du mot'],
+    ] as const) {
+      assert.deepEqual(catalog.grouped(query, lang), []);
+      const suggestion = catalog.nearest(query, lang);
+      assert.equal(suggestion, expected);
+      assert.deepEqual(
+        catalog.search(suggestion, lang).map(({ id }) => id),
+        ['aphasia'],
+      );
+    }
+  });
+
   test('CAT-49 · no deficit has more than six findings, aphasia has six, and its paint colours 6 regions', () => {
     const counts = data.deficits.map((d) => catalog.forDeficit(d.id).length);
     assert.equal(Math.max(...counts), 6);

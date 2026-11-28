@@ -155,8 +155,8 @@
     highlight?: { pressed: boolean; full: boolean } | null;
     /** Highlights the region, or takes its highlight away. */
     onhighlight?: () => void;
-    /** S2's `clearSelection`: it rescues focus. */
-    onclear: () => void;
+    /** S2's `clearSelection`, or null when the location bar leads back to the parent profile. */
+    onclear: (() => void) | null;
     /** A constituent structure: opens it, as S2's `openConstituent`. */
     onregion: (id: string) => void;
     /** Where the region's parts can be shown on their own (`partsSystem`); none where they cannot. */
@@ -302,13 +302,15 @@
         <span class="region-title-text">{label.name}</span>
         {#if swatch}<Swatch colour={swatch} />{/if}
       </h2>
-      <IconButton
-        class="selection-clear"
-        icon="close"
-        label={copy.clearSelection}
-        data-tooltip={copy.clearSelection}
-        onclick={onclear}
-      />
+      {#if onclear}
+        <IconButton
+          class="selection-clear"
+          icon="close"
+          label={copy.clearSelection}
+          data-tooltip={copy.clearSelection}
+          onclick={onclear}
+        />
+      {/if}
     </div>
     <dl class="selection-context">
       <dt class="visually-hidden">{copy.hemisphere}</dt>

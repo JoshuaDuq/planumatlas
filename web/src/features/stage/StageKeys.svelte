@@ -150,7 +150,10 @@
       let above = 0;
       for (const plate of current) {
         // A plate's command takes a row's height.
-        const sized = { ...plate, count: plate.rows.length + (plate.action ? 1 : 0) };
+        const sized = {
+          ...plate,
+          count: plate.rows.length + (plate.action || plate.clearPick ? 1 : 0),
+        };
         const open = defaultOpen(sized, { phone, coarse }, room, above);
         crowd.set(plate.map, open);
         above += keyHeight(sized, { phone, coarse }, folds.get(plate.map) ?? open) + KEY_GAP_PX;
@@ -183,6 +186,15 @@
 
   function toggleFold(plate: KeyPlate) {
     folds.set(plate.map, !isOpen(plate));
+  }
+
+  async function clearFinding() {
+    const previous = host?.querySelector<HTMLButtonElement>(
+      '#paint-key button[aria-pressed="true"]',
+    );
+    onPaintPick(null);
+    await tick();
+    if (previous?.checkVisibility()) previous.focus();
   }
 
   // The paint note gives way where the stage is narrow, or where the rows would otherwise be cut short.
@@ -250,11 +262,22 @@
       style:--line-casing={BORDER_INK.casing}
     ></span>
   {:else if row.color !== null}
-    <Swatch colour={row.absent ? 'transparent' : swatchColor(row.color)} />
+    {@const colour = swatchColor(row.color)}
+    <Swatch
+      colour={row.absent
+        ? 'transparent'
+        : row.shared
+          ? `linear-gradient(135deg, ${colour} 50%, transparent 50%)`
+          : colour}
+    />
   {:else}
     <span class="stage-key-spacer" aria-hidden="true"></span>
   {/if}
-  <span class="stage-key-label">{row.label}</span>
+  <span class="stage-key-text">
+    <span class="stage-key-label">{row.label}</span>{#if row.shared}<span class="stage-key-shared">
+        · {t(lang, 'deficitKey').shared}
+      </span>{/if}
+  </span>
   {#if row.absent}<span class="visually-hidden">. {t(lang, 'viewport').keyAbsent}</span>{/if}
 {/snippet}
 
@@ -267,7 +290,7 @@
     data-picked={plate.rows.some((row) => row.pressed) || undefined}
   >
     {#each plate.rows as row (row.id)}
-      <li data-absent={row.absent || undefined}>
+      <li data-absent={row.absent || undefined} data-shared={row.shared || undefined}>
         {#if plate.pickable}
           <button
             type="button"
@@ -313,6 +336,11 @@
           </div>
         {:else}
           {@render rows(plate)}
+        {/if}
+        {#if plate.clearPick}
+          <button type="button" class="stage-key-action all-findings" onclick={clearFinding}>
+            {plate.clearPick}
+          </button>
         {/if}
         {#if plate.name === 'paint'}
           <p class="stage-key-note" hidden={!noteShown}>{plate.note}</p>
@@ -476,8 +504,11 @@
       flex: none;
       margin-top: calc((var(--lh-caption) - 10px) / 2);
     }
-    .stage-key-label {
+    .stage-key-text {
       overflow-wrap: anywhere;
+    }
+    .stage-key-shared {
+      color: var(--overlay-ink-muted);
     }
     /* A paint row is a toggle: pressing one shows that row's regions alone, the others step back. */
     .stage-key-list li:has(> button) {
@@ -509,6 +540,9 @@
         transparent 0 2px,
         rgb(144 150 158 / 0.35) 2px 3px
       );
+      box-shadow: inset 0 0 0 1px rgb(144 150 158 / 0.5);
+    }
+    .stage-key-list li[data-shared] :global(.network-swatch) {
       box-shadow: inset 0 0 0 1px rgb(144 150 158 / 0.5);
     }
     @media (hover: hover) and (pointer: fine) {

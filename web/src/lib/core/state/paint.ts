@@ -227,6 +227,8 @@ export interface LegendRow {
   pressed: boolean;
   /** Keyed but greyed: no region in this view carries the colour. */
   absent?: boolean;
+  /** The visible regions take another finding's colour in the combined view. */
+  shared?: boolean;
 }
 
 export interface Legend {
@@ -492,24 +494,28 @@ export function legendFor(
   if (kind === 'deficit') {
     const copy = t(lang, 'deficitKey');
     const { findings } = clinical.paint(state.selectedDeficit!);
-    // A finding whose colour no drawn region carries, because its regions are not drawn in this view or
-    // take an earlier finding's colour, is keyed but greyed, so the key promises nothing the stage lacks.
-    // A FreeSurfer structure is shown by its teaching-set stand-ins, too.
-    const shows = (association: (typeof findings)[number]['association'], color: Rgb) =>
-      association.mappings.some(({ region }) =>
-        [region, ...clinical.standIns(region)].some(
-          (id) => state.paint!.colors.get(id)?.join() === color.join() && drawn(id, state),
-        ),
-      );
-    const rows = findings.map(({ association, color }) => ({
-      id: association.id,
-      color,
-      label: association.title[lang]!,
-      pressed: association.id === state.selectedFinding,
-      absent:
-        (!state.selectedFinding || association.id === state.selectedFinding) &&
-        !shows(association, color),
-    }));
+    const { colors } = state.paint!;
+    const rows = findings.map(({ association, color }): LegendRow => {
+      const pressed = association.id === state.selectedFinding;
+      const active = !state.selectedFinding || pressed;
+      // A FreeSurfer structure can be drawn through its teaching-set stand-ins.
+      const painted = active
+        ? association.mappings
+            .flatMap(({ region }) => [region, ...clinical.standIns(region)])
+            .filter((id) => drawn(id, state))
+            .map((id) => colors.get(id))
+        : [];
+      const shown = painted.some((actual) => actual?.join() === color.join());
+      const shared = !state.selectedFinding && !shown && painted.some(Boolean);
+      return {
+        id: association.id,
+        color,
+        label: association.title[lang]!,
+        pressed,
+        absent: active && !shown && !shared,
+        ...(shared && { shared }),
+      };
+    });
     const note =
       findings.length === 1
         ? copy.keyOne(ground)

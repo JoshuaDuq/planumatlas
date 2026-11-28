@@ -377,16 +377,15 @@ export async function composeWorld(
     engine.on('visualFieldPoint', ({ reading, visualArea }) =>
       world.visualFieldMap.read(reading, visualArea),
     ),
-    // The lesion's report is Anatomy's detail, which shows it once no region is selected. A phone's
-    // sheet stays down so the brain stays in reach for the next press; Show the report raises it.
-    // A lesson stays open over its lesion, which Show the report reaches.
+    // Deficits' index opens its own report. Elsewhere the report is Anatomy's detail. An open lesson
+    // stays in front, and a phone's sheet stays down. Show the report reaches it from either place.
     engine.on('lesionPoint', ({ point }) => {
-      const { explorer, lesson } = view.current;
+      const { explorer, lesson, selectedDeficit } = view.current;
       if (explorer === 'circuits' && lesson.circuit) {
         world.lesion.place(point);
         return;
       }
-      world.excursions.chooseExplorer('anatomy');
+      if (explorer !== 'deficits' || selectedDeficit) world.excursions.chooseExplorer('anatomy');
       world.anatomy.selectRegion(null);
       world.lesion.place(point);
       flushSync();

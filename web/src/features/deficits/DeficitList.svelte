@@ -8,6 +8,7 @@
   import { bridgeText, type Elsewhere } from '../../lib/core/elsewhere.ts';
   import { t, templateCopy } from '../../lib/core/i18n/index.ts';
   import { deficitsForRegion } from '../../lib/core/panels/clinical.ts';
+  import { paintKind } from '../../lib/core/state/paint.ts';
   import { registerCurrentItem } from '../../lib/core/workspace.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import type { Explorer } from '../../lib/types/index.ts';
@@ -49,6 +50,21 @@
   const count = $derived(groups.reduce((sum, entry) => sum + entry.deficits.length, 0));
   const others = $derived(elsewhere(query));
   const near = $derived(groups.length === 0 ? clinical.nearest(query, lang) : null);
+  const activeMap = $derived(
+    view.selectedDeficit && paintKind(view.paint) === 'deficit'
+      ? clinical.get(view.selectedDeficit)
+      : null,
+  );
+  const activeFinding = $derived(
+    activeMap && view.selectedFinding
+      ? clinical.forDeficit(activeMap.id).find(({ id }) => id === view.selectedFinding)
+      : null,
+  );
+
+  function openResult(id: string) {
+    if (id === activeMap?.id) explorer.resumeDeficit();
+    else void explorer.openDeficit(id);
+  }
 
   /** Rows of the selected region's group before "Show all N". */
   const REGION_ROWS_SHOWN = 8;
@@ -133,6 +149,32 @@
     onquery={(value) => explorer.setQuery(value)}
   />
 </div>
+{#if activeMap}
+  {@const id = activeMap.id}
+  <div class="active-map">
+    <p class="map-label">{text.activeMap}</p>
+    <p class="map-name">
+      <strong>{activeMap.name[lang]}</strong>{#if activeFinding}<span class="map-finding">
+          &nbsp;· {activeFinding.title[lang]}
+        </span>{/if}
+    </p>
+    <div class="map-actions">
+      <button type="button" class="resume-map" onclick={explorer.resumeDeficit}>
+        {text.resume}
+      </button>
+      {#if explorer.restorable}
+        <button
+          type="button"
+          class="restore-map"
+          aria-disabled={explorer.opening || undefined}
+          onclick={() => explorer.restore(id)}
+        >
+          {text.restore}
+        </button>
+      {/if}
+    </div>
+  </div>
+{/if}
 <div class="deficit-body scroll-fade">
   <div id="{uid}-list" role="group" aria-label={text.deficits} bind:this={list}>
     {#if explorer.clinicalLinks && !query}
@@ -152,7 +194,7 @@
                 name={deficit.name[lang]}
                 secondary={deficit.domain[lang]}
                 current={false}
-                onclick={() => explorer.openDeficit(deficit.id)}
+                onclick={() => openResult(deficit.id)}
               />
             </li>
           {/each}
@@ -172,7 +214,7 @@
                 name={deficit.name[lang]}
                 secondary={deficit.domain[lang]}
                 current={view.selectedDeficit === deficit.id}
-                onclick={() => explorer.openDeficit(deficit.id)}
+                onclick={() => openResult(deficit.id)}
               />
             </li>
           {/each}
@@ -221,6 +263,65 @@
       padding: var(--space-3) var(--panel-inset);
       border-bottom: 1px solid var(--border-subtle);
       background: var(--surface-base);
+    }
+    .active-map {
+      flex: none;
+      padding: var(--space-2) var(--panel-inset);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--accent-wash);
+    }
+    .map-label {
+      color: var(--text-secondary);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+    }
+    .map-name {
+      font-size: var(--text-ui);
+      line-height: var(--lh-ui);
+      overflow-wrap: anywhere;
+    }
+    .map-name strong {
+      font-weight: 600;
+    }
+    .map-finding {
+      color: var(--text-secondary);
+    }
+    .map-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-1) var(--space-3);
+      margin-top: var(--space-2);
+    }
+    .map-actions button {
+      min-height: var(--control-height);
+      border: 1px solid transparent;
+      border-radius: var(--radius-control);
+      padding: var(--space-1) var(--space-2);
+      color: var(--accent);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+    }
+    .map-actions .resume-map {
+      background: var(--surface-base);
+      border-color: var(--border-subtle);
+      font-weight: 600;
+    }
+    .restore-map {
+      background: none;
+    }
+    .map-actions button[aria-disabled='true'] {
+      color: var(--text-tertiary);
+      cursor: default;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .resume-map:hover {
+        background: var(--surface-tonal-hover);
+      }
+      .restore-map:hover:not([aria-disabled='true']) {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
     }
     .group {
       isolation: isolate;

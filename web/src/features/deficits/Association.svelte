@@ -23,8 +23,10 @@
     sideOnRow,
     open = $bindable(false),
     opening,
+    pressed,
     clinical,
     anatomy,
+    onselect,
     onregion,
   }: {
     association: ClinicalAssociation;
@@ -34,9 +36,11 @@
     open?: boolean;
     /** A deficit is opening: region buttons stay focusable, say they are unavailable and do nothing. */
     opening: boolean;
+    pressed: boolean;
     clinical: ClinicalCatalog;
     anatomy: Pick<ReturnType<typeof createCatalog>, 'get'>;
-    onregion: (id: string) => void;
+    onselect?: () => void;
+    onregion: (id: string, trigger: HTMLButtonElement) => void;
   } = $props();
 
   const text = $derived(t(lang, 'clinical'));
@@ -58,16 +62,32 @@
   );
 </script>
 
+{#snippet titleContent()}
+  <!-- The colour this finding's regions take on the brain, as the stage key shows it. -->
+  <span class="mark"><Swatch colour={networkCss(color)} /></span>
+  <span class="name">{association.title[lang]}</span>
+  <!-- The short side reads on screen; a screen reader hears the full one even when the profile states it. -->
+  {#if sideOnRow}
+    <span class="side" aria-hidden="true">{text.lateralityShort[association.laterality]}</span>
+  {/if}
+  <span class="visually-hidden">{` · ${text.laterality[association.laterality]}`}</span>
+{/snippet}
+
 <article class="association" data-association={association.id}>
   <h4 class="title">
-    <!-- The colour this finding's regions take on the brain, as the stage key shows it. -->
-    <span class="mark"><Swatch colour={networkCss(color)} /></span>
-    <span class="name">{association.title[lang]}</span>
-    <!-- The short side reads on screen; a screen reader hears the full one even when the profile states it. -->
-    {#if sideOnRow}
-      <span class="side" aria-hidden="true">{text.lateralityShort[association.laterality]}</span>
+    {#if onselect}
+      <button
+        type="button"
+        class="title-content finding-pick"
+        aria-pressed={pressed}
+        aria-disabled={opening || undefined}
+        onclick={() => !opening && onselect()}
+      >
+        {@render titleContent()}
+      </button>
+    {:else}
+      <span class="title-content">{@render titleContent()}</span>
     {/if}
-    <span class="visually-hidden">{` · ${text.laterality[association.laterality]}`}</span>
   </h4>
 
   <div class="regions">
@@ -79,7 +99,7 @@
         data-clinical-region={id}
         aria-label="{text.openRegion}: {full}"
         aria-disabled={opening ? 'true' : undefined}
-        onclick={() => onregion(id)}
+        onclick={(event) => onregion(id, event.currentTarget)}
       >
         {stated ? entry.label.name : full}
       </button>
@@ -113,21 +133,44 @@
       padding: var(--space-4) 0;
     }
     .association + :global(.association),
-    :global(.section-heading) + .association {
+    :global(.findings-heading) + .association {
       border-top: 1px solid var(--border-subtle);
     }
     p {
       margin: 0;
     }
     .title {
-      display: flex;
-      align-items: baseline;
-      gap: var(--space-2);
       margin: 0;
       font-size: var(--text-ui);
       font-weight: 600;
       line-height: var(--lh-ui);
       text-wrap: pretty;
+    }
+    .title-content {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-2);
+    }
+    .finding-pick {
+      min-height: var(--control-height);
+      padding: var(--space-1) var(--space-2);
+      margin-inline: calc(-1 * var(--space-2));
+      width: calc(100% + 2 * var(--space-2));
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-control);
+      background: none;
+      color: inherit;
+      font: inherit;
+      text-align: start;
+      cursor: pointer;
+    }
+    .finding-pick[aria-pressed='true'] {
+      border-color: var(--accent);
+      background: var(--accent-wash);
+      color: var(--accent);
+    }
+    .finding-pick[aria-disabled='true'] {
+      cursor: default;
     }
     .mark {
       flex: none;
@@ -238,6 +281,9 @@
       margin-top: var(--space-2);
     }
     @media (hover: hover) and (pointer: fine) {
+      .finding-pick:hover:not([aria-disabled='true'], [aria-pressed='true']) {
+        background: var(--surface-hover);
+      }
       .region:hover:not([aria-disabled='true']) {
         color: var(--accent-hover);
         text-decoration: underline;
@@ -259,6 +305,12 @@
     @media (prefers-reduced-motion: reduce) {
       summary::before {
         transition: none;
+      }
+    }
+    @media (forced-colors: active) {
+      .finding-pick[aria-pressed='true'] {
+        outline: 1px solid Highlight;
+        outline-offset: -1px;
       }
     }
   }

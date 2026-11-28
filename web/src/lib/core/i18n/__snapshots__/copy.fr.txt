@@ -212,6 +212,10 @@
   ],
   "atRegion": "Touchant cette région",
   "simulateLesion": "Simuler une lésion",
+  "activeMap": "Sur le cerveau",
+  "resume": "Reprendre",
+  "backToResults": "Retour aux résultats",
+  "backToFinding": "Retour à l’association",
   "associations": "Associations",
   "findings": "Données probantes",
   "studyFinding": "Résultat rapporté",
@@ -475,7 +479,9 @@
    "[\"grey\"] → \"Les régions que cite ce constat<NNBSP>; les régions grises ne sont pas citées.\""
   ],
   "keyAbsent": "Un constat cerné n’a aucune région colorée dans cette vue.",
-  "keyPicked": "Seulement les régions de ce constat. Choisissez-le de nouveau pour tous les constats."
+  "keyPicked": "Seules les régions de ce constat sont colorées.",
+  "allFindings": "Tous les constats",
+  "shared": "Régions partagées"
  },
  "diffusion": {
   "bundlesDrawn": [

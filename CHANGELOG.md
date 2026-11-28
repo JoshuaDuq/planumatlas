@@ -38,6 +38,14 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   such as CA1 for amnesia and the caudate heads for abulia, are listed without a measured coverage.
 - The **Take the tour** invitation on the stage has a **×** that dismisses it for good. **How to use
   Planum** in the settings menu still starts the tour.
+- While a deficit's map is on the brain, the **Deficits** list names it under **On the brain** with
+  **Resume**. A region opened from a finding keeps your place in the profile, and the panel's back button
+  reads **Back to finding**, or **Back to results** after a search.
+- The deficit profile and the stage key share one finding filter, with **All findings** to show every
+  finding. The key marks a finding whose regions take another finding's colour as **Shared regions**
+  rather than greying it out.
+- Searching **Deficits** for everyday wording such as "word finding" or "manque du mot" finds aphasia, and a
+  typo offers the corrected search.
 
 ### Removed
 

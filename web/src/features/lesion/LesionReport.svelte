@@ -1,9 +1,8 @@
 <!--
-  The lesion's report, Anatomy's detail while no region is selected. It leads with what the lesion
-  reaches, under the groups the Functions and Deficits tabs share: the functions whose territories
-  it overlaps and the deficits whose findings cite a region inside it, each opening its own tab. The
-  brain shows the lesion alone, those functions' territories or those findings' regions. The anatomy
-  it was measured on folds away underneath. It measures overlap and says so; it predicts nothing.
+  The lesion's report, in Anatomy or Deficits. It leads with what the lesion reaches under the groups
+  the Functions and Deficits tabs share. From Deficits, cited regions' findings come first. The brain
+  shows the lesion alone, the functions' territories or the findings' regions. The anatomy measured
+  folds away underneath. The report describes the measured overlap.
 -->
 <script lang="ts">
   import { untrack } from 'svelte';
@@ -28,9 +27,13 @@
   import Swatch from '../../lib/ui/Swatch.svelte';
   import SphereTracts from './SphereTracts.svelte';
 
+  type ProfileGroup = NonNullable<LesionStore['profile']>[number];
+  const resultKinds = ['deficits', 'functions'] as const;
+
   let {
     lesion,
     lang,
+    deficitsFirst,
     atlases,
     label,
     bundleName,
@@ -45,6 +48,7 @@
   }: {
     lesion: LesionStore;
     lang: Language;
+    deficitsFirst: boolean;
     /** The cortical atlases measured, the one on screen first. */
     atlases: readonly { id: string; name: string }[];
     /** A region's name as the panel words it. */
@@ -166,6 +170,60 @@
   </li>
 {/snippet}
 
+{#snippet profileGroups(groups: readonly ProfileGroup[], kind?: (typeof resultKinds)[number])}
+  {#each groups as entry (entry.group)}
+    {@const headingId = `lesion-group-${uid}-${kind ?? 'all'}-${entry.group}`}
+    <section class="lesion-group" aria-labelledby={headingId}>
+      <svelte:element this={kind ? 'h5' : 'h4'} class="lesion-group-heading" id={headingId}>
+        {groupName(entry.group)}
+      </svelte:element>
+      {#if kind !== 'deficits' && entry.functions.length}
+        {#if !kind}<p class="lesion-label">{copy.functionsLabel}</p>{/if}
+        <ul class="lesion-targets">
+          {#each entry.functions.slice(0, LEADING) as row (row.id)}
+            {@render functionRow(row)}
+          {/each}
+        </ul>
+        {#if entry.functions.length > LEADING}
+          <Disclosure summary={copy.more(grouped(entry.functions.length - LEADING))}>
+            <ul class="lesion-targets">
+              {#each entry.functions.slice(LEADING) as row (row.id)}
+                {@render functionRow(row)}
+              {/each}
+            </ul>
+          </Disclosure>
+        {/if}
+      {/if}
+      {#if kind !== 'functions' && entry.deficits.length}
+        {#if !kind}<p class="lesion-label">{copy.deficitsLabel}</p>{/if}
+        <ul class="lesion-targets">
+          {#each entry.deficits as row (row.deficit)}
+            <li>
+              <button type="button" class="lesion-target" onclick={() => onDeficit(row.deficit)}>
+                <span class="lesion-key">
+                  {#each row.findings.filter( (finding) => colours.has(finding.association.id) ) as finding (finding.association.id)}
+                    <Swatch colour={colours.get(finding.association.id)!} />
+                  {/each}
+                </span>
+                <span class="lesion-target-name">
+                  {deficitName(row.deficit)}
+                  <span class="lesion-row-volume">
+                    {copy.deficitReach(
+                      count(row.findings.length, 'finding', lang),
+                      share(row.share),
+                    )}
+                  </span>
+                </span>
+                <span class="lesion-chevron" aria-hidden="true"></span>
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </section>
+  {/each}
+{/snippet}
+
 <div class="region-detail lesion-report">
   <div class="selection-head">
     <h2 class="region-name">{copy.title}</h2>
@@ -208,55 +266,19 @@
     <p class="detail-note">{copy.reachesNote}</p>
     {#if !profile.length}
       <p class="detail-note">{copy.nothingReached}</p>
+    {:else if deficitsFirst}
+      {#each resultKinds as kind (kind)}
+        {@const groups = profile.filter((entry) => entry[kind].length)}
+        {#if groups.length}
+          <h4 class="lesion-result-heading">
+            {kind === 'deficits' ? copy.deficitsLabel : copy.functionsLabel}
+          </h4>
+          {@render profileGroups(groups, kind)}
+        {/if}
+      {/each}
+    {:else}
+      {@render profileGroups(profile)}
     {/if}
-    {#each profile as entry (entry.group)}
-      <section class="lesion-group" aria-labelledby="lesion-group-{uid}-{entry.group}">
-        <h4 id="lesion-group-{uid}-{entry.group}">{groupName(entry.group)}</h4>
-        {#if entry.functions.length}
-          <p class="lesion-label">{copy.functionsLabel}</p>
-          <ul class="lesion-targets">
-            {#each entry.functions.slice(0, LEADING) as row (row.id)}
-              {@render functionRow(row)}
-            {/each}
-          </ul>
-          {#if entry.functions.length > LEADING}
-            <Disclosure summary={copy.more(grouped(entry.functions.length - LEADING))}>
-              <ul class="lesion-targets">
-                {#each entry.functions.slice(LEADING) as row (row.id)}
-                  {@render functionRow(row)}
-                {/each}
-              </ul>
-            </Disclosure>
-          {/if}
-        {/if}
-        {#if entry.deficits.length}
-          <p class="lesion-label">{copy.deficitsLabel}</p>
-          <ul class="lesion-targets">
-            {#each entry.deficits as row (row.deficit)}
-              <li>
-                <button type="button" class="lesion-target" onclick={() => onDeficit(row.deficit)}>
-                  <span class="lesion-key">
-                    {#each row.findings.filter( (finding) => colours.has(finding.association.id) ) as finding (finding.association.id)}
-                      <Swatch colour={colours.get(finding.association.id)!} />
-                    {/each}
-                  </span>
-                  <span class="lesion-target-name">
-                    {deficitName(row.deficit)}
-                    <span class="lesion-row-volume">
-                      {copy.deficitReach(
-                        count(row.findings.length, 'finding', lang),
-                        share(row.share),
-                      )}
-                    </span>
-                  </span>
-                  <span class="lesion-chevron" aria-hidden="true"></span>
-                </button>
-              </li>
-            {/each}
-          </ul>
-        {/if}
-      </section>
-    {/each}
     {#if lesion.functions?.slight.length}
       <p class="detail-note">{copy.slightFunctions(grouped(lesion.functions.slight.length))}</p>
     {/if}
@@ -433,11 +455,25 @@
       padding-top: var(--space-3);
       border-top: 1px solid var(--border-subtle);
     }
-    .lesion-group h4 {
+    .lesion-group-heading,
+    .lesion-result-heading {
       margin: 0;
       font-size: var(--text-ui);
       font-weight: 600;
       line-height: var(--lh-ui);
+    }
+    .lesion-result-heading {
+      margin-top: var(--space-5);
+    }
+    .lesion-result-heading + .lesion-group {
+      margin-top: 0;
+      padding-top: var(--space-2);
+      border-top: 0;
+    }
+    h5.lesion-group-heading {
+      color: var(--text-secondary);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
     }
     .lesion-group .lesion-label {
       margin: var(--space-2) 0 var(--space-1);

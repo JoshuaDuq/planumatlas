@@ -510,6 +510,22 @@ export function createExcursions(
     return true;
   }
 
+  /** Return from a region to the map as it was read, keeping the earlier excursion available. */
+  async function restoreDeficitView(scene: ReaderState): Promise<boolean> {
+    const current = commands.begin();
+    const failures = await reader.apply(scene, current);
+    if (!current()) return false;
+    if (failures.length) {
+      throw new AggregateError(
+        failures.map(({ error }) => error),
+        'The finding view was not fully restored.',
+      );
+    }
+    session.notify(null);
+    render();
+    return true;
+  }
+
   /** Focus the obscured selection in place, keeping the evidence map and its profile open. */
   function focusListedRegion() {
     const notice = session.state.notice;
@@ -596,6 +612,9 @@ export function createExcursions(
     openFunctionMri,
     openDeficitMri,
     openListedRegion,
+    captureDeficitView: () => reader.capture(),
+    restoreDeficitView,
+    resumeDeficit: () => shell.showDetail(),
     focusListedRegion,
     pickPaint,
     offerReload,

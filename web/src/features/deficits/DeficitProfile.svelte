@@ -15,7 +15,11 @@
   import ProfileBody from './ProfileBody.svelte';
   import { stageCounts } from './profile-meta.ts';
 
-  let { explorer, view }: { explorer: DeficitsExplorer; view: View } = $props();
+  let {
+    explorer,
+    view,
+    hidden = false,
+  }: { explorer: DeficitsExplorer; view: View; hidden?: boolean } = $props();
 
   const clinical = $derived(explorer.deps.clinical);
   const anatomy = $derived(explorer.deps.anatomy);
@@ -63,7 +67,7 @@
   });
 </script>
 
-<div class="clinical-profile" hidden={!deficit}>
+<div class="clinical-profile" hidden={hidden || !deficit}>
   <div class="clinical-content">
     <h2
       class="clinical-profile-name"
@@ -84,7 +88,14 @@
         />
       {/if}
       {#key deficit.id}
-        <ProfileBody {explorer} {deficit} {lang} {side} {colours} />
+        <ProfileBody
+          {explorer}
+          {deficit}
+          {lang}
+          {side}
+          {colours}
+          selectedFinding={view.selectedFinding}
+        />
       {/key}
     {/if}
   </div>

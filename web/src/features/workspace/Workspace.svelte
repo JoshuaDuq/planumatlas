@@ -57,6 +57,8 @@
     stepper?: Snippet;
     /** The restore action (S3), in the location bar. */
     trailing?: Snippet;
+    /** A detail opened from another detail has its own parent. */
+    detailBack?: { label: string; busy: boolean; onclick: () => void };
     /** The location bar's search icon: shows the list with its search field in focus. */
     onSearch?: () => void;
     onMode: (mode: Explorer) => void;
@@ -83,6 +85,7 @@
     detail,
     stepper,
     trailing,
+    detailBack,
     onSearch,
     onMode,
     onClear,
@@ -192,7 +195,7 @@
     onReturn();
   }
 
-  // Choosing the mode already in front steps back to its list, like Back.
+  // Choosing the mode already in front opens its list.
   function choose(next: Explorer) {
     if (next === mode) {
       returnToList();
@@ -297,9 +300,11 @@
   export function detailShown() {
     return view === 'detail';
   }
-  /** Back to the list, as the Back button does. */
+  /** Step back one level within the mode, as the Back button does. */
   export function back() {
-    returnToList();
+    if (view !== 'detail') return;
+    if (!detailBack) returnToList();
+    else if (!detailBack.busy) detailBack.onclick();
   }
 </script>
 
@@ -361,7 +366,12 @@
     <LocationBar
       {lang}
       {crumbs}
-      onBack={returnToList}
+      backLabel={detailBack?.label ??
+        (mode === 'deficits' && snapshot.selectedDeficit
+          ? t(lang, 'clinical').backToResults
+          : undefined)}
+      backBusy={detailBack?.busy}
+      onBack={back}
       onGroup={locate}
       bind:back={backButton}
       {stepper}

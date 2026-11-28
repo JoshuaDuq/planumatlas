@@ -508,6 +508,40 @@ test('a finding none of whose regions is drawn coloured is keyed as absent, and 
   drawn.add('destrieux:left:2');
 });
 
+test('the deficit key distinguishes a visible shared region from a hidden region', () => {
+  const shared = { ...associations[1]!, mappings: associations[0]!.mappings };
+  const hidden = { ...associations[1]!, id: 'hidden' };
+  const catalog = {
+    ...clinical,
+    paint: (id: string, finding: string | null = null) =>
+      findingPaint(id, [associations[0]!, shared, hidden], finding),
+  } as unknown as ClinicalCatalog;
+  const state = { ...base, explorer: 'deficits' as const };
+  const catalogSources = {
+    ...sources,
+    clinical: catalog,
+    drawn: (id: string) => id.endsWith(':1'),
+  };
+  const key = legendFor({ ...state, paint: catalog.paint('aphasia').paint }, catalogSources)!;
+  assert.deepEqual(
+    key.rows.map(({ shared, absent }) => [Boolean(shared), absent]),
+    [
+      [false, false],
+      [true, false],
+      [false, true],
+    ],
+  );
+  const selected = {
+    ...state,
+    selectedFinding: shared.id,
+    paint: catalog.paint('aphasia', shared.id).paint,
+  };
+  const picked = legendFor(selected, catalogSources)!;
+  assert.equal(picked.rows[1]!.pressed, true);
+  assert.equal(picked.rows[1]!.absent, false);
+  assert.equal(Boolean(picked.rows[1]!.shared), false);
+});
+
 describe('the published cdmd functions and deficits', () => {
   const manifest = readModel<Manifest>('cdmd/manifest.json');
   const regionsById = new Map(manifest.regions.map((region) => [region.id, region]));

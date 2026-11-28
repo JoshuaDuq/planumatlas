@@ -113,6 +113,72 @@ describe('before the engine', () => {
   });
 });
 
+test('Deficits returns to the exact finding and resumes its map from search results', async () => {
+  const world = await boot();
+  await userEvent.click(page.getByRole('tab', { name: 'Deficits' }));
+  const search = page.getByRole('searchbox', { name: /search deficits/i });
+  await search.fill('aphasia');
+  const result = () => list().querySelector<HTMLButtonElement>('[data-deficit="aphasia"] .row')!;
+  await userEvent.click(result());
+
+  const finding = world.clinical
+    .forDeficit('aphasia')
+    .find(({ title }) => title.en === 'Naming pictures')!;
+  world.excursions.pickPaint(finding.id);
+  const association = [...detail().querySelectorAll('article.association')].find((article) =>
+    article.querySelector('h4')?.textContent?.includes(finding.title.en),
+  )!;
+  const evidence = association.querySelector('details')!;
+  await userEvent.click(evidence.querySelector('summary')!);
+  const trigger = association.querySelector<HTMLButtonElement>('button.region')!;
+  const scroller = detail().querySelector<HTMLElement>('.detail-body')!;
+  trigger.scrollIntoView({ block: 'center' });
+  const readingPosition = scroller.scrollTop;
+  expect(readingPosition).toBeGreaterThan(0);
+  await userEvent.click(trigger);
+  await expect.poll(() => world.view.current.selectedRegion?.id).toBe(finding.mappings[0]!.region);
+
+  const back = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('button', {
+    name: 'Back to finding',
+  });
+  await expect.element(back).toBeVisible();
+  expect(association.closest<HTMLElement>('.clinical-profile')?.hidden).toBe(true);
+  expect(scroller.scrollTop).toBe(0);
+
+  const restored = cameraCalls('restore').length;
+  await userEvent.click(back);
+  await expect.poll(() => document.activeElement).toBe(trigger);
+  expect(evidence.open).toBe(true);
+  expect(scroller.scrollTop).toBeCloseTo(readingPosition, 0);
+  expect(world.view.current.selectedRegion).toBeNull();
+  expect(cameraCalls('restore')).toHaveLength(restored + 1);
+
+  await userEvent.keyboard('{Enter}');
+  await expect.element(back).toBeVisible();
+  await userEvent.keyboard('{Escape}');
+  await expect.poll(() => document.activeElement).toBe(trigger);
+  expect(detail().hidden).toBe(false);
+
+  const paint = `deficit:aphasia:${finding.id}`;
+  await userEvent.click(page.getByRole('button', { name: 'Back to results' }));
+  await expect.element(search).toHaveValue('aphasia');
+  expect(list().querySelector('.active-map .map-name')?.textContent).toMatch(
+    /Aphasia\s*· Naming pictures/,
+  );
+  expect(world.view.current.paint?.id).toBe(paint);
+  await userEvent.click(page.getByRole('button', { name: 'Resume', exact: true }));
+  expect(detail().hidden).toBe(false);
+  expect(world.view.current.paint?.id).toBe(paint);
+  await userEvent.click(page.getByRole('button', { name: 'Back to results' }));
+  await userEvent.click(result());
+  expect(world.view.current.paint?.id).toBe(paint);
+  await userEvent.click(page.getByRole('button', { name: 'Back to results' }));
+  await userEvent.click(page.getByRole('button', { name: 'Restore previous view' }));
+  await expect.poll(() => world.view.current.selectedDeficit).toBeNull();
+  expect(world.view.current.paint).toBeNull();
+  await expect.element(search).toHaveValue('aphasia');
+});
+
 describe('selection', () => {
   test('a region picked on the model opens its detail, named in the strip of another mode', async () => {
     await boot();
@@ -235,6 +301,49 @@ describe('what each tab shows (1.4)', () => {
   });
 });
 
+test('finding filters stay in sync between the deficit profile and stage key', async () => {
+  const world = await boot('#tab=deficits&deficit=aphasia');
+  const findings = world.clinical.forDeficit('aphasia');
+  const first = findings.find(({ id }) => id === 'aphasia-comprehension')!;
+  const second = findings.find(({ id }) => id === 'aphasia-naming')!;
+  const region = second.mappings[0]!.region;
+  const profile = (id: string) =>
+    document.querySelector<HTMLButtonElement>(`[data-association="${id}"] h4 button`)!;
+  const legend = page.getByRole('toolbar', { name: 'Aphasia' });
+  const firstKey = () => legend.getByRole('button', { name: first.title.en });
+  const secondKey = () => legend.getByRole('button', { name: second.title.en });
+
+  await expect
+    .element(legend.getByRole('button', { name: /Naming pictures.*Shared regions/ }))
+    .toBeVisible();
+  const combinedColor = world.view.current.paint?.colors.get(region);
+  expect(combinedColor).toBeDefined();
+  await userEvent.click(profile(first.id));
+  await expect.element(firstKey()).toHaveAttribute('aria-pressed', 'true');
+  await expect.poll(() => world.view.current.paint?.id).toBe(`deficit:aphasia:${first.id}`);
+
+  await secondKey().click();
+  expect(profile(second.id).getAttribute('aria-pressed')).toBe('true');
+  expect(profile(first.id).getAttribute('aria-pressed')).toBe('false');
+  await expect.poll(() => world.view.current.paint?.id).toBe(`deficit:aphasia:${second.id}`);
+  expect(world.view.current.paint?.colors.get(region)).not.toEqual(combinedColor);
+
+  const clear = page.getByRole('button', { name: 'All findings', exact: true });
+  expect(clear.elements()).toHaveLength(2);
+  await userEvent.click(
+    document.querySelector<HTMLButtonElement>('.clinical-profile .all-findings')!,
+  );
+  await expect.poll(() => world.view.current.selectedFinding).toBeNull();
+  expect(document.activeElement).toBe(profile(second.id));
+  expect(world.view.current.paint?.colors.get(region)).toEqual(combinedColor);
+  expect(clear.elements()).toHaveLength(0);
+
+  await firstKey().click();
+  await userEvent.click(document.querySelector<HTMLButtonElement>('#paint-key .all-findings')!);
+  await expect.poll(() => world.view.current.paint?.id).toBe('deficit:aphasia');
+  expect(document.activeElement).toBe(firstKey().element());
+});
+
 describe('clinical material in the Deficits list (4.2)', () => {
   const links = () => [...list().querySelectorAll<HTMLElement>('.clinical-links .link-row')];
   const deficits = async () => {
@@ -271,19 +380,42 @@ describe('clinical material in the Deficits list (4.2)', () => {
     const world = await boot();
     await deficits();
     await userEvent.click(links()[0]!);
-    world.lesion.place([-40, 10, 20]);
+    engine.emit('lesionPoint', { point: [-40, 10, 20] });
     flushSync();
-    await userEvent.click(page.getByRole('button', { name: 'Show the report' }));
     expect(world.view.current.explorer).toBe('deficits');
     await expect.poll(() => detail().querySelector('h2.region-name')?.textContent).toBe('Lesion');
     expect(detail().hidden).toBe(false);
     // In front, the report's own Remove serves: the popover offers no second way to it.
     expect(page.getByRole('button', { name: 'Show the report' }).elements()).toEqual([]);
+    await userEvent.click(page.getByRole('button', { name: 'Back to Deficits' }));
+    expect(list().hidden).toBe(false);
+    expect(world.lesion.sphere?.centre).toEqual([-40, 10, 20]);
+    await userEvent.click(page.getByRole('button', { name: 'Show the report' }));
+    expect(detail().hidden).toBe(false);
     // A deficit opened over it takes the detail.
     const deficit = world.clinical.grouped('', 'en')[0]!.deficits[0]!;
     await app.ports.openDeficit(deficit.id);
     flushSync();
     expect(detail().querySelector('.clinical-profile')).not.toBeNull();
+  });
+
+  test('simulating from the Deficits index closes the previously viewed profile', async () => {
+    const world = await boot();
+    await deficits();
+    const deficit = world.clinical.grouped('', 'en')[0]!.deficits[0]!;
+    await app.ports.openDeficit(deficit.id);
+    app.ports.back();
+    flushSync();
+    expect(list().hidden).toBe(false);
+    expect(world.view.current.selectedDeficit).toBe(deficit.id);
+    await userEvent.click(links()[0]!);
+    await expect.poll(() => world.lesion.placing).toBe(true);
+    engine.emit('lesionPoint', { point: [-40, 10, 20] });
+    flushSync();
+    expect(world.view.current.explorer).toBe('deficits');
+    expect(world.view.current.selectedDeficit).toBeNull();
+    expect(detail().querySelector('h2.region-name')?.textContent).toBe('Lesion');
+    expect(detail().hidden).toBe(false);
   });
 
   test('DEF-38 · with a cohort published, the list still offers Simulate a lesion alone', async () => {

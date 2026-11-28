@@ -8,6 +8,7 @@
   import { createClinicalCatalog } from '../../lib/core/clinical/catalog.ts';
   import type { ClinicalData } from '../../lib/core/clinical/types.ts';
   import { createInvolvement } from '../../lib/core/panels/related.ts';
+  import { readerState } from '../../lib/core/state/reader-state.ts';
   import type { Manifest, Region } from '../../lib/types/index.ts';
   import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
   import { FOCUS_TARGETS, registerFocusTarget } from '../../lib/ui/focus.ts';
@@ -96,6 +97,10 @@
       deficit === 'aphasia'
         ? [{ id: 'language', name: 'Language', color: [10, 20, 30] as const }]
         : [],
+    pickPaint(id: string | null) {
+      view.selectedFinding = id;
+      view.paint = clinical.paint(view.selectedDeficit!, id).paint;
+    },
     async openDeficit(id: string) {
       calls.push(`deficit:${id}`);
       view.explorer = 'deficits';
@@ -108,6 +113,12 @@
       view.selectedRegion = regions.get(id)!;
       return true;
     },
+    captureDeficitView: () => readerState(view, view),
+    async restoreDeficitView(scene: ReturnType<typeof readerState>) {
+      view.selectedRegion = scene.selectedRegion ? regions.get(scene.selectedRegion)! : null;
+      return true;
+    },
+    resumeDeficit() {},
     async restoreBeforeExcursion() {
       calls.push('restore');
       if (restoreHold) await restoreHold;
@@ -128,6 +139,7 @@
   const explorer = createDeficitsExplorer({
     clinical,
     anatomy: catalog,
+    view: { current: view },
     session: {
       state: view,
       setClinicalQuery(query) {

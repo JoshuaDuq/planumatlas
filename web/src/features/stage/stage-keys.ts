@@ -40,6 +40,8 @@ export interface KeyRow {
   pressed: boolean;
   /** Keyed but not drawn in this view. */
   absent: boolean;
+  /** A visible finding whose mapped regions take an earlier finding's colour. */
+  shared?: boolean;
   /** A colour scale instead of one colour: CSS colours from its start to its end. */
   ramp?: readonly string[];
   /** The line another atlas's borders are drawn with instead of a colour (`BORDER_LINE`). */
@@ -59,6 +61,8 @@ export interface KeyPlate {
   pickable: boolean;
   /** A command under the rows. */
   action?: { id: 'network-matrix' | 'remove-borders'; label: string };
+  /** A deficit can return to its full paint while showing one finding. */
+  clearPick?: string;
 }
 
 /** A partition with named colours: Yeo's networks and CAB-NP. */
@@ -272,11 +276,16 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
       name: 'paint',
       map: legend.map,
       title: legend.title,
-      rows: legend.rows.map((entry) =>
-        row(entry.id, entry.color, entry.label, entry.pressed, entry.absent),
-      ),
+      rows: legend.rows.map((entry) => ({
+        ...row(entry.id, entry.color, entry.label, entry.pressed, entry.absent),
+        ...(entry.shared && { shared: true }),
+      })),
       note: legend.note,
       pickable: legend.pickable !== false && legend.rows.length > 1,
+      ...(legend.map === 'deficit' &&
+        legend.rows.some((entry) => entry.pressed) && {
+          clearPick: t(lang, 'deficitKey').allFindings,
+        }),
     });
   }
 

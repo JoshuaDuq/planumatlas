@@ -12,11 +12,15 @@ import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
 import LesionReport from './LesionReport.svelte';
 
 const domains = {
-  groups: [{ id: 'language-number' }],
+  groups: [{ id: 'audition' }, { id: 'language-number' }],
   domains: [
+    { id: 'auditory', group: 'audition', name: 'Auditory', name_fr: 'Audition' },
     { id: 'phonology', group: 'language-number', name: 'Phonology', name_fr: 'Phonologie' },
   ],
-  regions: {},
+  regions: {
+    'destrieux:left:34': [{ domain: 'phonology' }],
+    'destrieux:left:35': [{ domain: 'auditory' }],
+  },
 } as never;
 
 const associations = [
@@ -31,12 +35,21 @@ const associations = [
 ] as never;
 
 const measurement: LesionMeasurement = {
-  volume: 100,
-  tissue: { cortex: 100, white: 0, deep: 0, fluid: 0, outside: 0 },
-  regions: new Map([['destrieux:left:34', { inside: 40, whole: 100 }]]),
-  sizes: new Map([['destrieux:left:34', 100]]),
+  volume: 120,
+  tissue: { cortex: 120, white: 0, deep: 0, fluid: 0, outside: 0 },
+  regions: new Map([
+    ['destrieux:left:34', { inside: 40, whole: 100 }],
+    ['destrieux:left:35', { inside: 80, whole: 100 }],
+  ]),
+  sizes: new Map([
+    ['destrieux:left:34', 100],
+    ['destrieux:left:35', 100],
+  ]),
   centre: { tissue: 'cortex', region: 'destrieux:left:34' },
-  tissueOf: new Map([['destrieux:left:34', 'cortex']]),
+  tissueOf: new Map([
+    ['destrieux:left:34', 'cortex'],
+    ['destrieux:left:35', 'cortex'],
+  ]),
 };
 
 let stop = () => {};
@@ -45,7 +58,7 @@ afterEach(() => {
   cleanup();
 });
 
-async function mount(lang: Language) {
+async function mount(lang: Language, deficitsFirst = false) {
   let settle!: (value: LesionMeasurement) => void;
   const lesion = {
     show() {},
@@ -69,11 +82,12 @@ async function mount(lang: Language) {
   flushSync();
   store.place([-50, -20, 5]);
   settle(measurement);
-  await expect.poll(() => store.profile?.length).toBe(1);
+  await expect.poll(() => store.profile?.length).toBe(2);
   const name = (id: string) => id;
   render(LesionReport, {
     lesion: store,
     lang,
+    deficitsFirst,
     atlases: [{ id: 'destrieux', name: 'Destrieux' }],
     label: name,
     bundleName: name,
@@ -90,6 +104,20 @@ async function mount(lang: Language) {
 
 const paragraph = (text: RegExp) =>
   [...document.querySelectorAll('p')].find((element) => text.test(element.textContent ?? ''))!;
+
+test.each([
+  ['Anatomy', false, ['auditory', 'phonology', 'Aphasia']],
+  ['Deficits', true, ['Aphasia', 'auditory', 'phonology']],
+] as const)(
+  'the %s report puts its primary results first',
+  async (_tab, deficitsFirst, expected) => {
+    await mount('en', deficitsFirst);
+    const resultNames = [...document.querySelectorAll('.lesion-target-name')].map((name) =>
+      name.firstChild!.textContent!.trim(),
+    );
+    expect(resultNames).toEqual(expected);
+  },
+);
 
 test('the caveat comes before what the lesion reaches, and a deficit’s share is of a cited region', async () => {
   await mount('en');
